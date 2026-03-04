@@ -5,7 +5,7 @@ Aplikacja webowa dla sieci franczyzowej PokiePaws
 ### Platforma: TypeScript + React / Next.js
 ### Obsługuje role: Guest, Vet, Admin
 ### Komunikuje się z centralnym REST API + WebSocket (real-time)
-- ## 📋 Opis
+## 📋 Opis
 Aplikacja webowa jest jednym z czterech komponentów systemu PokiePaws.
 Umożliwia niezalogowanym użytkownikom poznanie sieci, lekarzom/franczyzobiorcom prowadzenie gabinetu, a centrali - pełną administrację i kontrolę.
 Pełna responsywność (TailwindCSS mobile-first), ujednolicony design PokiePaws, powiadomienia w czasie rzeczywistym.
