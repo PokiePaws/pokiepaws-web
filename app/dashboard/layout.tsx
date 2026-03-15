@@ -1,9 +1,9 @@
 'use client';
 
-import { useAuthStore } from '@/store/use-auth-store';
+import { useAuthStore } from '../../store/use-auth-store';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import Navbar from '@/components/navbar';
+import Navbar from '../../components/navbar';
 import Link from 'next/link';
 import { LayoutDashboard, PawPrint, Calendar, User, Settings, LogOut } from 'lucide-react';
 

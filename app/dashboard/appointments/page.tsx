@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Calendar as CalendarIcon, Clock, User, ChevronLeft, ChevronRight, Plus, Check, X, AlertCircle, PawPrint } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, eachDayOfInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
-import { useNotificationStore } from '@/store/use-notification-store';
+import { useNotificationStore } from '../../../store/use-notification-store';
 
 export default function AppointmentsPage() {
     const [currentDate, setCurrentDate] = useState(new Date());

@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuthStore } from '@/store/use-auth-store';
+import { useAuthStore } from '../../store/use-auth-store';
 import Image from 'next/image';
 import { PawPrint, Calendar, Clock, ChevronRight, Plus, HeartPulse, ShieldCheck, Activity } from 'lucide-react';
 import Link from 'next/link';

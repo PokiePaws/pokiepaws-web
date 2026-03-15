@@ -13,7 +13,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
     const addNotification = useNotificationStore(state => state.addNotification);
 
     useEffect(() => {
-        if (!user || (user.role !== 'Staff' && user.role !== 'Admin')) {
+        if (!user || (user.role !== 'Staff' && user.role !== 'Admin' && user.role !== 'SuperAdmin')) {
             router.push('/login');
         }
     }, [user, router]);

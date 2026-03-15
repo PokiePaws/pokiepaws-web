@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { PawPrint, Mail, Lock, ChevronRight, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuthStore } from '../../store/use-auth-store';
+import { useLanguageStore } from '../../store/use-language-store';
+import { translations } from '../../lib/translations';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -14,6 +16,9 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const setUser = useAuthStore((state) => state.setUser);
+    const { language } = useLanguageStore();
+
+    const t = translations[language];
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,17 +27,17 @@ export default function LoginPage() {
 
         // Mock login logic
         setTimeout(() => {
-            if (email === 'admin@vetcare.com' && password === 'admin123') {
-                setUser({ id: '1', name: 'Admin User', email, role: 'Admin' });
+            if (email === 'super@vetcare.com' && password === 'super123') {
+                setUser({ id: '0', name: 'Super Admin', email, role: 'SuperAdmin' });
+                router.push('/staff');
+            } else if (email === 'admin@vetcare.com' && password === 'admin123') {
+                setUser({ id: '1', name: 'Clinic Admin', email, role: 'Admin', clinicId: 'c1' });
                 router.push('/staff');
             } else if (email === 'staff@vetcare.com' && password === 'staff123') {
                 setUser({ id: '2', name: 'Dr. Jane Smith', email, role: 'Staff', clinicId: 'c1' });
                 router.push('/staff');
-            } else if (email === 'client@example.com' && password === 'client123') {
-                setUser({ id: '3', name: 'John Doe', email, role: 'Client' });
-                router.push('/dashboard');
             } else {
-                setError('Invalid email or password. Try client@example.com / client123');
+                setError(t.login.error + ' Try admin@vetcare.com / admin123');
             }
             setIsLoading(false);
         }, 1000);
@@ -48,13 +53,10 @@ export default function LoginPage() {
                     <span className="text-3xl font-display font-bold text-slate-900">VetClinic</span>
                 </Link>
                 <h2 className="text-center text-3xl font-display font-bold text-slate-900">
-                    Welcome back
+                    {t.login.title}
                 </h2>
                 <p className="mt-2 text-center text-sm text-slate-600">
-                    Or{' '}
-                    <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                        create a new account
-                    </Link>
+                    {t.login.subtitle}
                 </p>
             </div>
 
@@ -74,7 +76,7 @@ export default function LoginPage() {
 
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-                                Email address
+                                {t.login.email}
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -95,22 +97,24 @@ export default function LoginPage() {
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
-                                Password
+                                {t.login.password}
                             </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Lock className="h-5 w-5 text-slate-400" />
+                            <div className="mt-1">
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <Lock className="h-5 w-5 text-slate-400" />
+                                    </div>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
+                                        placeholder="••••••••"
+                                    />
                                 </div>
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="block w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all"
-                                    placeholder="••••••••"
-                                />
                             </div>
                         </div>
 
@@ -144,8 +148,8 @@ export default function LoginPage() {
                                     <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                 ) : (
                                     <span className="flex items-center gap-2">
-                    Sign in
-                    <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    {t.login.button}
+                                        <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </span>
                                 )}
                             </button>
@@ -162,9 +166,9 @@ export default function LoginPage() {
                             </div>
                         </div>
                         <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl">
-                            <p><strong>Client:</strong> client@example.com / client123</p>
                             <p><strong>Staff:</strong> staff@vetcare.com / staff123</p>
                             <p><strong>Admin:</strong> admin@vetcare.com / admin123</p>
+                            <p><strong>SuperAdmin:</strong> super@vetcare.com / super123</p>
                         </div>
                     </div>
                 </motion.div>
