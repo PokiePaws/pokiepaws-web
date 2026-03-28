@@ -18,11 +18,11 @@ export default function Home() {
 
             <main className="flex-grow">
                 {/* Hero Section */}
-                <section className="bg-blue-600 py-20 lg:py-32 relative overflow-hidden">
+                <section className="bg-[#68b9dc] py-20 lg:py-32 relative overflow-hidden">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
                         <h1 className="text-4xl lg:text-6xl font-display font-bold text-white leading-tight mb-6">
                             {t.home.heroTitle} <br />
-                            <span className="text-blue-200 underline decoration-blue-400">{t.home.heroSubtitle}</span>
+                            <span className="text-white">{t.home.heroSubtitle}</span>
                         </h1>
                         <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
                             {t.home.heroDescription}
@@ -50,19 +50,19 @@ export default function Home() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                             <div>
-                                <p className="text-3xl font-bold text-blue-600">15+</p>
+                                <p className="text-[#68b9dc] text-3xl font-bold">4</p>
                                 <p className="text-sm text-slate-500 font-medium uppercase tracking-wider">{t.home.stats.clinics}</p>
                             </div>
                             <div>
-                                <p className="text-3xl font-bold text-blue-600">50+</p>
+                                <p className="text-[#68b9dc] text-3xl font-bold">10+</p>
                                 <p className="text-sm text-slate-500 font-medium uppercase tracking-wider">{t.home.stats.specialists}</p>
                             </div>
                             <div>
-                                <p className="text-3xl font-bold text-blue-600">10k+</p>
+                                <p className="text-[#68b9dc] text-3xl font-bold">5 000+</p>
                                 <p className="text-sm text-slate-500 font-medium uppercase tracking-wider">{t.home.stats.pets}</p>
                             </div>
                             <div>
-                                <p className="text-3xl font-bold text-blue-600">24/7</p>
+                                <p className="text-[#68b9dc] text-3xl font-bold">24/7</p>
                                 <p className="text-sm text-slate-500 font-medium uppercase tracking-wider">{t.home.stats.support}</p>
                             </div>
                         </div>
