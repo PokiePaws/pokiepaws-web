@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { PawPrint, Mail, Lock, ChevronRight, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -47,8 +48,14 @@ export default function LoginPage() {
         <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <Link href="/" className="flex justify-center items-center gap-2 mb-6">
-                    <div className="bg-blue-600 p-2 rounded-xl">
-                        <PawPrint className="h-8 w-8 text-white" />
+                    <div className="relative w-20 h-20 overflow-hidden rounded-2xl">
+                        <Image
+                            src="/PokiePaws-logo.png"
+                            alt="Logo"
+                            fill
+                            className="object-cover"
+                            referrerPolicy="no-referrer"
+                        />
                     </div>
                     <span className="text-3xl font-display font-bold text-slate-900">Pokie Paws</span>
                 </Link>
@@ -59,6 +66,7 @@ export default function LoginPage() {
                     {t.login.subtitle}
                 </p>
             </div>
+
 
             <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
                 <motion.div

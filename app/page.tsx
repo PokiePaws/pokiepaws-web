@@ -213,19 +213,29 @@ export default function Home() {
             <footer className="bg-slate-900 text-slate-400 py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <div className="flex justify-center items-center gap-2 mb-6">
-                        <div className="bg-blue-600 p-1.5 rounded-lg">
-                            <PawPrint className="h-6 w-6 text-white" />
+                        <div className="relative w-20 h-20 overflow-hidden rounded-xl">
+                            <Image
+                                src="/PokiePaws-logo.png"
+                                alt="Logo"
+                                fill
+                                className="object-cover"
+                                referrerPolicy="no-referrer"
+                            />
                         </div>
-                        <span className="text-xl font-display font-bold tracking-tight text-white">Pokie Paws Clinic <span className="text-blue-400">Network</span></span>
+                        <span className="text-xl font-display font-bold tracking-tight text-[#d4585b]"> Pokie
+  <span className="text-[#335f7d]">Paws </span>
+  <span className="text-[#68b9dc]">Network</span>
+</span>
                     </div>
                     <p className="mb-8 max-w-md mx-auto">{t.home.footerDesc}</p>
                     <div className="flex justify-center gap-8 mb-8">
                         <Link href="/clinics" className="hover:text-white transition-colors">{t.nav.clinics}</Link>
                         <Link href="/blog" className="hover:text-white transition-colors">{t.nav.blog}</Link>
                     </div>
-                    <p className="text-sm">© 2026 Pokie Paws Clinic. All rights reserved.</p>
+                    <p className="text-sm">© 2026 Pokie Paws Network. All rights reserved.</p>
                 </div>
             </footer>
         </div>
     );
 }
+
