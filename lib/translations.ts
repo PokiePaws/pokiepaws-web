@@ -13,7 +13,7 @@ export const translations = {
       blog: 'Blog',
       clinics: 'Clinics',
       contact: 'Contact',
-      login: 'Staff Login',
+      login: 'Login',
     },
     sidebar: {
       overview: 'Overview',
@@ -233,7 +233,7 @@ export const translations = {
       blog: 'Blog',
       clinics: 'Kliniki',
       contact: 'Kontakt',
-      login: 'Logowanie personelu',
+      login: 'Logowanie',
     },
     sidebar: {
       overview: 'Przegląd',

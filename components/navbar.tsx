@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, PawPrint, User, Calendar, LogOut, Bell, ClipboardList, Microscope, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -42,10 +43,19 @@ export default function Navbar() {
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
                         <Link href="/" className="flex items-center gap-2">
-                            <div className="bg-blue-600 p-1.5 rounded-lg">
-                                <PawPrint className="h-6 w-6 text-white" />
+                            <div className="relative w-20 h-20 overflow-hidden rounded-lg">
+                                <Image
+                                    src="/PokiePaws-logo.png"
+                                    alt="Logo"
+                                    fill
+                                    className="object-cover"
+                                    referrerPolicy="no-referrer"
+                                />
                             </div>
-                            <span className="text-xl font-display font-bold tracking-tight text-slate-900">Pokie Paws <span className="text-blue-600">Network</span></span>
+                            <span className="text-xl font-display font-bold tracking-tight text-[#d4585b]"> Pokie
+  <span className="text-[#335f7d]">Paws </span>
+  <span className="text-[#68b9dc]">Network</span>
+</span>
                         </Link>
                     </div>
 
@@ -54,13 +64,13 @@ export default function Navbar() {
                         <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg mr-4">
                             <button
                                 onClick={() => setLanguage('en')}
-                                className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${language === 'en' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${language === 'en' ? 'bg-white text-[#335f7d] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                             >
                                 EN
                             </button>
                             <button
                                 onClick={() => setLanguage('pl')}
-                                className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${language === 'pl' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`px-2 py-1 text-xs font-bold rounded-md transition-all ${language === 'pl' ? 'bg-white text-[#335f7d] shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                             >
                                 PL
                             </button>
@@ -70,8 +80,8 @@ export default function Navbar() {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-                                    pathname === link.href ? 'text-blue-600' : 'text-slate-600'
+                                className={`text-sm font-medium transition-colors hover:text-[#d4585b] ${
+                                    pathname === link.href ? 'text-[#335f7d]' : 'text-slate-600'
                                 }`}
                             >
                                 {link.name}
@@ -83,7 +93,7 @@ export default function Navbar() {
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowNotifications(!showNotifications)}
-                                        className="p-2 text-slate-500 hover:text-blue-600 transition-colors relative"
+                                        className="p-2 text-slate-500 hover:text-[#335f7d] transition-colors relative"
                                     >
                                         <Bell className="h-5 w-5" />
                                         {notifications.length > 0 && (
@@ -100,7 +110,7 @@ export default function Navbar() {
                                                 className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-blue-100 overflow-hidden"
                                             >
                                                 <div className="p-3 border-b border-blue-50 bg-blue-50/30">
-                                                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">{t.common.notifications}</p>
+                                                    <p className="text-xs font-semibold uppercase tracking-wider text-[#335f7d]">{t.common.notifications}</p>
                                                 </div>
                                                 <div className="max-h-64 overflow-y-auto">
                                                     {notifications.length === 0 ? (
@@ -126,7 +136,7 @@ export default function Navbar() {
 
                                 <Link
                                     href="/staff"
-                                    className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-blue-600 transition-colors"
+                                    className="flex items-center gap-2 text-sm font-medium text-slate-700 hover:text[#335f7d] transition-colors"
                                 >
                                     <User className="h-4 w-4" />
                                     <span>{user.name}</span>
@@ -142,7 +152,7 @@ export default function Navbar() {
                             <div className="flex items-center gap-4 ml-4">
                                 <Link
                                     href="/login"
-                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-all shadow-sm active:scale-95"
+                                    className="bg-[#68b9dc] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#335f7d] transition-all shadow-sm active:scale-95"
                                 >
                                     {t.nav.login}
                                 </Link>
