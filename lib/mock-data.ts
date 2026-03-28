@@ -28,7 +28,7 @@ export interface LabTest {
 export const mockClinics: Clinic[] = [
     {
         id: 'c1',
-        name: 'VetCare Central',
+        name: 'PokiePaws Central',
         city: 'Warsaw',
         address: 'ul. Marszałkowska 10, 00-001 Warszawa',
         phone: '+48 22 123 45 67',
@@ -38,7 +38,7 @@ export const mockClinics: Clinic[] = [
     },
     {
         id: 'c2',
-        name: 'VetCare North',
+        name: 'PokiePaws North',
         city: 'Gdańsk',
         address: 'ul. Grunwaldzka 50, 80-001 Gdańsk',
         phone: '+48 58 321 45 67',
@@ -48,7 +48,7 @@ export const mockClinics: Clinic[] = [
     },
     {
         id: 'c3',
-        name: 'VetCare South',
+        name: 'PokiePaws South',
         city: 'Kraków',
         address: 'ul. Floriańska 15, 31-001 Kraków',
         phone: '+48 12 456 78 90',

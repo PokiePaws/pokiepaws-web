@@ -45,7 +45,7 @@ export default function Navbar() {
                             <div className="bg-blue-600 p-1.5 rounded-lg">
                                 <PawPrint className="h-6 w-6 text-white" />
                             </div>
-                            <span className="text-xl font-display font-bold tracking-tight text-slate-900">VetClinic <span className="text-blue-600">Network</span></span>
+                            <span className="text-xl font-display font-bold tracking-tight text-slate-900">Pokie Paws <span className="text-blue-600">Network</span></span>
                         </Link>
                     </div>
 

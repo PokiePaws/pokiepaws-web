@@ -15,7 +15,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-    title: 'VetCare - Veterinary Clinic Management',
+    title: 'PokiePaws - Veterinary Clinic Management',
     description: 'Comprehensive management system for veterinary clinics and their clients.',
 };
 

@@ -27,17 +27,17 @@ export default function LoginPage() {
 
         // Mock login logic
         setTimeout(() => {
-            if (email === 'super@vetcare.com' && password === 'super123') {
+            if (email === 'super@pokiepaws.com' && password === 'super123') {
                 setUser({ id: '0', name: 'Super Admin', email, role: 'SuperAdmin' });
                 router.push('/staff');
-            } else if (email === 'admin@vetcare.com' && password === 'admin123') {
+            } else if (email === 'admin@pokiepaws.com' && password === 'admin123') {
                 setUser({ id: '1', name: 'Clinic Admin', email, role: 'Admin', clinicId: 'c1' });
                 router.push('/staff');
-            } else if (email === 'staff@vetcare.com' && password === 'staff123') {
+            } else if (email === 'staff@pokiepaws.com' && password === 'staff123') {
                 setUser({ id: '2', name: 'Dr. Jane Smith', email, role: 'Staff', clinicId: 'c1' });
                 router.push('/staff');
             } else {
-                setError(t.login.error + ' Try admin@vetcare.com / admin123');
+                setError(t.login.error + ' Try admin@pokiepaws.com / admin123');
             }
             setIsLoading(false);
         }, 1000);
@@ -50,7 +50,7 @@ export default function LoginPage() {
                     <div className="bg-blue-600 p-2 rounded-xl">
                         <PawPrint className="h-8 w-8 text-white" />
                     </div>
-                    <span className="text-3xl font-display font-bold text-slate-900">VetClinic</span>
+                    <span className="text-3xl font-display font-bold text-slate-900">Pokie Paws</span>
                 </Link>
                 <h2 className="text-center text-3xl font-display font-bold text-slate-900">
                     {t.login.title}
@@ -166,9 +166,9 @@ export default function LoginPage() {
                             </div>
                         </div>
                         <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl">
-                            <p><strong>Staff:</strong> staff@vetcare.com / staff123</p>
-                            <p><strong>Admin:</strong> admin@vetcare.com / admin123</p>
-                            <p><strong>SuperAdmin:</strong> super@vetcare.com / super123</p>
+                            <p><strong>Staff:</strong> staff@pokiepaws.com / staff123</p>
+                            <p><strong>Admin:</strong> admin@pokiepaws.com / admin123</p>
+                            <p><strong>SuperAdmin:</strong> super@pokiepaws.com / super123</p>
                         </div>
                     </div>
                 </motion.div>

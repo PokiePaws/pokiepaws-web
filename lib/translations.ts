@@ -7,7 +7,6 @@ export const translations = {
       role: 'Role',
       vet: 'Veterinarian',
       admin: 'Admin',
-      superAdmin: 'SuperAdmin',
     },
     nav: {
       home: 'Home',
@@ -41,7 +40,7 @@ export const translations = {
       clinicsTitle: 'Our Clinics',
       clinicsSubtitle: 'Choose a location near you to book an appointment.',
       viewAll: 'View All Clinics',
-      advantageTitle: 'The VetClinic Advantage',
+      advantageTitle: 'The Pokie Paws Advantage',
       advantageSubtitle: 'Experience seamless veterinary care across our entire network of professional clinics.',
       features: {
         historyTitle: 'Shared History',
@@ -119,13 +118,13 @@ export const translations = {
       }
     },
     blog: {
-      title: 'VetCare Blog',
+      title: 'PokiePaws Blog',
       subtitle: 'Expert advice, pet care tips, and the latest news from our clinic.',
       readMore: 'Read Full Article',
     },
     clinics: {
       title: 'Our Clinic Network',
-      subtitle: 'Find a VetClinic location near you. All our clinics share your pet\'s medical history for seamless care.',
+      subtitle: 'Find a PokiePaws location near you. All our clinics share your pet\'s medical history for seamless care.',
       searchPlaceholder: 'Search clinics...',
       allCities: 'All Cities',
       noClinics: 'No clinics found',
@@ -261,7 +260,7 @@ export const translations = {
       clinicsTitle: 'Nasze Kliniki',
       clinicsSubtitle: 'Wybierz lokalizację blisko Ciebie, aby umówić wizytę.',
       viewAll: 'Zobacz wszystkie kliniki',
-      advantageTitle: 'Przewaga VetClinic',
+      advantageTitle: 'Przewaga PokiePaws',
       advantageSubtitle: 'Doświadcz płynnej opieki weterynaryjnej w całej naszej sieci profesjonalnych klinik.',
       features: {
         historyTitle: 'Wspólna Historia',
@@ -339,13 +338,13 @@ export const translations = {
       }
     },
     blog: {
-      title: 'Blog VetCare',
+      title: 'Blog PokiePaws',
       subtitle: 'Eksperckie porady, wskazówki dotyczące opieki nad zwierzętami i najnowsze wiadomości z naszej kliniki.',
       readMore: 'Przeczytaj cały artykuł',
     },
     clinics: {
       title: 'Nasza Sieć Klinik',
-      subtitle: 'Znajdź lokalizację VetClinic blisko Ciebie. Wszystkie nasze kliniki współdzielą historię medyczną Twojego pupila.',
+      subtitle: 'Znajdź lokalizację PokiePaws blisko Ciebie. Wszystkie nasze kliniki współdzielą historię medyczną Twojego pupila.',
       searchPlaceholder: 'Szukaj klinik...',
       allCities: 'Wszystkie miasta',
       noClinics: 'Nie znaleziono klinik',

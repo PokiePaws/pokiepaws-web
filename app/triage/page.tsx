@@ -270,7 +270,7 @@ export default function SmartTriagePage() {
                 <div className="max-w-7xl mx-auto px-4 text-center space-y-4">
                     <div className="flex justify-center items-center gap-2">
                         <Heart className="h-5 w-5 text-emerald-600 fill-emerald-600" />
-                        <span className="font-display font-bold text-stone-900">VetClinic Network</span>
+                        <span className="font-display font-bold text-stone-900">PokiePaws Network</span>
                     </div>
                     <p className="text-stone-400 text-sm">© 2024 Caring for your pets with AI and Love.</p>
                 </div>
