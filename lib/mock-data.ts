@@ -25,6 +25,14 @@ export interface LabTest {
     name: string;
 }
 
+export interface Veterinarian {
+    id: string;
+    name: string;
+    specialization: string;
+    clinicId: string;
+    image: string;
+    bio: string;}
+
 export const mockClinics: Clinic[] = [
     {
         id: 'c1',
@@ -87,6 +95,80 @@ export const mockLabTests: LabTest[] = [
     { id: 't5', name: 'X-Ray' }
 ];
 
+export const mockVets: Veterinarian[] = [
+    {
+        id: 'v1',
+        name: 'Dr. Anna Kowalska',
+        specialization: 'Chirurg (Surgeon)',
+        clinicId: 'c1',
+        image: 'https://picsum.photos/seed/vet1/400/400',
+        bio: 'Specialist in soft tissue and orthopedic surgery.'
+    },
+    {
+        id: 'v2',
+        name: 'Dr. Marek Nowak',
+        specialization: 'Kardiolog (Cardiologist)',
+        clinicId: 'c1',
+        image: 'https://picsum.photos/seed/vet2/400/400',
+        bio: 'Expert in heart diseases and echocardiography.'
+    },
+    {
+        id: 'v3',
+        name: 'Dr. Ewa Wiśniewska',
+        specialization: 'Dermatolog (Dermatologist)',
+        clinicId: 'c1',
+        image: 'https://picsum.photos/seed/vet3/400/400',
+        bio: 'Focuses on skin allergies and chronic conditions.'
+    },
+    {
+        id: 'v4',
+        name: 'Dr. Piotr Zieliński',
+        specialization: 'Neurolog (Neurologist)',
+        clinicId: 'c2',
+        image: 'https://picsum.photos/seed/vet4/400/400',
+        bio: 'Specializes in spinal injuries and brain disorders.'
+    },
+    {
+        id: 'v5',
+        name: 'Dr. Maria Lewandowska',
+        specialization: 'Onkolog (Oncologist)',
+        clinicId: 'c2',
+        image: 'https://picsum.photos/seed/vet5/400/400',
+        bio: 'Dedicated to cancer treatment and chemotherapy.'
+    },
+    {
+        id: 'v6',
+        name: 'Dr. Jan Wójcik',
+        specialization: 'Okulista (Ophthalmologist)',
+        clinicId: 'c2',
+        image: 'https://picsum.photos/seed/vet6/400/400',
+        bio: 'Expert in eye surgeries and vision care.'
+    },
+    {
+        id: 'v7',
+        name: 'Dr. Katarzyna Mazur',
+        specialization: 'Radiolog (Radiologist)',
+        clinicId: 'c3',
+        image: 'https://picsum.photos/seed/vet7/400/400',
+        bio: 'Specialist in advanced imaging (CT, MRI, X-Ray).'
+    },
+    {
+        id: 'v8',
+        name: 'Dr. Tomasz Kaczmarek',
+        specialization: 'Stomatolog (Dentist)',
+        clinicId: 'c3',
+        image: 'https://picsum.photos/seed/vet8/400/400',
+        bio: 'Focuses on oral hygiene and dental surgeries.'
+    },
+    {
+        id: 'v9',
+        name: 'Dr. Agnieszka Zając',
+        specialization: 'Lekarz ratunkowy (Emergency Care)',
+        clinicId: 'c3',
+        image: 'https://picsum.photos/seed/vet9/400/400',
+        bio: 'Specialist in critical care and emergency medicine.'
+    }
+];
 export const mockPrescriptions = [];
 export const mockLabOrders = [];
 export const mockSupplyOrders = [];

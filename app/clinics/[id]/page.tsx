@@ -5,11 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Phone, Star, Clock, ChevronLeft, Calendar, ShieldCheck, Users, Heart } from 'lucide-react';
 import Navbar from '../../../components/navbar';
-import { mockClinics } from '../../../lib/mock-data';
+import { mockClinics, mockVets } from '../../../lib/mock-data';
 
 export default function ClinicDetailPage() {
     const params = useParams();
     const clinic = mockClinics.find(c => c.id === params.id);
+    const clinicVets = mockVets.filter(v => v.clinicId === params.id);
 
     if (!clinic) {
         return (
@@ -17,7 +18,7 @@ export default function ClinicDetailPage() {
                 <Navbar />
                 <div className="max-w-7xl mx-auto px-4 py-20 text-center">
                     <h1 className="text-2xl font-bold">Clinic not found</h1>
-                    <Link href="/clinics" className="text-[#68b9dc] hover:underline mt-4 inline-block">Back to catalog</Link>
+                    <Link href="/clinics" className="text-[#68bade] hover:underline mt-4 inline-block">Back to catalog</Link>
                 </div>
             </div>
         );
@@ -45,7 +46,7 @@ export default function ClinicDetailPage() {
                             </Link>
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div>
-                                    <div className="flex items-center gap-2 text-white text-sm font-bold uppercase tracking-widest mb-2">
+                                    <div className="flex items-center gap-2 text-blue-400 text-sm font-bold uppercase tracking-widest mb-2">
                                         <MapPin className="h-4 w-4" />
                                         {clinic.city}
                                     </div>
@@ -79,14 +80,14 @@ export default function ClinicDetailPage() {
                             <section className="grid sm:grid-cols-2 gap-8">
                                 <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                                     <div className="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center">
-                                        <ShieldCheck className="h-6 w-6 text-[#68b9dc]" />
+                                        <ShieldCheck className="h-6 w-6 text-[#68bade]" />
                                     </div>
                                     <h3 className="font-bold text-slate-900 text-xl">Accredited Care</h3>
                                     <p className="text-slate-500 text-sm">Our facility is fully accredited and follows international standards for veterinary medicine.</p>
                                 </div>
                                 <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                                     <div className="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center">
-                                        <Users className="h-6 w-6 text-[#68b9dc]" />
+                                        <Users className="h-6 w-6 text-[#68bade]" />
                                     </div>
                                     <h3 className="font-bold text-slate-900 text-xl">Expert Team</h3>
                                     <p className="text-slate-500 text-sm">Our veterinarians are specialists in various fields, from surgery to internal medicine.</p>
@@ -96,14 +97,14 @@ export default function ClinicDetailPage() {
                             <section>
                                 <h2 className="text-2xl font-bold text-slate-900 mb-6">Our Specialists</h2>
                                 <div className="grid sm:grid-cols-3 gap-6">
-                                    {[1, 2, 3].map((i) => (
-                                        <div key={i} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-4">
+                                    {clinicVets.map((vet) => (
+                                        <div key={vet.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center space-y-4">
                                             <div className="w-20 h-20 rounded-full bg-slate-100 mx-auto relative overflow-hidden">
-                                                <Image src={`https://picsum.photos/seed/doc${i}/200/200`} alt="Doctor" fill className="object-cover" />
+                                                <Image src={vet.image} alt={vet.name} fill className="object-cover" />
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-slate-900">Dr. Marta Nowak</h4>
-                                                <p className="text-xs text-slate-500">Senior Veterinarian</p>
+                                                <h4 className="font-bold text-slate-900">{vet.name}</h4>
+                                                <p className="text-xs text-slate-500">{vet.specialization}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -117,21 +118,21 @@ export default function ClinicDetailPage() {
                                 <h3 className="text-2xl font-bold text-slate-900 mb-6">Book Visit</h3>
                                 <div className="space-y-6">
                                     <div className="flex items-start gap-4">
-                                        <MapPin className="h-5 w-5 text-[#68b9dc] mt-1" />
+                                        <MapPin className="h-5 w-5 text-[#68bade] mt-1" />
                                         <div>
                                             <p className="font-bold text-slate-900">Address</p>
                                             <p className="text-sm text-slate-500">{clinic.address}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4">
-                                        <Phone className="h-5 w-5 text-[#68b9dc] mt-1" />
+                                        <Phone className="h-5 w-5 text-[#68bade] mt-1" />
                                         <div>
                                             <p className="font-bold text-slate-900">Phone</p>
                                             <p className="text-sm text-slate-500">{clinic.phone}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4">
-                                        <Clock className="h-5 w-5 text-[#68b9dc] mt-1" />
+                                        <Clock className="h-5 w-5 text-[#68bade] mt-1" />
                                         <div>
                                             <p className="font-bold text-slate-900">Opening Hours</p>
                                             <p className="text-sm text-slate-500">Mon-Fri: 8:00 - 20:00<br />Sat: 9:00 - 16:00</p>
@@ -142,7 +143,7 @@ export default function ClinicDetailPage() {
                                 <div className="mt-10 space-y-4">
                                     <Link
                                         href="/register"
-                                        className="w-full bg-[#68b9dc] text-white py-4 rounded-2xl font-bold text-center block hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                                        className="w-full bg-[#68bade] text-white py-4 rounded-2xl font-bold text-center block hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
                                     >
                                         Schedule Appointment
                                     </Link>
@@ -152,14 +153,14 @@ export default function ClinicDetailPage() {
                                 </div>
                             </div>
 
-                            <div className="bg-[#c06061] p-8 rounded-[2.5rem] text-white relative overflow-hidden">
+                            <div className="bg-[#d34f57] p-8 rounded-[2.5rem] text-white relative overflow-hidden">
                                 <div className="relative z-10">
                                     <Heart className="h-8 w-8 mb-4" />
                                     <h4 className="text-xl font-bold mb-2">Emergency?</h4>
                                     <p className="text-blue-100 text-sm mb-6">Call our 24/7 emergency line for immediate assistance.</p>
-                                    <a href={`tel:${clinic.phone}`} className="bg-white text-[#d35458] px-6 py-3 rounded-xl font-bold text-sm inline-block">Call Now</a>
+                                    <a href={`tel:${clinic.phone}`} className="bg-white text-[#d34f57] px-6 py-3 rounded-xl font-bold text-sm inline-block">Call Now</a>
                                 </div>
-                                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#d35458] rounded-full blur-3xl opacity-50" />
+                                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#d34f57] rounded-full blur-3xl opacity-50" />
                             </div>
                         </div>
                     </div>
