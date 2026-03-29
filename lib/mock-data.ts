@@ -33,6 +33,16 @@ export interface Veterinarian {
     image: string;
     bio: string;}
 
+export interface Blog {
+    id: string;
+    title: string;
+    excerpt: string;
+    author: string;
+    date: string;
+    category: string;
+    image: string;
+}
+
 export const mockClinics: Clinic[] = [
     {
         id: 'c1',
@@ -167,6 +177,18 @@ export const mockVets: Veterinarian[] = [
         clinicId: 'c3',
         image: 'https://picsum.photos/seed/vet9/400/400',
         bio: 'Specialist in critical care and emergency medicine.'
+    },
+];
+
+export const mockBlog : Blog [] = [
+    {
+        id: '1',
+        title: 'How to Keep Your Pet Cool in Summer',
+        excerpt: 'Summer heat can be dangerous for pets. Learn how to prevent heatstroke and keep your furry friends comfortable.',
+        author: 'Dr. Sarah Smith',
+        date: 'May 10, 2024',
+        category: 'Pet Care',
+        image: 'https://picsum.photos/seed/summer-pet/800/600',
     }
 ];
 export const mockPrescriptions = [];
