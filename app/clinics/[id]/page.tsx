@@ -17,7 +17,7 @@ export default function ClinicDetailPage() {
                 <Navbar />
                 <div className="max-w-7xl mx-auto px-4 py-20 text-center">
                     <h1 className="text-2xl font-bold">Clinic not found</h1>
-                    <Link href="/clinics" className="text-blue-600 hover:underline mt-4 inline-block">Back to catalog</Link>
+                    <Link href="/clinics" className="text-[#68b9dc] hover:underline mt-4 inline-block">Back to catalog</Link>
                 </div>
             </div>
         );
@@ -45,7 +45,7 @@ export default function ClinicDetailPage() {
                             </Link>
                             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                                 <div>
-                                    <div className="flex items-center gap-2 text-blue-400 text-sm font-bold uppercase tracking-widest mb-2">
+                                    <div className="flex items-center gap-2 text-white text-sm font-bold uppercase tracking-widest mb-2">
                                         <MapPin className="h-4 w-4" />
                                         {clinic.city}
                                     </div>
@@ -54,7 +54,7 @@ export default function ClinicDetailPage() {
                                 <div className="flex items-center gap-4">
                                     <div className="bg-white/10 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/20 text-white">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                                            <Star className="h-4 w-4 text-[#d65759] fill-[#d65759]" />
                                             <span className="text-xl font-bold">{clinic.rating}</span>
                                         </div>
                                         <p className="text-xs text-white/60">Clinic Rating</p>
@@ -79,14 +79,14 @@ export default function ClinicDetailPage() {
                             <section className="grid sm:grid-cols-2 gap-8">
                                 <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                                     <div className="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center">
-                                        <ShieldCheck className="h-6 w-6 text-blue-600" />
+                                        <ShieldCheck className="h-6 w-6 text-[#68b9dc]" />
                                     </div>
                                     <h3 className="font-bold text-slate-900 text-xl">Accredited Care</h3>
                                     <p className="text-slate-500 text-sm">Our facility is fully accredited and follows international standards for veterinary medicine.</p>
                                 </div>
                                 <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                                     <div className="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center">
-                                        <Users className="h-6 w-6 text-blue-600" />
+                                        <Users className="h-6 w-6 text-[#68b9dc]" />
                                     </div>
                                     <h3 className="font-bold text-slate-900 text-xl">Expert Team</h3>
                                     <p className="text-slate-500 text-sm">Our veterinarians are specialists in various fields, from surgery to internal medicine.</p>
@@ -102,7 +102,7 @@ export default function ClinicDetailPage() {
                                                 <Image src={`https://picsum.photos/seed/doc${i}/200/200`} alt="Doctor" fill className="object-cover" />
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-slate-900">Dr. Jane Smith</h4>
+                                                <h4 className="font-bold text-slate-900">Dr. Marta Nowak</h4>
                                                 <p className="text-xs text-slate-500">Senior Veterinarian</p>
                                             </div>
                                         </div>
@@ -117,21 +117,21 @@ export default function ClinicDetailPage() {
                                 <h3 className="text-2xl font-bold text-slate-900 mb-6">Book Visit</h3>
                                 <div className="space-y-6">
                                     <div className="flex items-start gap-4">
-                                        <MapPin className="h-5 w-5 text-blue-600 mt-1" />
+                                        <MapPin className="h-5 w-5 text-[#68b9dc] mt-1" />
                                         <div>
                                             <p className="font-bold text-slate-900">Address</p>
                                             <p className="text-sm text-slate-500">{clinic.address}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4">
-                                        <Phone className="h-5 w-5 text-blue-600 mt-1" />
+                                        <Phone className="h-5 w-5 text-[#68b9dc] mt-1" />
                                         <div>
                                             <p className="font-bold text-slate-900">Phone</p>
                                             <p className="text-sm text-slate-500">{clinic.phone}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4">
-                                        <Clock className="h-5 w-5 text-blue-600 mt-1" />
+                                        <Clock className="h-5 w-5 text-[#68b9dc] mt-1" />
                                         <div>
                                             <p className="font-bold text-slate-900">Opening Hours</p>
                                             <p className="text-sm text-slate-500">Mon-Fri: 8:00 - 20:00<br />Sat: 9:00 - 16:00</p>
@@ -142,7 +142,7 @@ export default function ClinicDetailPage() {
                                 <div className="mt-10 space-y-4">
                                     <Link
                                         href="/register"
-                                        className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-center block hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                                        className="w-full bg-[#68b9dc] text-white py-4 rounded-2xl font-bold text-center block hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
                                     >
                                         Schedule Appointment
                                     </Link>
@@ -152,14 +152,14 @@ export default function ClinicDetailPage() {
                                 </div>
                             </div>
 
-                            <div className="bg-blue-600 p-8 rounded-[2.5rem] text-white relative overflow-hidden">
+                            <div className="bg-[#c06061] p-8 rounded-[2.5rem] text-white relative overflow-hidden">
                                 <div className="relative z-10">
                                     <Heart className="h-8 w-8 mb-4" />
                                     <h4 className="text-xl font-bold mb-2">Emergency?</h4>
                                     <p className="text-blue-100 text-sm mb-6">Call our 24/7 emergency line for immediate assistance.</p>
-                                    <a href={`tel:${clinic.phone}`} className="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold text-sm inline-block">Call Now</a>
+                                    <a href={`tel:${clinic.phone}`} className="bg-white text-[#d35458] px-6 py-3 rounded-xl font-bold text-sm inline-block">Call Now</a>
                                 </div>
-                                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500 rounded-full blur-3xl opacity-50" />
+                                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#d35458] rounded-full blur-3xl opacity-50" />
                             </div>
                         </div>
                     </div>

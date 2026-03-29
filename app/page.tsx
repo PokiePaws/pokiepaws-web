@@ -130,7 +130,7 @@ export default function Home() {
                                 <h2 className="text-3xl font-display font-bold text-slate-900 mb-2">{t.home.clinicsTitle}</h2>
                                 <p className="text-slate-500">{t.home.clinicsSubtitle}</p>
                             </div>
-                            <Link href="/clinics" className="text-blue-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                            <Link href="/clinics" className="text-[#68b9dc] font-bold flex items-center gap-1 hover:gap-2 transition-all">
                                 {t.home.viewAll} <ChevronRight className="h-5 w-5" />
                             </Link>
                         </div>
@@ -151,20 +151,20 @@ export default function Home() {
                                             referrerPolicy="no-referrer"
                                         />
                                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                                            <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                                            <Star className="h-3 w-3 text-[#d4585b] fill-[#d4585b]" />
                                             <span className="text-xs font-bold text-slate-900">{clinic.rating}</span>
                                         </div>
                                     </div>
                                     <div className="p-6">
-                                        <div className="flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-widest mb-2">
+                                        <div className="flex items-center gap-2 text-[#68b9dc] text-xs font-bold uppercase tracking-widest mb-2">
                                             <MapPin className="h-3 w-3" />
                                             {clinic.city}
                                         </div>
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">{clinic.name}</h3>
+                                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#68b9dc] transition-colors">{clinic.name}</h3>
                                         <p className="text-slate-500 text-sm line-clamp-2 mb-6">{clinic.description}</p>
                                         <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                                             <span className="text-xs text-slate-400">{clinic.address}</span>
-                                            <div className="bg-blue-50 p-2 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                            <div className="bg-blue-50 p-2 rounded-lg text-[#68b9dc] group-hover:bg-[#68b9dc] group-hover:text-white transition-colors">
                                                 <ChevronRight className="h-4 w-4" />
                                             </div>
                                         </div>
@@ -185,21 +185,21 @@ export default function Home() {
 
                         <div className="grid md:grid-cols-3 gap-12">
                             <div className="text-center space-y-4">
-                                <div className="bg-white w-16 h-16 rounded-2xl shadow-sm flex items-center justify-center mx-auto text-blue-600">
+                                <div className="bg-white w-16 h-16 rounded-2xl shadow-sm flex items-center justify-center mx-auto text-[#68b9dc]">
                                     <ShieldCheck className="h-8 w-8" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900">{t.home.features.historyTitle}</h3>
                                 <p className="text-slate-500">{t.home.features.historyDesc}</p>
                             </div>
                             <div className="text-center space-y-4">
-                                <div className="bg-white w-16 h-16 rounded-2xl shadow-sm flex items-center justify-center mx-auto text-blue-600">
+                                <div className="bg-white w-16 h-16 rounded-2xl shadow-sm flex items-center justify-center mx-auto text-[#68b9dc]">
                                     <Building2 className="h-8 w-8" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900">{t.home.features.facilitiesTitle}</h3>
                                 <p className="text-slate-500">{t.home.features.facilitiesDesc}</p>
                             </div>
                             <div className="text-center space-y-4">
-                                <div className="bg-white w-16 h-16 rounded-2xl shadow-sm flex items-center justify-center mx-auto text-blue-600">
+                                <div className="bg-white w-16 h-16 rounded-2xl shadow-sm flex items-center justify-center mx-auto text-[#68b9dc]">
                                     <Users2 className="h-8 w-8" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900">{t.home.features.teamTitle}</h3>

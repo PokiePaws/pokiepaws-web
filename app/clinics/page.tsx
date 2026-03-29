@@ -43,7 +43,7 @@ export default function ClinicsPage() {
                                 placeholder={t.clinics.searchPlaceholder}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#68b9dc]"
                             />
                         </div>
                         <div className="relative">
@@ -51,7 +51,7 @@ export default function ClinicsPage() {
                             <select
                                 value={selectedCity}
                                 onChange={(e) => setSelectedCity(e.target.value)}
-                                className="pl-10 pr-8 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none"
+                                className="pl-10 pr-8 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#68b9dc] appearance-none"
                             >
                                 {cities.map(city => (
                                     <option key={city} value={city}>
@@ -84,18 +84,18 @@ export default function ClinicsPage() {
                                 </div>
                             </div>
                             <div className="p-6">
-                                <div className="flex items-center gap-2 text-blue-600 text-xs font-bold uppercase tracking-widest mb-2">
+                                <div className="flex items-center gap-2 text-[#68b9dc] text-xs font-bold uppercase tracking-widest mb-2">
                                     <MapPin className="h-3 w-3" />
                                     {clinic.city}
                                 </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">{clinic.name}</h3>
+                                <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#68b9dc] transition-colors">{clinic.name}</h3>
                                 <p className="text-slate-500 text-sm line-clamp-2 mb-6">{clinic.description}</p>
                                 <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                                     <div className="flex items-center gap-2 text-xs text-slate-400">
                                         <Building2 className="h-3 w-3" />
                                         {clinic.address}
                                     </div>
-                                    <div className="bg-blue-50 p-2 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                    <div className="bg-blue-50 p-2 rounded-lg text-[#68b9dc] group-hover:bg-[#68b9dc] group-hover:text-white transition-colors">
                                         <ChevronRight className="h-4 w-4" />
                                     </div>
                                 </div>

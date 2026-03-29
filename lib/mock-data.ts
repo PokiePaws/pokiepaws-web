@@ -32,17 +32,17 @@ export const mockClinics: Clinic[] = [
         city: 'Warsaw',
         address: 'ul. Marszałkowska 10, 00-001 Warszawa',
         phone: '+48 22 123 45 67',
-        image: 'https://picsum.photos/seed/clinic1/800/600',
+        image: '/WWA.jpg',
         description: 'Our flagship clinic in the heart of Warsaw, equipped with the latest diagnostic tools.',
         rating: 4.9
     },
     {
         id: 'c2',
-        name: 'PokiePaws North',
-        city: 'Gdańsk',
-        address: 'ul. Grunwaldzka 50, 80-001 Gdańsk',
+        name: 'PokiePaws West',
+        city: 'Wrocław',
+        address: 'ul. Grunwaldzka 50, 80-001 Wrocław',
         phone: '+48 58 321 45 67',
-        image: 'https://picsum.photos/seed/clinic2/800/600',
+        image: '/WRO.jpg',
         description: 'Specializing in marine animal care and general veterinary services.',
         rating: 4.7
     },
@@ -52,7 +52,7 @@ export const mockClinics: Clinic[] = [
         city: 'Kraków',
         address: 'ul. Floriańska 15, 31-001 Kraków',
         phone: '+48 12 456 78 90',
-        image: 'https://picsum.photos/seed/clinic3/800/600',
+        image: '/KRK.jpg',
         description: 'A cozy clinic with a long tradition of caring for local pets.',
         rating: 4.8
     }
