@@ -49,7 +49,7 @@ export default function Sidebar() {
                 <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
                     <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">{t.common.role}</p>
                     <p className="text-sm font-bold text-stone-900">
-                        {user.role === 'Staff' ? t.common.vet : user.role === 'Admin' ? t.common.admin : t.common.superAdmin}
+                        {user.role === 'Staff' ? t.common.vet : user.role === 'Admin'}
                     </p>
                 </div>
             </div>

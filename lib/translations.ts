@@ -7,6 +7,9 @@ export const translations = {
       role: 'Role',
       vet: 'Veterinarian',
       admin: 'Admin',
+      superAdmin: 'SuperAdmin',
+      warehouse: 'Warehouse Worker',
+      owner: 'Pet Owner',
     },
     nav: {
       home: 'Home',
@@ -14,6 +17,15 @@ export const translations = {
       clinics: 'Clinics',
       contact: 'Contact',
       login: 'Login',
+      register: 'Register',
+    },
+    auth: {
+      mfaTitle: 'Two-Factor Authentication',
+      mfaSubtitle: 'A verification link has been sent to {email}. Please click the link to complete your login.',
+      mfaResend: 'Resend link',
+      mfaSuccess: 'Login successful!',
+      mfaError: 'Invalid or expired verification link.',
+      mfaPending: 'Waiting for verification...',
     },
     sidebar: {
       overview: 'Overview',
@@ -40,7 +52,7 @@ export const translations = {
       clinicsTitle: 'Our Clinics',
       clinicsSubtitle: 'Choose a location near you to book an appointment.',
       viewAll: 'View All Clinics',
-      advantageTitle: 'The Pokie Paws Advantage',
+      advantageTitle: 'The Pokie Paws Clinics Advantage',
       advantageSubtitle: 'Experience seamless veterinary care across our entire network of professional clinics.',
       features: {
         historyTitle: 'Shared History',
@@ -118,13 +130,13 @@ export const translations = {
       }
     },
     blog: {
-      title: 'PokiePaws Blog',
+      title: 'VetCare Blog',
       subtitle: 'Expert advice, pet care tips, and the latest news from our clinic.',
       readMore: 'Read Full Article',
     },
     clinics: {
       title: 'Our Clinic Network',
-      subtitle: 'Find a PokiePaws location near you. All our clinics share your pet\'s medical history for seamless care.',
+      subtitle: 'Find a Pokie Paws Clinics location near you. All our clinics share your pet\'s medical history for seamless care.',
       searchPlaceholder: 'Search clinics...',
       allCities: 'All Cities',
       noClinics: 'No clinics found',
@@ -138,7 +150,11 @@ export const translations = {
         email: 'Email',
         location: 'Location',
         hours: 'Hours',
+        manager: 'Clinic Manager',
       },
+      hqTitle: 'General Headquarters',
+      clinicContactsTitle: 'Clinic Contact Points',
+      clinicContactsSubtitle: 'Direct contact information for our local branches.',
       form: {
         title: 'Send a Message',
         subtitle: 'Fill out the form below and we\'ll be in touch shortly.',
@@ -227,13 +243,24 @@ export const translations = {
       vet: 'Weterynarz',
       admin: 'Administrator',
       superAdmin: 'SuperAdmin',
+      warehouse: 'Pracownik Magazynu',
+      owner: 'Właściciel Zwierzęcia',
     },
     nav: {
       home: 'Strona główna',
       blog: 'Blog',
       clinics: 'Kliniki',
       contact: 'Kontakt',
-      login: 'Logowanie',
+      login: 'Zaloguj się',
+      register: 'Zarejestruj się',
+    },
+    auth: {
+      mfaTitle: 'Uwierzytelnianie Dwuetapowe',
+      mfaSubtitle: 'Link weryfikacyjny został wysłany na adres {email}. Kliknij w link, aby dokończyć logowanie.',
+      mfaResend: 'Wyślij ponownie',
+      mfaSuccess: 'Logowanie pomyślne!',
+      mfaError: 'Nieprawidłowy lub wygasły link weryfikacyjny.',
+      mfaPending: 'Oczekiwanie na weryfikację...',
     },
     sidebar: {
       overview: 'Przegląd',
@@ -260,7 +287,7 @@ export const translations = {
       clinicsTitle: 'Nasze Kliniki',
       clinicsSubtitle: 'Wybierz lokalizację blisko Ciebie, aby umówić wizytę.',
       viewAll: 'Zobacz wszystkie kliniki',
-      advantageTitle: 'Przewaga PokiePaws',
+      advantageTitle: 'Przewaga Pokie Paws Clinics',
       advantageSubtitle: 'Doświadcz płynnej opieki weterynaryjnej w całej naszej sieci profesjonalnych klinik.',
       features: {
         historyTitle: 'Wspólna Historia',
@@ -338,13 +365,13 @@ export const translations = {
       }
     },
     blog: {
-      title: 'Blog PokiePaws',
+      title: 'Blog VetCare',
       subtitle: 'Eksperckie porady, wskazówki dotyczące opieki nad zwierzętami i najnowsze wiadomości z naszej kliniki.',
       readMore: 'Przeczytaj cały artykuł',
     },
     clinics: {
       title: 'Nasza Sieć Klinik',
-      subtitle: 'Znajdź lokalizację PokiePaws blisko Ciebie. Wszystkie nasze kliniki współdzielą historię medyczną Twojego pupila.',
+      subtitle: 'Znajdź lokalizację Pokie Paws Clinics blisko Ciebie. Wszystkie nasze kliniki współdzielą historię medyczną Twojego pupila.',
       searchPlaceholder: 'Szukaj klinik...',
       allCities: 'Wszystkie miasta',
       noClinics: 'Nie znaleziono klinik',
@@ -358,7 +385,11 @@ export const translations = {
         email: 'E-mail',
         location: 'Lokalizacja',
         hours: 'Godziny otwarcia',
+        manager: 'Kierownik Kliniki',
       },
+      hqTitle: 'Centrala Ogólna',
+      clinicContactsTitle: 'Punkty Kontaktowe Klinik',
+      clinicContactsSubtitle: 'Bezpośrednie dane kontaktowe do naszych lokalnych oddziałów.',
       form: {
         title: 'Wyślij wiadomość',
         subtitle: 'Wypełnij poniższy formularz, a wkrótce się z Tobą skontaktujemy.',

@@ -4,6 +4,8 @@ export interface Clinic {
     city: string;
     address: string;
     phone: string;
+    email: string;
+    manager: string;
     image: string;
     description: string;
     rating: number;
@@ -50,6 +52,8 @@ export const mockClinics: Clinic[] = [
         city: 'Warsaw',
         address: 'ul. Marszałkowska 10, 00-001 Warszawa',
         phone: '+48 22 123 45 67',
+        email: 'central@pokiepaws.pl',
+        manager: 'Dr. Anna Kowalska',
         image: '/WWA.jpg',
         description: 'Our flagship clinic in the heart of Warsaw, equipped with the latest diagnostic tools.',
         rating: 4.9
@@ -60,6 +64,8 @@ export const mockClinics: Clinic[] = [
         city: 'Wrocław',
         address: 'ul. Grunwaldzka 50, 80-001 Wrocław',
         phone: '+48 58 321 45 67',
+        email: 'west@pokiepaws.pl',
+        manager: 'Dr. Piotr Zieliński',
         image: '/WRO.jpg',
         description: 'Specializing in marine animal care and general veterinary services.',
         rating: 4.7
@@ -70,6 +76,8 @@ export const mockClinics: Clinic[] = [
         city: 'Kraków',
         address: 'ul. Floriańska 15, 31-001 Kraków',
         phone: '+48 12 456 78 90',
+        email: 'south@pokiepaws.pl',
+        manager: 'Dr. Katarzyna Mazur',
         image: '/KRK.jpg',
         description: 'A cozy clinic with a long tradition of caring for local pets.',
         rating: 4.8

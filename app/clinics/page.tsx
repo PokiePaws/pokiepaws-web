@@ -79,7 +79,7 @@ export default function ClinicsPage() {
                                     referrerPolicy="no-referrer"
                                 />
                                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                                    <Star className="h-3 w-3 text-amber-500 fill-amber-500" />
+                                    <Star className="h-3 w-3 text-[#d25257] fill-[#d25257]" />
                                     <span className="text-xs font-bold text-slate-900">{clinic.rating}</span>
                                 </div>
                             </div>
