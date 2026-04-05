@@ -16,7 +16,8 @@ import {
     ClipboardList,
     Microscope,
     Package,
-    ShieldCheck
+    ShieldCheck,
+    Building2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -35,12 +36,15 @@ export default function Sidebar() {
         { name: t.sidebar.patients, href: '/staff/patients', icon: Users },
         { name: t.sidebar.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
         { name: t.sidebar.labOrders, href: '/staff/labOrders', icon: Microscope },
-        { name: t.sidebar.supplies, href: '/staff/supplies', icon: Package },
+        { name: t.sidebar.supplies, href: '/staff/inventory', icon: Package },
         { name: t.sidebar.settings, href: '/staff/settings', icon: Settings },
     ];
 
     if (user.role === 'Admin' || user.role === 'SuperAdmin') {
-        links.push({ name: t.sidebar.adminPanel, href: '/staff/admin', icon: ShieldCheck });
+        links.push({ name: t.sidebar.adminPanel, href: '/staff/users', icon: ShieldCheck });
+        links.push({ name: language === 'pl' ? 'Kliniki' : 'Clinics', href: '/staff/clinics', icon: Building2 });
+        links.push({ name: language === 'pl' ? 'Statystyki' : 'Statistics', href: '/staff/stats', icon: LayoutDashboard });
+
     }
 
     return (
@@ -49,7 +53,7 @@ export default function Sidebar() {
                 <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
                     <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">{t.common.role}</p>
                     <p className="text-sm font-bold text-stone-900">
-                        {user.role === 'Staff' ? t.common.vet : user.role === 'Admin'}
+                        {user.role === 'Staff' ? t.common.vet : user.role === 'Admin' ? t.common.admin : t.common.superAdmin}
                     </p>
                 </div>
             </div>
@@ -88,3 +92,4 @@ export default function Sidebar() {
         </aside>
     );
 }
+
