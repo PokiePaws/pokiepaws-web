@@ -36,7 +36,7 @@ export default function Sidebar() {
         { name: t.sidebar.patients, href: '/staff/patients', icon: Users },
         { name: t.sidebar.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
         { name: t.sidebar.labOrders, href: '/staff/labOrders', icon: Microscope },
-        { name: t.sidebar.supplies, href: '/staff/inventory', icon: Package },
+        { name: t.sidebar.supplies, href: '/staff/supplies', icon: Package },
         { name: t.sidebar.settings, href: '/staff/settings', icon: Settings },
     ];
 
