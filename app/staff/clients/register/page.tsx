@@ -20,6 +20,12 @@ export default function ClientRegistrationPage() {
         street: '',
         city: '',
         zipCode: '',
+        petsName:'',
+        gender:'',
+        breed:'',
+        petsAge:'',
+        petsChip:'',
+        petsAccomodation:'',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -67,6 +73,12 @@ export default function ClientRegistrationPage() {
                                     street: '',
                                     city: '',
                                     zipCode: '',
+                                    petsName:'',
+                                    gender:'',
+                                    breed:'',
+                                    petsAge:'',
+                                    petsChip:'',
+                                    petsAccomodation:'',
                                 });
                             }}
                             className="bg-stone-100 text-stone-600 px-8 py-4 rounded-2xl font-bold hover:bg-stone-200 transition-all"
@@ -199,6 +211,78 @@ export default function ClientRegistrationPage() {
                                 value={formData.zipCode}
                                 onChange={handleChange}
                                 placeholder="10001"
+                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.petsName}</label>
+                            <input
+                                required
+                                type="text"
+                                name="petsName"
+                                value={formData.petsName}
+                                onChange={handleChange}
+                                placeholder="Eevee"
+                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.gender}</label>
+                            <input
+                                required
+                                type="text"
+                                name="gender"
+                                value={formData.gender}
+                                onChange={handleChange}
+                                placeholder="Eevee"
+                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.breed}</label>
+                            <input
+                                required
+                                type="text"
+                                name="breed"
+                                value={formData.breed}
+                                onChange={handleChange}
+                                placeholder="Eevee"
+                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.petsAge}</label>
+                            <input
+                                required
+                                type="text"
+                                name="petsAge"
+                                value={formData.petsAge}
+                                onChange={handleChange}
+                                placeholder="Eevee"
+                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.petsChip}</label>
+                            <input
+                                required
+                                type="text"
+                                name="petsChip"
+                                value={formData.petsChip}
+                                onChange={handleChange}
+                                placeholder="Eevee"
+                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.petsAccomodation}</label>
+                            <input
+                                required
+                                type="text"
+                                name="petsAccomodation"
+                                value={formData.petsAccomodation}
+                                onChange={handleChange}
+                                placeholder="Eevee"
                                 className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                             />
                         </div>
