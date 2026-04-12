@@ -14,12 +14,14 @@ export interface Clinic {
 export interface Diagnosis {
     code: string;
     name: string;
+    namePl: string;
 }
 
 export interface Medicine {
     id: string;
     name: string;
     unit: string;
+    namePl: string
 }
 
 export interface LabTest {
@@ -85,25 +87,194 @@ export const mockClinics: Clinic[] = [
 ];
 
 export const mockDiagnoses: Diagnosis[] = [
-    { code: 'A00.0', name: 'Cholera due to Vibrio cholerae 01, biovar cholerae' },
-    { code: 'B01.9', name: 'Varicella without complication' },
-    { code: 'J06.9', name: 'Acute upper respiratory infection, unspecified' },
-    { code: 'K29.7', name: 'Gastritis, unspecified' },
-    { code: 'M54.5', name: 'Low back pain' },
-    { code: 'S06.0', name: 'Concussion' },
-    { code: 'VET-001', name: 'Canine Parvovirus' },
-    { code: 'VET-002', name: 'Feline Leukemia Virus (FeLV)' },
-    { code: 'VET-003', name: 'Otitis Externa' },
-    { code: 'VET-004', name: 'Dental Calculus' }
+    // Human ICD codes
+    { code: 'A00.0', name: 'Cholera due to Vibrio cholerae 01, biovar cholerae', namePl: 'Cholera wywołana przez Vibrio cholerae 01, biowar cholerae' },
+    { code: 'B01.9', name: 'Varicella without complication', namePl: 'Ospa wietrzna bez powikłań' },
+    { code: 'J06.9', name: 'Acute upper respiratory infection, unspecified', namePl: 'Ostra infekcja górnych dróg oddechowych, nieokreślona' },
+    { code: 'K29.7', name: 'Gastritis, unspecified', namePl: 'Zapalenie żołądka, nieokreślone' },
+    { code: 'M54.5', name: 'Low back pain', namePl: 'Ból dolnej części pleców' },
+    { code: 'S06.0', name: 'Concussion', namePl: 'Wstrząśnienie mózgu' },
+
+    // Veterinary - Viral
+    { code: 'VET-001', name: 'Canine Parvovirus', namePl: 'Parwowiroza psów' },
+    { code: 'VET-002', name: 'Feline Leukemia Virus (FeLV)', namePl: 'Białaczka kotów (FeLV)' },
+    { code: 'VET-010', name: 'Canine Distemper', namePl: 'Nosówka psów' },
+    { code: 'VET-011', name: 'Feline Panleukopenia', namePl: 'Panleukopenia kotów' },
+    { code: 'VET-012', name: 'Feline Immunodeficiency Virus (FIV)', namePl: 'Niedobór odporności kotów (FIV)' },
+    { code: 'VET-013', name: 'Canine Infectious Hepatitis', namePl: 'Zakaźne zapalenie wątroby psów' },
+    { code: 'VET-014', name: 'Rabies', namePl: 'Wścieklizna' },
+    { code: 'VET-015', name: 'Feline Calicivirus', namePl: 'Kaliciwiroza kotów' },
+    { code: 'VET-016', name: 'Feline Herpesvirus (Rhinotracheitis)', namePl: 'Herpeswirusowe zapalenie tchawicy i spojówek kotów' },
+    { code: 'VET-017', name: 'Canine Coronavirus', namePl: 'Koronawiroza psów' },
+
+    // Veterinary - Bacterial
+    { code: 'VET-020', name: 'Leptospirosis', namePl: 'Leptospiroza' },
+    { code: 'VET-021', name: 'Bordetella (Kennel Cough)', namePl: 'Kaszel kennelowy (Bordetella)' },
+    { code: 'VET-022', name: 'Lyme Disease (Borreliosis)', namePl: 'Borelioza z Lyme' },
+    { code: 'VET-023', name: 'Salmonellosis', namePl: 'Salmonelloza' },
+    { code: 'VET-024', name: 'Pyoderma', namePl: 'Ropne zapalenie skóry' },
+    { code: 'VET-025', name: 'Urinary Tract Infection', namePl: 'Zakażenie układu moczowego' },
+
+    // Veterinary - Parasitic
+    { code: 'VET-030', name: 'Heartworm Disease', namePl: 'Dirofilarioza (robak sercowy)' },
+    { code: 'VET-031', name: 'Toxoplasmosis', namePl: 'Toksoplazmoza' },
+    { code: 'VET-032', name: 'Giardiasis', namePl: 'Giardoza' },
+    { code: 'VET-033', name: 'Sarcoptic Mange', namePl: 'Świerzb (nużyca sarkoptyczna)' },
+    { code: 'VET-034', name: 'Demodectic Mange', namePl: 'Nużyca demodektyczna' },
+    { code: 'VET-035', name: 'Flea Allergy Dermatitis', namePl: 'Alergia na pchły (FAD)' },
+    { code: 'VET-036', name: 'Tick-borne Encephalitis', namePl: 'Kleszczowe zapalenie mózgu' },
+
+    // Veterinary - Internal / Chronic
+    { code: 'VET-040', name: 'Diabetes Mellitus', namePl: 'Cukrzyca' },
+    { code: 'VET-041', name: 'Hypothyroidism', namePl: 'Niedoczynność tarczycy' },
+    { code: 'VET-042', name: 'Hyperthyroidism (Feline)', namePl: 'Nadczynność tarczycy (koty)' },
+    { code: 'VET-043', name: 'Chronic Kidney Disease', namePl: 'Przewlekła choroba nerek' },
+    { code: 'VET-044', name: 'Liver Disease / Hepatopathy', namePl: 'Choroba wątroby / hepatopatia' },
+    { code: 'VET-045', name: 'Pancreatitis', namePl: 'Zapalenie trzustki' },
+    { code: 'VET-046', name: 'Inflammatory Bowel Disease (IBD)', namePl: 'Nieswoiste zapalenie jelit (IBD)' },
+    { code: 'VET-047', name: 'Addison\'s Disease (Hypoadrenocorticism)', namePl: 'Choroba Addisona (niedoczynność nadnerczy)' },
+    { code: 'VET-048', name: 'Cushing\'s Disease (Hyperadrenocorticism)', namePl: 'Choroba Cushinga (nadczynność nadnerczy)' },
+
+    // Veterinary - Musculoskeletal
+    { code: 'VET-050', name: 'Hip Dysplasia', namePl: 'Dysplazja stawu biodrowego' },
+    { code: 'VET-051', name: 'Elbow Dysplasia', namePl: 'Dysplazja stawu łokciowego' },
+    { code: 'VET-052', name: 'Osteoarthritis', namePl: 'Choroba zwyrodnieniowa stawów' },
+    { code: 'VET-053', name: 'Intervertebral Disc Disease (IVDD)', namePl: 'Choroba dysku międzykręgowego (IVDD)' },
+    { code: 'VET-054', name: 'Cruciate Ligament Rupture', namePl: 'Zerwanie więzadła krzyżowego' },
+
+    // Veterinary - Dermatological
+    { code: 'VET-060', name: 'Atopic Dermatitis', namePl: 'Atopowe zapalenie skóry' },
+    { code: 'VET-061', name: 'Ringworm (Dermatophytosis)', namePl: 'Grzybica skóry (dermatofitoza)' },
+    { code: 'VET-062', name: 'Hot Spots (Acute Moist Dermatitis)', namePl: 'Ostre wilgotne zapalenie skóry' },
+
+    // Veterinary - ENT / Eyes
+    { code: 'VET-003', name: 'Otitis Externa', namePl: 'Zapalenie ucha zewnętrznego' },
+    { code: 'VET-070', name: 'Otitis Media / Interna', namePl: 'Zapalenie ucha środkowego / wewnętrznego' },
+    { code: 'VET-071', name: 'Conjunctivitis', namePl: 'Zapalenie spojówek' },
+    { code: 'VET-072', name: 'Glaucoma', namePl: 'Jaskra' },
+    { code: 'VET-073', name: 'Cataracts', namePl: 'Zaćma' },
+
+    // Veterinary - Dental
+    { code: 'VET-004', name: 'Dental Calculus', namePl: 'Kamień nazębny' },
+    { code: 'VET-080', name: 'Periodontal Disease', namePl: 'Choroba przyzębia' },
+    { code: 'VET-081', name: 'Tooth Resorption (Feline)', namePl: 'Resorpcja zębów (koty)' },
+
+    // Veterinary - Oncology
+    { code: 'VET-090', name: 'Mast Cell Tumor', namePl: 'Guz z komórek tucznych' },
+    { code: 'VET-091', name: 'Lymphoma', namePl: 'Chłoniak' },
+    { code: 'VET-092', name: 'Osteosarcoma', namePl: 'Mięsak kościopochodny' },
+    { code: 'VET-093', name: 'Mammary Gland Tumor', namePl: 'Guz gruczołu mlekowego' },
+    // Pasożyty zewnętrzne
+    { code: 'VET-100', name: 'Flea Infestation', namePl: 'Inwazja pcheł' },
+    { code: 'VET-101', name: 'Tick Infestation', namePl: 'Inwazja kleszczy' },
+    { code: 'VET-102', name: 'Lice Infestation (Pediculosis)', namePl: 'Wszawica (pediculosis)' },
+    { code: 'VET-103', name: 'Cheyletiellosis (Walking Dandruff)', namePl: 'Cheyletieloza (wędrujący łupież)' },
+    { code: 'VET-104', name: 'Harvest Mite Infestation (Trombiculosis)', namePl: 'Inwazja roztocza (trombiculoza)' },
 ];
 
 export const mockMedicines: Medicine[] = [
-    { id: 'm1', name: 'Amoxicillin', unit: 'mg' },
-    { id: 'm2', name: 'Carprofen', unit: 'mg' },
-    { id: 'm3', name: 'Meloxicam', unit: 'ml' },
-    { id: 'm4', name: 'Prednisone', unit: 'mg' },
-    { id: 'm5', name: 'Fipronil', unit: 'pipette' }
-];
+    // Antybiotyki
+    { id: 'm1', name: 'Amoxicillin', namePl: 'Amoksycylina', unit: 'mg' },
+    { id: 'm2', name: 'Amoxicillin + Clavulanic Acid', namePl: 'Amoksycylina + kwas klawulanowy', unit: 'mg' },
+    { id: 'm3', name: 'Doxycycline', namePl: 'Doksycyklina', unit: 'mg' },
+    { id: 'm4', name: 'Enrofloxacin', namePl: 'Enrofloksacyna', unit: 'mg' },
+    { id: 'm5', name: 'Metronidazole', namePl: 'Metronidazol', unit: 'mg' },
+    { id: 'm6', name: 'Clindamycin', namePl: 'Klindamycyna', unit: 'mg' },
+    { id: 'm7', name: 'Trimethoprim + Sulfamethoxazole', namePl: 'Trimetoprim + sulfametoksazol', unit: 'mg' },
+    { id: 'm8', name: 'Marbofloxacin', namePl: 'Marbofloksacyna', unit: 'mg' },
+
+    // Przeciwzapalne / Przeciwbólowe
+    { id: 'm9', name: 'Carprofen', namePl: 'Karprofen', unit: 'mg' },
+    { id: 'm10', name: 'Meloxicam', namePl: 'Meloksykam', unit: 'ml' },
+    { id: 'm11', name: 'Robenacoxib', namePl: 'Robenakoksyb', unit: 'mg' },
+    { id: 'm12', name: 'Grapiprant', namePl: 'Grapiprant', unit: 'mg' },
+    { id: 'm13', name: 'Tramadol', namePl: 'Tramadol', unit: 'mg' },
+    { id: 'm14', name: 'Buprenorphine', namePl: 'Buprenorfina', unit: 'ml' },
+    { id: 'm15', name: 'Gabapentin', namePl: 'Gabapentyna', unit: 'mg' },
+
+    // Kortykosteroidy
+    { id: 'm16', name: 'Prednisone', namePl: 'Prednizon', unit: 'mg' },
+    { id: 'm17', name: 'Prednisolone', namePl: 'Prednizolon', unit: 'mg' },
+    { id: 'm18', name: 'Dexamethasone', namePl: 'Deksametazon', unit: 'mg' },
+    { id: 'm19', name: 'Triamcinolone', namePl: 'Triamcynolon', unit: 'mg' },
+
+    // Przeciwpasożytnicze
+    { id: 'm20', name: 'Fipronil', namePl: 'Fipronil', unit: 'pipette' },
+    { id: 'm21', name: 'Imidacloprid', namePl: 'Imidakloprid', unit: 'pipette' },
+    { id: 'm22', name: 'Selamectin', namePl: 'Selamektyna', unit: 'pipette' },
+    { id: 'm23', name: 'Milbemycin Oxime', namePl: 'Milbemycyna oksym', unit: 'mg' },
+    { id: 'm24', name: 'Praziquantel', namePl: 'Prazikwantel', unit: 'mg' },
+    { id: 'm25', name: 'Fenbendazole', namePl: 'Fenbendazol', unit: 'mg' },
+    { id: 'm26', name: 'Metronidazole (Antiprotozoal)', namePl: 'Metronidazol (przeciwpierwotniacze)', unit: 'mg' },
+    { id: 'm27', name: 'Afoxolaner (NexGard)', namePl: 'Afoksolaner (NexGard)', unit: 'mg' },
+    { id: 'm28', name: 'Fluralaner (Bravecto)', namePl: 'Fluralaner (Bravecto)', unit: 'mg' },
+
+    // Kardiologiczne
+    { id: 'm29', name: 'Enalapril', namePl: 'Enalapryl', unit: 'mg' },
+    { id: 'm30', name: 'Benazepril', namePl: 'Benazepril', unit: 'mg' },
+    { id: 'm31', name: 'Furosemide', namePl: 'Furosemid', unit: 'mg' },
+    { id: 'm32', name: 'Spironolactone', namePl: 'Spironolakton', unit: 'mg' },
+    { id: 'm33', name: 'Pimobendan', namePl: 'Pimobendan', unit: 'mg' },
+    { id: 'm34', name: 'Atenolol', namePl: 'Atenolol', unit: 'mg' },
+    { id: 'm35', name: 'Digoxin', namePl: 'Digoksyna', unit: 'mg' },
+
+    // Hormonalne / Endokrynologiczne
+    { id: 'm36', name: 'Levothyroxine', namePl: 'Lewotyroksyna', unit: 'mg' },
+    { id: 'm37', name: 'Methimazole', namePl: 'Metimazol', unit: 'mg' },
+    { id: 'm38', name: 'Insulin (Caninsulin)', namePl: 'Insulina (Caninsulin)', unit: 'IU' },
+    { id: 'm39', name: 'Trilostane', namePl: 'Trilostan', unit: 'mg' },
+    { id: 'm40', name: 'Mitotane (o,p-DDD)', namePl: 'Mitotan (o,p-DDD)', unit: 'mg' },
+
+    // Gastroenterologiczne
+    { id: 'm41', name: 'Omeprazole', namePl: 'Omeprazol', unit: 'mg' },
+    { id: 'm42', name: 'Famotidine', namePl: 'Famotydyna', unit: 'mg' },
+    { id: 'm43', name: 'Maropitant (Cerenia)', namePl: 'Maropitant (Cerenia)', unit: 'mg' },
+    { id: 'm44', name: 'Ondansetron', namePl: 'Ondansetron', unit: 'mg' },
+    { id: 'm45', name: 'Sucralfate', namePl: 'Sukralfat', unit: 'mg' },
+    { id: 'm46', name: 'Lactulose', namePl: 'Laktuloza', unit: 'ml' },
+    { id: 'm47', name: 'Probiotics (Enterococcus)', namePl: 'Probiotyki (Enterococcus)', unit: 'capsule' },
+
+    // Dermatologiczne
+    { id: 'm48', name: 'Oclacitinib (Apoquel)', namePl: 'Oklacytynib (Apoquel)', unit: 'mg' },
+    { id: 'm49', name: 'Lokivetmab (Cytopoint)', namePl: 'Lokivetmab (Cytopoint)', unit: 'ml' },
+    { id: 'm50', name: 'Ciclosporin (Atopica)', namePl: 'Cyklosporyna (Atopica)', unit: 'mg' },
+    { id: 'm51', name: 'Ketoconazole (topical)', namePl: 'Ketokonazol (miejscowo)', unit: 'g' },
+    { id: 'm52', name: 'Chlorhexidine Shampoo', namePl: 'Szampon z chlorheksydyną', unit: 'ml' },
+
+    // Neurologiczne
+    { id: 'm53', name: 'Phenobarbital', namePl: 'Fenobarbital', unit: 'mg' },
+    { id: 'm54', name: 'Potassium Bromide', namePl: 'Bromek potasu', unit: 'mg' },
+    { id: 'm55', name: 'Levetiracetam', namePl: 'Lewetyracetam', unit: 'mg' },
+    { id: 'm56', name: 'Diazepam', namePl: 'Diazepam', unit: 'mg' },
+
+    // Okulistyczne
+    { id: 'm57', name: 'Dorzolamide Eye Drops', namePl: 'Krople do oczu z dorzolamidem', unit: 'drop' },
+    { id: 'm58', name: 'Latanoprost Eye Drops', namePl: 'Krople do oczu z latanoprostem', unit: 'drop' },
+    { id: 'm59', name: 'Tobramycin Eye Drops', namePl: 'Krople do oczu z tobramycyną', unit: 'drop' },
+    { id: 'm60', name: 'Dexamethasone Eye Drops', namePl: 'Krople do oczu z deksametazonem', unit: 'drop' },
+
+    // Onkologiczne
+    { id: 'm61', name: 'Chlorambucil', namePl: 'Chlorambucyl', unit: 'mg' },
+    { id: 'm62', name: 'Cyclophosphamide', namePl: 'Cyklofosfamid', unit: 'mg' },
+    { id: 'm63', name: 'Vincristine', namePl: 'Winkrystyna', unit: 'mg' },
+    { id: 'm64', name: 'Toceranib (Palladia)', namePl: 'Toceranib (Palladia)', unit: 'mg' },
+
+    // Suplementy
+    { id: 'm65', name: 'Omega-3 Fatty Acids', namePl: 'Kwasy tłuszczowe Omega-3', unit: 'capsule' },
+    { id: 'm66', name: 'Joint Supplement (Glucosamine + Chondroitin)', namePl: 'Suplement na stawy (glukozamina + chondroityna)', unit: 'tablet' },
+    { id: 'm67', name: 'Vitamin B12', namePl: 'Witamina B12', unit: 'ml' },
+    { id: 'm68', name: 'Iron Supplement', namePl: 'Suplement żelaza', unit: 'mg' },
+
+    // Pasożyty zewnętrzne
+    { id: 'm69', name: 'Fipronil + Methoprene (Frontline Combo)', namePl: 'Fipronil + metopren (Frontline Combo)', unit: 'pipette' },
+    { id: 'm70', name: 'Imidacloprid + Permethrin (Advantix)', namePl: 'Imidakloprid + permetryna (Advantix)', unit: 'pipette' },
+    { id: 'm71', name: 'Spinosad (Comfortis)', namePl: 'Spinosad (Comfortis)', unit: 'mg' },
+    { id: 'm72', name: 'Nitenpyram (Capstar)', namePl: 'Nitenpyram (Capstar)', unit: 'mg' },
+    { id: 'm73', name: 'Indoxacarb (Activyl)', namePl: 'Indoksykarb (Activyl)', unit: 'pipette' },
+    { id: 'm74', name: 'Permethrin Spray', namePl: 'Spray z permetryną', unit: 'ml' },
+    { id: 'm75', name: 'Ivermectin', namePl: 'Iwermektyna', unit: 'mg' },
+    { id: 'm76', name: 'Lime Sulfur Dip', namePl: 'Kąpiel z siarczanem wapnia', unit: 'ml' },
+    ];
 
 export const mockLabTests: LabTest[] = [
     { id: 't1', name: 'Complete Blood Count (CBC)' },
