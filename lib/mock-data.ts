@@ -27,6 +27,7 @@ export interface Medicine {
 export interface LabTest {
     id: string;
     name: string;
+    namePl: string;
 }
 
 export interface Veterinarian {
@@ -277,11 +278,95 @@ export const mockMedicines: Medicine[] = [
     ];
 
 export const mockLabTests: LabTest[] = [
-    { id: 't1', name: 'Complete Blood Count (CBC)' },
-    { id: 't2', name: 'Biochemistry Panel' },
-    { id: 't3', name: 'Urinalysis' },
-    { id: 't4', name: 'Fecal Exam' },
-    { id: 't5', name: 'X-Ray' }
+    // Hematologia
+    { id: 't1', name: 'Complete Blood Count (CBC)', namePl: 'Morfologia krwi (CBC)' },
+    { id: 't2', name: 'Reticulocyte Count', namePl: 'Liczba retikulocytów' },
+    { id: 't3', name: 'Blood Smear Evaluation', namePl: 'Ocena rozmazu krwi' },
+    { id: 't4', name: 'Coagulation Profile (PT/APTT)', namePl: 'Profil krzepnięcia (PT/APTT)' },
+
+    // Biochemia
+    { id: 't5', name: 'Biochemistry Panel', namePl: 'Panel biochemiczny' },
+    { id: 't6', name: 'Liver Function Panel (ALT, AST, ALP, GGT)', namePl: 'Panel wątrobowy (ALT, AST, ALP, GGT)' },
+    { id: 't7', name: 'Kidney Function Panel (BUN, Creatinine)', namePl: 'Panel nerkowy (mocznik, kreatynina)' },
+    { id: 't8', name: 'Electrolytes (Na, K, Cl)', namePl: 'Elektrolity (Na, K, Cl)' },
+    { id: 't9', name: 'Blood Glucose', namePl: 'Glukoza we krwi' },
+    { id: 't10', name: 'Fructosamine (Diabetes Monitoring)', namePl: 'Fruktozamina (kontrola cukrzycy)' },
+    { id: 't11', name: 'Total Protein & Albumin', namePl: 'Białko całkowite i albuminy' },
+    { id: 't12', name: 'Cholesterol & Triglycerides', namePl: 'Cholesterol i trójglicerydy' },
+    { id: 't13', name: 'Amylase & Lipase', namePl: 'Amylaza i lipaza' },
+    { id: 't14', name: 'Bile Acids', namePl: 'Kwasy żółciowe' },
+    { id: 't15', name: 'Calcium & Phosphorus', namePl: 'Wapń i fosfor' },
+
+    // Mocz i nerki
+    { id: 't16', name: 'Urinalysis', namePl: 'Badanie moczu' },
+    { id: 't17', name: 'Urine Culture & Sensitivity', namePl: 'Posiew moczu z antybiogramem' },
+    { id: 't18', name: 'Urine Protein:Creatinine Ratio (UPC)', namePl: 'Wskaźnik białko/kreatynina w moczu (UPC)' },
+    { id: 't19', name: 'SDMA (Early Kidney Disease Marker)', namePl: 'SDMA (wczesny marker choroby nerek)' },
+
+    // Hormony / Endokrynologia
+    { id: 't20', name: 'Total T4 (Thyroid)', namePl: 'Tyroksyna całkowita T4 (tarczyca)' },
+    { id: 't21', name: 'Free T4 (fT4)', namePl: 'Wolna tyroksyna (fT4)' },
+    { id: 't22', name: 'TSH (Thyroid Stimulating Hormone)', namePl: 'TSH (tyreotropina)' },
+    { id: 't23', name: 'Cortisol (Basal)', namePl: 'Kortyzol (podstawowy)' },
+    { id: 't24', name: 'ACTH Stimulation Test', namePl: 'Test stymulacji ACTH' },
+    { id: 't25', name: 'Low-Dose Dexamethasone Suppression Test', namePl: 'Test hamowania niską dawką deksametazonu' },
+    { id: 't26', name: 'Progesterone Level', namePl: 'Poziom progesteronu' },
+    { id: 't27', name: 'Insulin Level', namePl: 'Poziom insuliny' },
+
+    // Trzustka
+    { id: 't28', name: 'cPL / fPL (Pancreatic Lipase)', namePl: 'cPL / fPL (lipaza trzustkowa)' },
+    { id: 't29', name: 'Trypsin-like Immunoreactivity (TLI)', namePl: 'Immunoreaktywność trypsyny (TLI)' },
+    { id: 't30', name: 'Cobalamin (B12) & Folate', namePl: 'Kobalamina (B12) i folian' },
+
+    // Mikrobiologia
+    { id: 't31', name: 'Skin Scraping (Mites/Fungi)', namePl: 'Zeskrobiny skóry (roztocza/grzyby)' },
+    { id: 't32', name: 'Ear Swab Culture', namePl: 'Posiew wymazu z ucha' },
+    { id: 't33', name: 'Wound Culture & Sensitivity', namePl: 'Posiew rany z antybiogramem' },
+    { id: 't34', name: 'Fungal Culture (Dermatophytosis)', namePl: 'Hodowla grzybów (dermatofitoza)' },
+
+    // Pasożytologia
+    { id: 't35', name: 'Fecal Exam (Direct & Flotation)', namePl: 'Badanie kału (bezpośrednie i flotacja)' },
+    { id: 't36', name: 'Giardia Antigen Test', namePl: 'Test antygenowy na Giardia' },
+    { id: 't37', name: 'Heartworm Antigen Test', namePl: 'Test antygenowy na dirofilariozę' },
+    { id: 't38', name: 'Fecal PCR Panel', namePl: 'Panel PCR z kału' },
+
+    // Serologia / Choroby zakaźne
+    { id: 't39', name: 'FeLV / FIV Combo Test', namePl: 'Test combo FeLV/FIV' },
+    { id: 't40', name: 'Parvovirus Antigen Test', namePl: 'Test antygenowy na parwowirozę' },
+    { id: 't41', name: 'Distemper Antibody Titer', namePl: 'Miano przeciwciał przeciw nosówce' },
+    { id: 't42', name: 'Leptospirosis Titer (MAT)', namePl: 'Miano leptospirozy (MAT)' },
+    { id: 't43', name: 'Borrelia (Lyme) Antibody Test', namePl: 'Test przeciwciał na boreliozę' },
+    { id: 't44', name: 'Toxoplasma IgG/IgM', namePl: 'Toksoplazma IgG/IgM' },
+    { id: 't45', name: 'Brucellosis Test', namePl: 'Test na brucelozę' },
+
+    // Cytologia / Histopatologia
+    { id: 't46', name: 'Fine Needle Aspirate (FNA) Cytology', namePl: 'Cytologia z biopsji aspiracyjnej cienkoigłowej (BAC)' },
+    { id: 't47', name: 'Histopathology (Biopsy)', namePl: 'Histopatologia (biopsja)' },
+    { id: 't48', name: 'Lymph Node Cytology', namePl: 'Cytologia węzła chłonnego' },
+    { id: 't49', name: 'Bone Marrow Aspirate', namePl: 'Aspirat szpiku kostnego' },
+
+    // Obrazowanie
+    { id: 't50', name: 'X-Ray (Thorax)', namePl: 'RTG klatki piersiowej' },
+    { id: 't51', name: 'X-Ray (Abdomen)', namePl: 'RTG jamy brzusznej' },
+    { id: 't52', name: 'X-Ray (Limbs / Joints)', namePl: 'RTG kończyn / stawów' },
+    { id: 't53', name: 'Ultrasound (Abdominal)', namePl: 'USG jamy brzusznej' },
+    { id: 't54', name: 'Ultrasound (Cardiac - Echocardiography)', namePl: 'USG serca (echokardiografia)' },
+    { id: 't55', name: 'CT Scan', namePl: 'Tomografia komputerowa (TK)' },
+    { id: 't56', name: 'MRI', namePl: 'Rezonans magnetyczny (MRI)' },
+
+    // Kardiologia
+    { id: 't57', name: 'Electrocardiogram (ECG)', namePl: 'Elektrokardiogram (EKG)' },
+    { id: 't58', name: 'Blood Pressure Measurement', namePl: 'Pomiar ciśnienia krwi' },
+    { id: 't59', name: 'Cardiac Biomarkers (NT-proBNP, Troponin)', namePl: 'Biomarkery sercowe (NT-proBNP, troponina)' },
+
+    // Okulistyka
+    { id: 't60', name: 'Schirmer Tear Test', namePl: 'Test Schirmera (łzawienie)' },
+    { id: 't61', name: 'Fluorescein Eye Stain', namePl: 'Barwienie fluoresceną oka' },
+    { id: 't62', name: 'Tonometry (Intraocular Pressure)', namePl: 'Tonometria (ciśnienie wewnątrzgałkowe)' },
+
+    // Alergia
+    { id: 't63', name: 'Allergy Intradermal Test', namePl: 'Śródskórny test alergiczny' },
+    { id: 't64', name: 'Serum Allergy Panel (IgE)', namePl: 'Panel alergiczny z surowicy (IgE)' },
 ];
 
 export const mockVets: Veterinarian[] = [
