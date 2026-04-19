@@ -455,6 +455,24 @@ export const mockBlog : Blog [] = [
         image: 'https://picsum.photos/seed/summer-pet/800/600',
     }
 ];
+const inventory = [
+    { id: 'i1', name: 'Latex Gloves (M)', stock: 45, unit: 'boxes', status: 'Low' },
+    { id: 'i2', name: 'Nitrile Gloves (L)', stock: 120, unit: 'boxes', status: 'In Stock' },
+    { id: 'i3', name: 'Syringes 5ml', stock: 300, unit: 'pcs', status: 'In Stock' },
+    { id: 'i4', name: 'Needles 21G', stock: 80, unit: 'pcs', status: 'Low' },
+    { id: 'i5', name: 'Amoxicillin 250mg', stock: 12, unit: 'bottles', status: 'Critical' },
+    { id: 'i6', name: 'Disinfectant Liquid', stock: 25, unit: 'bottles', status: 'Low' },
+    { id: 'i7', name: 'Bandages', stock: 200, unit: 'packs', status: 'In Stock' },
+    { id: 'i8', name: 'Gauze Pads', stock: 18, unit: 'packs', status: 'Critical' },
+    { id: 'i9', name: 'IV Drip Sets', stock: 60, unit: 'pcs', status: 'In Stock' },
+];
+const orders = [
+    { id: 'o1', item: 'Latex Gloves (M)', quantity: 20, date: '2024-05-14', status: 'Approved' },
+    { id: 'o2', item: 'Amoxicillin 250mg', quantity: 10, date: '2024-05-14', status: 'Pending' },
+    { id: 'o3', item: 'Gauze Pads', quantity: 15, date: '2024-05-13', status: 'Approved' },
+    { id: 'o4', item: 'Disinfectant Liquid', quantity: 8, date: '2024-05-12', status: 'Approved' },
+    { id: 'o5', item: 'Needles 21G', quantity: 50, date: '2024-05-11', status: 'Pending' },
+];
 export const mockPrescriptions = [];
 export const mockLabOrders = [];
 export const mockSupplyOrders = [];

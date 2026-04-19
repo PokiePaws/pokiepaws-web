@@ -33,7 +33,7 @@ export default function LoginPage() {
                 router.push('/staff');
             } else if (email === 'admin@pokiepaws.com' && password === 'admin123') {
                 setUser({ id: '1', name: 'Clinic Admin', email, role: 'Admin', clinicId: 'c1' });
-                router.push('/staff');
+                router.push('/admin');
             } else if (email === 'staff@pokiepaws.com' && password === 'staff123') {
                 setUser({ id: '2', name: 'Dr. Jane Smith', email, role: 'Staff', clinicId: 'c1' });
                 router.push('/staff');
@@ -176,7 +176,6 @@ export default function LoginPage() {
                         <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl">
                             <p><strong>Staff:</strong> staff@pokiepaws.com / staff123</p>
                             <p><strong>Admin:</strong> admin@pokiepaws.com / admin123</p>
-                            <p><strong>SuperAdmin:</strong> super@pokiepaws.com / super123</p>
                         </div>
                     </div>
                 </motion.div>
