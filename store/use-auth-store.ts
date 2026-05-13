@@ -1,43 +1,35 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { authApi } from '../lib/features/auth/auth-api';
+import type { User, UserRole } from '../lib/features/auth/auth-types';
 
-export type UserRole = 'Staff' | 'Admin' | 'SuperAdmin' | 'Client';
-
-export interface User {
-    id: string;
-    name: string;
-    email: string;
-    role: UserRole;
-    clinicId?: string; // Optional, used for Staff to identify their clinic
-}
+export type { User, UserRole };
 
 interface AuthState {
     user: User | null;
-    token: string | null;
     isAuthenticated: boolean;
-    setUser: (user: User | null, token?: string | null) => void;
-    logout: () => void;
+    isSessionResolved: boolean;
+    setUser: (user: User | null) => void;
+    setSessionResolved: (resolved: boolean) => void;
+    logout: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>()(
-    persist(
-        (set) => ({
-            user: null,
-            token: null,
-            isAuthenticated: false,
-            setUser: (user, token = null) => set({
-                user,
-                token,
-                isAuthenticated: !!user
-            }),
-            logout: () => set({
-                user: null,
-                token: null,
-                isAuthenticated: false
-            }),
+export const useAuthStore = create<AuthState>()((set) => ({
+    user: null,
+    isAuthenticated: false,
+    isSessionResolved: false,
+    setUser: (user) =>
+        set({
+            user,
+            isAuthenticated: !!user,
+            isSessionResolved: true,
         }),
-        {
-            name: 'vet-clinic-auth', // Key in localStorage
-        }
-    )
-);
+    setSessionResolved: (resolved) => set({ isSessionResolved: resolved }),
+    logout: async () => {
+        await authApi.logout().catch(() => undefined);
+        set({
+            user: null,
+            isAuthenticated: false,
+            isSessionResolved: true,
+        });
+    },
+}));

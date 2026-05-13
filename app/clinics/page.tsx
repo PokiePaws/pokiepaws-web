@@ -1,41 +1,36 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Search, MapPin, Star, ChevronRight, Filter, Building2, Loader2 } from 'lucide-react';
 import Navbar from '../../components/navbar';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
-import { clinicsApi } from '../../lib/features/clinics/clinics-api';
-import Clinic from '../../lib/types';
+import { useClinics } from '../../lib/features/clinics/use-clinics';
 
 export default function ClinicsPage() {
     const { language } = useLanguageStore();
     const t = translations[language];
-    const [clinics, setClinics] = useState<Clinic[]>([]);
-    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCity, setSelectedCity] = useState('All');
+    const selectedCityFilter = selectedCity === 'All' ? undefined : selectedCity;
+    const { data: clinics = [], isLoading } = useClinics(selectedCityFilter);
 
-    useEffect(() => {
-        async function fetchClinics() {
-            try {
-                setLoading(true);
-                const data = await clinicsApi.getClinics(selectedCity === 'All' ? undefined : selectedCity);
-                setClinics(data);
-            } catch (error) {
-                console.error('Error fetching clinics:', error);
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchClinics();
-    }, [selectedCity]);
+    const normalizedSearch = searchQuery.toLowerCase();
+    const filteredClinics = clinics.filter((clinic) => {
+        const searchableText = [
+            clinic.clinicName,
+            clinic.city,
+            clinic.street,
+            clinic.postalCode,
+        ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
 
-    const filteredClinics = clinics.filter(clinic =>
-        clinic.clinicName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+        return searchableText.includes(normalizedSearch);
+    });
 
     const cities = ['All', ...Array.from(new Set(clinics.map(c => c.city)))];
 
@@ -81,7 +76,7 @@ export default function ClinicsPage() {
                     </div>
                 </div>
 
-                {loading ? (
+                {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-20">
                         <Loader2 className="h-12 w-12 animate-spin text-[#68b9dc] mb-4" />
                         <p className="text-slate-500 font-medium">{t.clinics.loadingClinics}</p>
@@ -132,7 +127,7 @@ export default function ClinicsPage() {
                     </div>
                 )}
 
-                {!loading && filteredClinics.length === 0 && (
+                {!isLoading && filteredClinics.length === 0 && (
                     <div className="text-center py-20">
                         <div className="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Search className="h-8 w-8 text-slate-400" />

@@ -3,39 +3,20 @@
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 import { MapPin, Phone, Star, Clock, ChevronLeft, ShieldCheck, Users, Heart, Loader2 } from 'lucide-react';
 import Navbar from '../../../components/navbar';
-import { clinicsApi } from '../../../lib/features/clinics/clinics-api';
+import { useClinic } from '../../../lib/features/clinics/use-clinics';
 import { useLanguageStore } from '../../../store/use-language-store';
 import { translations } from '../../../lib/translations';
-import Clinic from '../../../lib/types';
 
 export default function ClinicDetailPage() {
     const params = useParams();
     const { language } = useLanguageStore();
     const t = translations[language].clinics.detail;
+    const clinicId = Array.isArray(params.id) ? params.id[0] : params.id;
+    const { data: clinic, isLoading, isError } = useClinic(clinicId);
 
-    const [clinic, setClinic] = useState<Clinic | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
-
-    useEffect(() => {
-        async function fetchClinic() {
-            try {
-                const data = await clinicsApi.getClinic(String(params.id));
-                setClinic(data);
-            } catch (e) {
-                console.error('Error fetching clinic:', e);
-                setError(true);
-            } finally {
-                setLoading(false);
-            }
-        }
-        if (params.id) fetchClinic();
-    }, [params.id]);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen bg-slate-50">
                 <Navbar />
@@ -47,7 +28,7 @@ export default function ClinicDetailPage() {
         );
     }
 
-    if (error || !clinic) {
+    if (isError || !clinic) {
         return (
             <div className="min-h-screen bg-slate-50">
                 <Navbar />

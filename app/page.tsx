@@ -2,15 +2,17 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { PawPrint, MapPin, Star, ChevronRight, Search, Building2, Users2, ShieldCheck, Sparkles } from 'lucide-react';
+import { MapPin, Star, ChevronRight, Search, Building2, Users2, ShieldCheck } from 'lucide-react';
 import Navbar from '../components/navbar';
-import { mockClinics } from '../lib/mock-data';
 import { useLanguageStore } from '../store/use-language-store';
 import { translations } from '../lib/translations';
+import { useClinics } from '../lib/features/clinics/use-clinics';
 
 export default function Home() {
     const { language } = useLanguageStore();
     const t = translations[language];
+    const { data: clinics = [] } = useClinics();
+    const featuredClinics = clinics.slice(0, 3);
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-50">
@@ -50,7 +52,7 @@ export default function Home() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                             <div>
-                                <p className="text-[#68b9dc] text-3xl font-bold">4</p>
+                                <p className="text-[#68b9dc] text-3xl font-bold">{clinics.length}</p>
                                 <p className="text-sm text-slate-500 font-medium uppercase tracking-wider">{t.home.stats.clinics}</p>
                             </div>
                             <div>
@@ -136,7 +138,7 @@ export default function Home() {
                         </div>
 
                         <div className="grid md:grid-cols-3 gap-8">
-                            {mockClinics.map((clinic) => (
+                            {featuredClinics.map((clinic) => (
                                 <Link
                                     key={clinic.id}
                                     href={`/clinics/${clinic.id}`}
@@ -144,15 +146,15 @@ export default function Home() {
                                 >
                                     <div className="aspect-video relative overflow-hidden">
                                         <Image
-                                            src={clinic.image}
-                                            alt={clinic.name}
+                                            src={clinic.imageUrl || 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?q=80&w=800'}
+                                            alt={clinic.clinicName}
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                             referrerPolicy="no-referrer"
                                         />
                                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
                                             <Star className="h-3 w-3 text-[#d4585b] fill-[#d4585b]" />
-                                            <span className="text-xs font-bold text-slate-900">{clinic.rating}</span>
+                                            <span className="text-xs font-bold text-slate-900">5.0</span>
                                         </div>
                                     </div>
                                     <div className="p-6">
@@ -160,10 +162,10 @@ export default function Home() {
                                             <MapPin className="h-3 w-3" />
                                             {clinic.city}
                                         </div>
-                                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#68b9dc] transition-colors">{clinic.name}</h3>
-                                        <p className="text-slate-500 text-sm line-clamp-2 mb-6">{clinic.description}</p>
+                                        <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#68b9dc] transition-colors">{clinic.clinicName}</h3>
+                                        <p className="text-slate-500 text-sm line-clamp-2 mb-6">{clinic.workingHours || t.clinics.hoursUnavailable}</p>
                                         <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                                            <span className="text-xs text-slate-400">{clinic.address}</span>
+                                            <span className="text-xs text-slate-400">{clinic.street} {clinic.houseNumber}, {clinic.city}</span>
                                             <div className="bg-blue-50 p-2 rounded-lg text-[#68b9dc] group-hover:bg-[#68b9dc] group-hover:text-white transition-colors">
                                                 <ChevronRight className="h-4 w-4" />
                                             </div>
@@ -172,6 +174,11 @@ export default function Home() {
                                 </Link>
                             ))}
                         </div>
+                        {featuredClinics.length === 0 && (
+                            <div className="bg-white border border-slate-100 rounded-3xl p-10 text-center text-slate-500">
+                                {t.clinics.noClinics}
+                            </div>
+                        )}
                     </div>
                 </section>
 

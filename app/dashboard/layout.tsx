@@ -8,16 +8,17 @@ import Link from 'next/link';
 import { LayoutDashboard, PawPrint, Calendar, User, Settings, LogOut } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const { user, logout } = useAuthStore();
+    const { user, logout, isSessionResolved } = useAuthStore();
     const router = useRouter();
 
     useEffect(() => {
+        if (!isSessionResolved) return;
         if (!user) {
             router.push('/login');
         }
-    }, [user, router]);
+    }, [isSessionResolved, user, router]);
 
-    if (!user) return null;
+    if (!isSessionResolved || !user) return null;
 
     const sidebarLinks = [
         { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -47,7 +48,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                     <div className="px-4 pt-4 border-t border-stone-100">
                         <button
-                            onClick={() => logout()}
+                            onClick={() => {
+                                void logout();
+                            }}
                             className="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition-all"
                         >
                             <LogOut className="h-5 w-5" />

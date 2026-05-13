@@ -1,23 +1,16 @@
 'use client';
 
 import { useAuthStore } from '../../store/use-auth-store';
-import Image from 'next/image';
-import { PawPrint, Calendar, Clock, ChevronRight, Plus, HeartPulse, ShieldCheck, Activity } from 'lucide-react';
+import { PawPrint, Calendar, Clock, ChevronRight, Plus, HeartPulse } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
+import { useAnimals, useOwnerUpcomingVisits } from '../../lib/features/api-hooks';
 
 export default function DashboardPage() {
     const { user } = useAuthStore();
-
-    const pets = [
-        { id: '1', name: 'Buddy', breed: 'Golden Retriever', type: 'Dog', image: 'https://picsum.photos/seed/dog1/200/200' },
-        { id: '2', name: 'Luna', breed: 'Siamese', type: 'Cat', image: 'https://picsum.photos/seed/cat1/200/200' },
-    ];
-
-    const appointments = [
-        { id: '1', pet: 'Buddy', service: 'Vaccination', date: '2024-05-15', time: '10:00 AM', status: 'Confirmed' },
-        { id: '2', pet: 'Luna', service: 'Dental Cleaning', date: '2024-05-20', time: '02:30 PM', status: 'Pending' },
-    ];
+    const { data: pets = [], isLoading: petsLoading } = useAnimals();
+    const { data: appointments = [], isLoading: visitsLoading } = useOwnerUpcomingVisits();
+    const petNameById = new Map(pets.map((pet) => [pet.id, pet.name]));
 
     return (
         <div className="space-y-8">
@@ -67,30 +60,29 @@ export default function DashboardPage() {
                         </Link>
                     </div>
                     <div className="space-y-3">
-                        {pets.map((pet) => (
+                        {pets.slice(0, 4).map((pet) => (
                             <motion.div
                                 key={pet.id}
                                 whileHover={{ x: 5 }}
                                 className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group cursor-pointer"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="h-12 w-12 rounded-xl overflow-hidden relative">
-                                        <Image
-                                            src={pet.image}
-                                            alt={pet.name}
-                                            fill
-                                            className="object-cover"
-                                            referrerPolicy="no-referrer"
-                                        />
+                                    <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                                        <PawPrint className="h-6 w-6 text-blue-500" />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-slate-900">{pet.name}</h3>
-                                        <p className="text-xs text-slate-500">{pet.breed}</p>
+                                        <p className="text-xs text-slate-500">{pet.breed || pet.species}</p>
                                     </div>
                                 </div>
                                 <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-blue-600 transition-colors" />
                             </motion.div>
                         ))}
+                        {!petsLoading && pets.length === 0 && (
+                            <div className="bg-white p-5 rounded-2xl border border-slate-100 text-sm text-slate-500">
+                                No pets registered yet.
+                            </div>
+                        )}
                         <Link
                             href="/dashboard/pets/add"
                             className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-500 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
@@ -110,15 +102,18 @@ export default function DashboardPage() {
                         </Link>
                     </div>
                     <div className="space-y-3">
-                        {appointments.map((apt) => (
+                        {appointments.slice(0, 4).map((apt) => {
+                            const startsAt = new Date(apt.startsAt);
+
+                            return (
                             <div key={apt.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <h3 className="font-bold text-slate-900">{apt.service}</h3>
-                                        <p className="text-sm text-slate-500">for {apt.pet}</p>
+                                        <h3 className="font-bold text-slate-900">{apt.description || 'Veterinary visit'}</h3>
+                                        <p className="text-sm text-slate-500">for {petNameById.get(apt.animalId) || `Pet #${apt.animalId}`}</p>
                                     </div>
                                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                                        apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                                        apt.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                                     }`}>
                     {apt.status}
                   </span>
@@ -126,15 +121,21 @@ export default function DashboardPage() {
                                 <div className="flex items-center gap-6 text-sm text-slate-600">
                                     <div className="flex items-center gap-2">
                                         <Calendar className="h-4 w-4 text-slate-400" />
-                                        <span>{apt.date}</span>
+                                        <span>{startsAt.toLocaleDateString()}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Clock className="h-4 w-4 text-slate-400" />
-                                        <span>{apt.time}</span>
+                                        <span>{startsAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
+                        {!visitsLoading && appointments.length === 0 && (
+                            <div className="bg-white p-5 rounded-2xl border border-slate-100 text-sm text-slate-500">
+                                No upcoming appointments.
+                            </div>
+                        )}
                         <Link
                             href="/dashboard/appointments/book"
                             className="flex items-center justify-center gap-2 p-4 bg-blue-600 text-white rounded-2xl font-semibold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"

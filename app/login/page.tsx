@@ -6,33 +6,11 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, ChevronRight, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useAuthStore, type UserRole } from '../../store/use-auth-store';
+import { useAuthStore } from '../../store/use-auth-store';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
-import { authApi, type ApiRole } from '../../lib/features/auth/auth-api';
-
-function mapApiRole(role: ApiRole): UserRole {
-    switch (role) {
-        case 'ADMIN':
-            return 'Admin';
-        case 'VET':
-            return 'Staff';
-        case 'OWNER':
-            return 'Client';
-        case 'WAREHOUSE':
-            return 'Staff';
-        case 'GUEST':
-            return 'Client';
-        default:
-            return 'Client';
-    }
-}
-
-function getRedirectPath(role: UserRole) {
-    if (role === 'Admin' || role === 'SuperAdmin') return '/admin';
-    if (role === 'Staff') return '/staff';
-    return '/dashboard';
-}
+import { authApi } from '../../lib/features/auth/auth-api';
+import { getRedirectPath } from '../../lib/features/auth/auth-types';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -51,17 +29,9 @@ export default function LoginPage() {
         setError('');
 
         try {
-            const response = await authApi.login(email, password);
-            const role = mapApiRole(response.role);
-
-            setUser({
-                id: response.email,
-                name: response.email,
-                email: response.email,
-                role,
-            }, response.token);
-
-            router.push(getRedirectPath(role));
+            const session = await authApi.login(email, password);
+            setUser(session.user);
+            router.push(getRedirectPath(session.user.role));
         } catch (error) {
             setError(error instanceof Error ? error.message : t.login.error);
         } finally {

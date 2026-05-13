@@ -6,16 +6,17 @@ import Image from 'next/image';
 import Navbar from '../../components/navbar';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
-import { Mail, Phone, MapPin, Clock, Send, CheckCircle2, User, Building2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, User, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { mockClinics } from '../../lib/mock-data';
+import { useClinics } from '../../lib/features/clinics/use-clinics';
 
 export default function ContactPage() {
     const { language } = useLanguageStore();
     const t = translations[language];
+    const { data: clinics = [] } = useClinics();
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [selectedClinicId, setSelectedClinicId] = useState(mockClinics[0].id);
+    const [selectedClinicId, setSelectedClinicId] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -64,7 +65,10 @@ export default function ContactPage() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        {mockClinics.map((clinic, index) => (
+                        {clinics.map((clinic, index) => {
+                            const address = `${clinic.street} ${clinic.houseNumber}, ${clinic.postalCode} ${clinic.city}`;
+
+                            return (
                             <motion.div
                                 key={clinic.id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -76,13 +80,13 @@ export default function ContactPage() {
                                     <div className="bg-blue-50 p-3 rounded-2xl">
                                         <Building2 className="h-6 w-6 text-blue-600" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-slate-900">{clinic.name}</h3>
+                                    <h3 className="text-xl font-bold text-slate-900">{clinic.clinicName}</h3>
                                 </div>
 
                                 <div className="space-y-4 text-slate-600">
                                     <div className="flex items-start gap-3">
                                         <MapPin className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
-                                        <span className="text-sm">{clinic.address}</span>
+                                        <span className="text-sm">{address}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Phone className="h-5 w-5 text-blue-500 shrink-0" />
@@ -101,12 +105,13 @@ export default function ContactPage() {
                                             <div className="bg-slate-100 p-2 rounded-full">
                                                 <User className="h-4 w-4 text-slate-500" />
                                             </div>
-                                            <span className="font-bold text-slate-900">{clinic.manager}</span>
+                                            <span className="font-bold text-slate-900">{clinic.workingHours || t.clinics.hoursUnavailable}</span>
                                         </div>
                                     </div>
                                 </div>
                             </motion.div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
 
@@ -180,8 +185,9 @@ export default function ContactPage() {
                                                     onChange={(e) => setSelectedClinicId(e.target.value)}
                                                     className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
                                                 >
-                                                    {mockClinics.map(clinic => (
-                                                        <option key={clinic.id} value={clinic.id}>{clinic.name} ({clinic.city})</option>
+                                                    <option value="">{language === 'en' ? 'Network office' : 'Biuro sieci'}</option>
+                                                    {clinics.map(clinic => (
+                                                        <option key={clinic.id} value={clinic.id}>{clinic.clinicName} ({clinic.city})</option>
                                                     ))}
                                                 </select>
                                             </div>

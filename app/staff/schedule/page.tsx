@@ -28,12 +28,12 @@ import {
     endOfWeek,
     isSameMonth,
     isSameDay,
-    addDays,
     eachDayOfInterval,
     parseISO
 } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { cn } from '../../../lib/utils';
+import { useCancelVisit, useConfirmVetVisit, useVetVisitsRange } from '../../../lib/features/api-hooks';
 
 interface Appointment {
     id: string;
@@ -45,45 +45,6 @@ interface Appointment {
     status: 'pending' | 'confirmed' | 'cancelled';
 }
 
-const INITIAL_APPOINTMENTS: Appointment[] = [
-    {
-        id: '1',
-        patientName: 'Buddy',
-        ownerName: 'John Doe',
-        type: 'Vaccination',
-        time: '10:00',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        status: 'confirmed'
-    },
-    {
-        id: '2',
-        patientName: 'Luna',
-        ownerName: 'Jane Smith',
-        type: 'General Check-up',
-        time: '11:30',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        status: 'pending'
-    },
-    {
-        id: '3',
-        patientName: 'Max',
-        ownerName: 'Robert Brown',
-        type: 'Dental Cleaning',
-        time: '14:00',
-        date: format(addDays(new Date(), 1), 'yyyy-MM-dd'),
-        status: 'pending'
-    },
-    {
-        id: '4',
-        patientName: 'Bella',
-        ownerName: 'Emily Davis',
-        type: 'Surgery Consultation',
-        time: '09:00',
-        date: format(subMonths(new Date(), 0), 'yyyy-MM-dd'),
-        status: 'confirmed'
-    }
-];
-
 export default function SchedulePage() {
     const { language } = useLanguageStore();
     const t = translations[language];
@@ -91,7 +52,6 @@ export default function SchedulePage() {
 
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [appointments, setAppointments] = useState<Appointment[]>(INITIAL_APPOINTMENTS);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [newAppointment, setNewAppointment] = useState({
         patientName: '',
@@ -115,15 +75,36 @@ export default function SchedulePage() {
     const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
     const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
+    const rangeFrom = format(startDate, 'yyyy-MM-dd');
+    const rangeTo = format(endDate, 'yyyy-MM-dd');
+    const { data: apiVisits = [] } = useVetVisitsRange(rangeFrom, rangeTo);
+    const confirmVisit = useConfirmVetVisit();
+    const cancelVisit = useCancelVisit();
+    const appointments: Appointment[] = apiVisits.map((visit) => {
+        const startsAt = parseISO(visit.startsAt);
+
+        return {
+            id: String(visit.id),
+            patientName: `Patient #${visit.animalId}`,
+            ownerName: `Owner`,
+            type: visit.description || visit.diagnosis || 'Visit',
+            time: format(startsAt, 'HH:mm'),
+            date: format(startsAt, 'yyyy-MM-dd'),
+            status: visit.status === 'CANCELLED' ? 'cancelled' : visit.status === 'CONFIRMED' ? 'confirmed' : 'pending',
+        };
+    });
 
     const selectedDayAppointments = useMemo(() => {
         return appointments.filter(app => isSameDay(parseISO(app.date), selectedDate));
     }, [appointments, selectedDate]);
 
     const handleStatusChange = (id: string, newStatus: 'confirmed' | 'cancelled') => {
-        setAppointments(prev => prev.map(app =>
-            app.id === id ? { ...app, status: newStatus } : app
-        ));
+        const visitId = Number(id);
+        if (newStatus === 'confirmed') {
+            confirmVisit.mutate(visitId);
+        } else {
+            cancelVisit.mutate(visitId);
+        }
         setOpenMenuId(null);
     };
 
@@ -133,7 +114,7 @@ export default function SchedulePage() {
             ? 'Czy na pewno chcesz usunąć tę wizytę?'
             : 'Are you sure you want to delete this appointment?';
         if (confirm(confirmMsg)) {
-            setAppointments(prev => prev.filter(app => app.id !== id));
+            cancelVisit.mutate(Number(id));
             setOpenMenuId(null);
         }
     };
@@ -149,19 +130,14 @@ export default function SchedulePage() {
     const handleReschedule = (e: React.FormEvent) => {
         e.preventDefault();
         if (!rescheduleModal) return;
-        setAppointments(prev => prev.map(app =>
-            app.id === rescheduleModal.id
-                ? { ...app, date: rescheduleData.date, time: rescheduleData.time }
-                : app
-        ));
+        alert(language === 'pl' ? 'Przebookowanie wymaga anulowania i utworzenia nowej wizyty.' : 'Rescheduling requires cancelling and creating a new visit.');
         setRescheduleModal(null);
     };
 
     const handleAddAppointment = (e: React.FormEvent) => {
         e.preventDefault();
-        const id = Math.random().toString(36).substr(2, 9);
-        setAppointments(prev => [...prev, { ...newAppointment, id, status: 'confirmed' }]);
         setIsAddModalOpen(false);
+        alert(language === 'pl' ? 'Dodawanie wizyt odbywa siÄ™ z panelu klienta przez endpoint rezerwacji.' : 'New visits are booked from the client panel via the booking endpoint.');
         setNewAppointment({
             patientName: '',
             ownerName: '',

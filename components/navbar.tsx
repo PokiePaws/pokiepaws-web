@@ -141,7 +141,9 @@ export default function Navbar() {
                                     <span>{user.name}</span>
                                 </Link>
                                 <button
-                                    onClick={() => logout()}
+                                    onClick={() => {
+                                        void logout();
+                                    }}
                                     className="p-2 text-slate-500 hover:text-red-600 transition-colors"
                                 >
                                     <LogOut className="h-5 w-5" />
@@ -216,7 +218,7 @@ export default function Navbar() {
                                         ))}
                                         <button
                                             onClick={() => {
-                                                logout();
+                                                void logout();
                                                 setIsOpen(false);
                                             }}
                                             className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50"

@@ -1,21 +1,37 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, User, ChevronLeft, ChevronRight, Plus, Check, X, AlertCircle, PawPrint } from 'lucide-react';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, eachDayOfInterval } from 'date-fns';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, X, PawPrint } from 'lucide-react';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, eachDayOfInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNotificationStore } from '../../../store/use-notification-store';
+import { useAnimals, useAvailableSlots, useCreateVisit, useOwnerVisitsRange, useVetsByClinic } from '../../../lib/features/api-hooks';
+import { useClinics } from '../../../lib/features/clinics/use-clinics';
 
 export default function AppointmentsPage() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [showBooking, setShowBooking] = useState(false);
+    const [booking, setBooking] = useState({
+        animalId: '',
+        clinicId: '',
+        vetUserId: '',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        startsAt: '',
+        description: '',
+    });
     const addNotification = useNotificationStore(state => state.addNotification);
-
-    const appointments = [
-        { id: '1', pet: 'Buddy', service: 'Vaccination', date: new Date(2024, 4, 15, 10, 0), status: 'Confirmed', doctor: 'Dr. Smith' },
-        { id: '2', pet: 'Luna', service: 'Dental Cleaning', date: new Date(2024, 4, 20, 14, 30), status: 'Pending', doctor: 'Dr. Wilson' },
-    ];
+    const from = format(startOfWeek(startOfMonth(currentDate)), 'yyyy-MM-dd');
+    const to = format(endOfWeek(endOfMonth(currentDate)), 'yyyy-MM-dd');
+    const { data: appointments = [] } = useOwnerVisitsRange(from, to);
+    const { data: pets = [] } = useAnimals();
+    const { data: clinics = [] } = useClinics();
+    const selectedClinicId = booking.clinicId ? Number(booking.clinicId) : undefined;
+    const selectedVetId = booking.vetUserId ? Number(booking.vetUserId) : undefined;
+    const { data: vets = [] } = useVetsByClinic(selectedClinicId);
+    const { data: slots } = useAvailableSlots(selectedClinicId, selectedVetId, booking.date);
+    const createVisit = useCreateVisit();
+    const petNameById = new Map(pets.map((pet) => [pet.id, pet.name]));
 
     const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
     const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -64,10 +80,10 @@ export default function AppointmentsPage() {
 
                     <div className="mt-2 space-y-1">
                         {appointments
-                            .filter(apt => isSameDay(apt.date, day))
+                            .filter(apt => isSameDay(new Date(apt.startsAt), day))
                             .map(apt => (
                                 <div key={apt.id} className="text-[10px] p-1 bg-emerald-100 text-emerald-700 rounded border border-emerald-200 truncate font-medium">
-                                    {format(apt.date, 'HH:mm')} - {apt.pet}
+                                    {format(new Date(apt.startsAt), 'HH:mm')} - {petNameById.get(apt.animalId) || `#${apt.animalId}`}
                                 </div>
                             ))}
                     </div>
@@ -113,25 +129,27 @@ export default function AppointmentsPage() {
                     Upcoming Visits
                 </h3>
                 <div className="grid gap-4">
-                    {appointments.map(apt => (
+                    {appointments.map(apt => {
+                        const startsAt = new Date(apt.startsAt);
+                        return (
                         <div key={apt.id} className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-4">
                                 <div className="bg-stone-50 p-3 rounded-xl">
                                     <CalendarIcon className="h-6 w-6 text-stone-400" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-stone-900">{apt.service}</h4>
-                                    <p className="text-sm text-stone-500">for {apt.pet} with {apt.doctor}</p>
+                                    <h4 className="font-bold text-stone-900">{apt.description || 'Veterinary visit'}</h4>
+                                    <p className="text-sm text-stone-500">for {petNameById.get(apt.animalId) || `Pet #${apt.animalId}`}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-6">
                                 <div className="text-right hidden sm:block">
-                                    <p className="font-bold text-stone-900">{format(apt.date, 'MMM d, yyyy')}</p>
-                                    <p className="text-sm text-stone-500">{format(apt.date, 'h:mm a')}</p>
+                                    <p className="font-bold text-stone-900">{format(startsAt, 'MMM d, yyyy')}</p>
+                                    <p className="text-sm text-stone-500">{format(startsAt, 'h:mm a')}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      apt.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                      apt.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                   }`}>
                     {apt.status}
                   </span>
@@ -141,7 +159,8 @@ export default function AppointmentsPage() {
                                 </div>
                             </div>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         );
@@ -195,47 +214,75 @@ export default function AppointmentsPage() {
                                     </button>
                                 </div>
 
-                                <form className="space-y-6" onSubmit={(e) => {
+                                <form className="space-y-6" onSubmit={async (e) => {
                                     e.preventDefault();
-                                    addNotification({ message: 'Appointment request sent successfully!', type: 'success' });
+                                    if (!booking.animalId || !booking.clinicId || !booking.vetUserId || !booking.startsAt) {
+                                        addNotification({ message: 'Select pet, clinic, vet and time.', type: 'error' });
+                                        return;
+                                    }
+
+                                    await createVisit.mutateAsync({
+                                        animalId: Number(booking.animalId),
+                                        clinicId: Number(booking.clinicId),
+                                        vetUserId: Number(booking.vetUserId),
+                                        startsAt: booking.startsAt,
+                                        description: booking.description || undefined,
+                                    });
+                                    addNotification({ message: 'Appointment booked successfully!', type: 'success' });
                                     setShowBooking(false);
                                 }}>
                                     <div className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-bold text-stone-700 mb-2">Select Pet</label>
-                                            <select className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                                                <option>Buddy (Golden Retriever)</option>
-                                                <option>Luna (Siamese)</option>
+                                            <select value={booking.animalId} onChange={(e) => setBooking({ ...booking, animalId: e.target.value })} className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                                                <option value="">Select pet</option>
+                                                {pets.map((pet) => (
+                                                    <option key={pet.id} value={pet.id}>{pet.name} ({pet.species})</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-bold text-stone-700 mb-2">Service Type</label>
-                                            <select className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                                                <option>General Checkup</option>
-                                                <option>Vaccination</option>
-                                                <option>Dental Cleaning</option>
-                                                <option>Surgery Consultation</option>
+                                            <label className="block text-sm font-bold text-stone-700 mb-2">Clinic</label>
+                                            <select value={booking.clinicId} onChange={(e) => setBooking({ ...booking, clinicId: e.target.value, vetUserId: '', startsAt: '' })} className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                                                <option value="">Select clinic</option>
+                                                {clinics.map((clinic) => (
+                                                    <option key={clinic.id} value={clinic.id}>{clinic.clinicName} ({clinic.city})</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-stone-700 mb-2">Veterinarian</label>
+                                            <select value={booking.vetUserId} onChange={(e) => setBooking({ ...booking, vetUserId: e.target.value, startsAt: '' })} className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                                                <option value="">Select vet</option>
+                                                {vets.map((vet) => (
+                                                    <option key={vet.userId} value={vet.userId}>{vet.firstName} {vet.lastName}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-bold text-stone-700 mb-2">Date</label>
-                                                <input type="date" className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                                                <input type="date" value={booking.date} onChange={(e) => setBooking({ ...booking, date: e.target.value, startsAt: '' })} className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-bold text-stone-700 mb-2">Time</label>
-                                                <select className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
-                                                    <option>09:00 AM</option>
-                                                    <option>10:30 AM</option>
-                                                    <option>02:00 PM</option>
-                                                    <option>04:30 PM</option>
+                                                <select value={booking.startsAt} onChange={(e) => setBooking({ ...booking, startsAt: e.target.value })} className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+                                                    <option value="">Select time</option>
+                                                    {(slots?.availableStarts ?? []).map((slot) => (
+                                                        <option key={slot} value={slot}>{format(new Date(slot), 'HH:mm')}</option>
+                                                    ))}
                                                 </select>
                                             </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-stone-700 mb-2">Reason</label>
+                                            <input value={booking.description} onChange={(e) => setBooking({ ...booking, description: e.target.value })} className="w-full p-4 bg-stone-50 border border-stone-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all" placeholder="General checkup" />
                                         </div>
                                     </div>
 
                                     <button
                                         type="submit"
+                                        disabled={createVisit.isPending}
                                         className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-bold text-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 mt-4"
                                     >
                                         Confirm Booking

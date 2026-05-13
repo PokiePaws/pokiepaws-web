@@ -8,15 +8,16 @@ import Sidebar from '../../components/sidebar';
 import { useNotificationStore } from '../../store/use-notification-store';
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
-    const { user, logout } = useAuthStore();
+    const { user, isSessionResolved } = useAuthStore();
     const router = useRouter();
     const addNotification = useNotificationStore(state => state.addNotification);
 
     useEffect(() => {
+        if (!isSessionResolved) return;
         if (!user || (user.role !== 'Staff' && user.role !== 'Admin')) {
             router.push('/login');
         }
-    }, [user, router]);
+    }, [isSessionResolved, user, router]);
 
     // Simulate WebSocket notifications
     useEffect(() => {
@@ -35,7 +36,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
         return () => clearInterval(interval);
     }, [user, addNotification]);
 
-    if (!user) return null;
+    if (!isSessionResolved || !user) return null;
 
     return (
         <div className="min-h-screen bg-stone-50 flex flex-col">

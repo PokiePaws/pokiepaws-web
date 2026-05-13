@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
-import { Search, Filter, ChevronRight, PawPrint, User, Phone, Mail, Plus, MoreVertical, Sparkles, X as CloseIcon, FileText } from 'lucide-react';
+import { Search, Filter, ChevronRight, PawPrint, User, Phone, Mail, MoreVertical, X as CloseIcon, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Link from 'next/link';
+import { format, subMonths, addMonths } from 'date-fns';
 
 import { useLanguageStore } from '../../../store/use-language-store';
 import { translations } from '../../../lib/translations';
+import { useVetVisitsRange } from '../../../lib/features/api-hooks';
 
 type Patient = {
     id: string;
@@ -26,13 +27,30 @@ export default function PatientsPage() {
     const t = translations[language];
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPatientForRecords, setSelectedPatientForRecords] = useState<Patient | null>(null);
+    const from = format(subMonths(new Date(), 12), 'yyyy-MM-dd');
+    const to = format(addMonths(new Date(), 12), 'yyyy-MM-dd');
+    const { data: visits = [] } = useVetVisitsRange(from, to);
 
-    const patients: Patient[] = [
-        { id: '1', name: 'Buddy', breed: 'Golden Retriever', owner: 'John Doe', lastVisit: '2024-04-15', phone: '+1 (555) 123-4567', email: 'john@example.com', image: 'https://picsum.photos/seed/dog1/200/200', history: 'Chronic ear infections, allergic to chicken, last vaccination Apr 2024.' },
-        { id: '2', name: 'Luna', breed: 'Siamese', owner: 'Jane Smith', lastVisit: '2024-04-20', phone: '+1 (555) 987-6543', email: 'jane@example.com', image: 'https://picsum.photos/seed/cat1/200/200', history: 'Healthy, indoor only, slight dental tartar noted in last visit.' },
-        { id: '3', name: 'Max', breed: 'Beagle', owner: 'Robert Brown', lastVisit: '2024-03-10', phone: '+1 (555) 456-7890', email: 'robert@example.com', image: 'https://picsum.photos/seed/dog2/200/200', history: 'History of hip dysplasia, on daily anti-inflammatory medication.' },
-        { id: '4', name: 'Bella', breed: 'Persian', owner: 'Sarah Wilson', lastVisit: '2024-05-01', phone: '+1 (555) 321-0987', email: 'sarah@example.com', image: 'https://picsum.photos/seed/cat2/200/200', history: 'Recovering from minor skin irritation, finished antibiotics last week.' },
-    ];
+    const patients: Patient[] = Array.from(
+        visits.reduce((map, visit) => {
+            const existing = map.get(visit.animalId);
+            const currentDate = visit.startsAt.slice(0, 10);
+            if (!existing || currentDate > existing.lastVisit) {
+                map.set(visit.animalId, {
+                    id: String(visit.animalId),
+                    name: `Patient #${visit.animalId}`,
+                    breed: 'From visit history',
+                    owner: `Owner #${visit.animalId}`,
+                    lastVisit: currentDate,
+                    phone: '-',
+                    email: '-',
+                    image: '',
+                    history: [visit.disease, visit.diagnosis, visit.recommendations].filter(Boolean).join(' ') || visit.description || 'No medical notes yet.',
+                });
+            }
+            return map;
+        }, new Map<number, Patient>()).values(),
+    );
 
     const filteredPatients = patients.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,13 +105,9 @@ export default function PatientsPage() {
                     >
                         <div className="flex justify-between items-start mb-6">
                             <div className="h-16 w-16 rounded-2xl overflow-hidden shadow-inner bg-slate-100 relative">
-                                <Image
-                                    src={patient.image}
-                                    alt={patient.name}
-                                    fill
-                                    className="object-cover"
-                                    referrerPolicy="no-referrer"
-                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-emerald-50">
+                                    <PawPrint className="h-8 w-8 text-emerald-500" />
+                                </div>
                             </div>
                             <div className="flex gap-2">
                                 <button className="p-2 text-stone-300 hover:text-stone-600 transition-colors">
@@ -164,7 +178,9 @@ export default function PatientsPage() {
                             <div className="p-8 max-h-[60vh] overflow-y-auto">
                                 <div className="flex items-center gap-6 mb-8 p-4 bg-stone-50 rounded-3xl">
                                     <div className="h-20 w-20 rounded-2xl overflow-hidden relative shadow-sm">
-                                        <Image src={selectedPatientForRecords.image} alt={selectedPatientForRecords.name} fill className="object-cover" />
+                                        <div className="absolute inset-0 flex items-center justify-center bg-emerald-50">
+                                            <PawPrint className="h-10 w-10 text-emerald-500" />
+                                        </div>
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-stone-900">{selectedPatientForRecords.name}</h3>
