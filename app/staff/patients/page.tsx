@@ -9,14 +9,25 @@ import Link from 'next/link';
 import { useLanguageStore } from '../../../store/use-language-store';
 import { translations } from '../../../lib/translations';
 
+type Patient = {
+    id: string;
+    name: string;
+    breed: string;
+    owner: string;
+    lastVisit: string;
+    phone: string;
+    email: string;
+    image: string;
+    history: string;
+};
 
 export default function PatientsPage() {
     const { language } = useLanguageStore();
     const t = translations[language];
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPatientForRecords, setSelectedPatientForRecords] = useState<any>(null);
+    const [selectedPatientForRecords, setSelectedPatientForRecords] = useState<Patient | null>(null);
 
-    const patients = [
+    const patients: Patient[] = [
         { id: '1', name: 'Buddy', breed: 'Golden Retriever', owner: 'John Doe', lastVisit: '2024-04-15', phone: '+1 (555) 123-4567', email: 'john@example.com', image: 'https://picsum.photos/seed/dog1/200/200', history: 'Chronic ear infections, allergic to chicken, last vaccination Apr 2024.' },
         { id: '2', name: 'Luna', breed: 'Siamese', owner: 'Jane Smith', lastVisit: '2024-04-20', phone: '+1 (555) 987-6543', email: 'jane@example.com', image: 'https://picsum.photos/seed/cat1/200/200', history: 'Healthy, indoor only, slight dental tartar noted in last visit.' },
         { id: '3', name: 'Max', breed: 'Beagle', owner: 'Robert Brown', lastVisit: '2024-03-10', phone: '+1 (555) 456-7890', email: 'robert@example.com', image: 'https://picsum.photos/seed/dog2/200/200', history: 'History of hip dysplasia, on daily anti-inflammatory medication.' },

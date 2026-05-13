@@ -215,6 +215,24 @@ export const translations = {
         }
       }
     },
+    triage: {
+      title: 'Smart Pet Triage',
+      subtitle: 'Answer a few questions to estimate how urgent your pet\'s symptoms may be.',
+      startQuiz: 'Start quiz',
+      thinking: 'Thinking...',
+      typeAnswer: 'Type your answer...',
+      finalAdvice: 'Triage result',
+      urgency: 'Urgency',
+      advice: 'Advice',
+      disclaimer: 'This result is informational and does not replace a veterinary examination. If symptoms are severe or worsening, contact a clinic immediately.',
+      restart: 'Start again',
+      levels: {
+        critical: 'Critical',
+        high: 'High',
+        medium: 'Medium',
+        low: 'Low',
+      },
+    },
     staffNav: {
       schedule: 'Schedule',
       patients: 'Patients',
@@ -577,6 +595,24 @@ export const translations = {
           feedback: 'Opinia',
         }
       }
+    },
+    triage: {
+      title: 'Inteligentna triage zwierzęcia',
+      subtitle: 'Odpowiedz na kilka pytań, aby wstępnie ocenić pilność objawów pupila.',
+      startQuiz: 'Rozpocznij quiz',
+      thinking: 'Analizuję...',
+      typeAnswer: 'Wpisz odpowiedź...',
+      finalAdvice: 'Wynik triage',
+      urgency: 'Pilność',
+      advice: 'Zalecenia',
+      disclaimer: 'Wynik ma charakter informacyjny i nie zastępuje badania weterynaryjnego. Jeśli objawy są ciężkie lub się nasilają, natychmiast skontaktuj się z gabinetem.',
+      restart: 'Zacznij od nowa',
+      levels: {
+        critical: 'Krytyczny',
+        high: 'Wysoki',
+        medium: 'Średni',
+        low: 'Niski',
+      },
     },
     staffNav: {
       schedule: 'Harmonogram',

@@ -234,7 +234,7 @@ export default function ClientRegistrationPage() {
                                 name="gender"
                                 value={formData.gender}
                                 onChange={handleChange}
-                                placeholder="Eevee"
+                                placeholder="Gender"
                                 className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                             />
                         </div>
@@ -246,7 +246,7 @@ export default function ClientRegistrationPage() {
                                 name="breed"
                                 value={formData.breed}
                                 onChange={handleChange}
-                                placeholder="Eevee"
+                                placeholder="Breed"
                                 className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                             />
                         </div>
@@ -258,7 +258,7 @@ export default function ClientRegistrationPage() {
                                 name="petsAge"
                                 value={formData.petsAge}
                                 onChange={handleChange}
-                                placeholder="Eevee"
+                                placeholder="Age"
                                 className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                             />
                         </div>
@@ -270,7 +270,7 @@ export default function ClientRegistrationPage() {
                                 name="petsChip"
                                 value={formData.petsChip}
                                 onChange={handleChange}
-                                placeholder="Eevee"
+                                placeholder="Chip number"
                                 className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                             />
                         </div>
@@ -282,7 +282,7 @@ export default function ClientRegistrationPage() {
                                 name="petsAccomodation"
                                 value={formData.petsAccomodation}
                                 onChange={handleChange}
-                                placeholder="Eevee"
+                                placeholder="Accomodation"
                                 className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                             />
                         </div>

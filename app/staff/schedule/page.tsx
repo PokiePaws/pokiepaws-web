@@ -14,8 +14,7 @@ import {
     X,
     MoreVertical,
     CalendarDays,
-    Search,
-    Filter,
+    Trash2,
     AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -31,9 +30,7 @@ import {
     isSameDay,
     addDays,
     eachDayOfInterval,
-    parseISO,
-    isAfter,
-    startOfDay
+    parseISO
 } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { cn } from '../../../lib/utils';
@@ -104,6 +101,11 @@ export default function SchedulePage() {
         date: format(new Date(), 'yyyy-MM-dd')
     });
 
+    // NEW: state for dropdown menu and reschedule modal
+    const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [rescheduleModal, setRescheduleModal] = useState<Appointment | null>(null);
+    const [rescheduleData, setRescheduleData] = useState({ date: '', time: '' });
+
     const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
     const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
 
@@ -122,6 +124,37 @@ export default function SchedulePage() {
         setAppointments(prev => prev.map(app =>
             app.id === id ? { ...app, status: newStatus } : app
         ));
+        setOpenMenuId(null);
+    };
+
+    // NEW: delete handler
+    const handleDelete = (id: string) => {
+        const confirmMsg = language === 'pl'
+            ? 'Czy na pewno chcesz usunąć tę wizytę?'
+            : 'Are you sure you want to delete this appointment?';
+        if (confirm(confirmMsg)) {
+            setAppointments(prev => prev.filter(app => app.id !== id));
+            setOpenMenuId(null);
+        }
+    };
+
+    // NEW: open reschedule modal with current values
+    const openReschedule = (app: Appointment) => {
+        setRescheduleData({ date: app.date, time: app.time });
+        setRescheduleModal(app);
+        setOpenMenuId(null);
+    };
+
+    // NEW: submit reschedule
+    const handleReschedule = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!rescheduleModal) return;
+        setAppointments(prev => prev.map(app =>
+            app.id === rescheduleModal.id
+                ? { ...app, date: rescheduleData.date, time: rescheduleData.time }
+                : app
+        ));
+        setRescheduleModal(null);
     };
 
     const handleAddAppointment = (e: React.FormEvent) => {
@@ -191,8 +224,8 @@ export default function SchedulePage() {
                         <div className="grid grid-cols-7 text-center py-4 bg-stone-50/10">
                             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
                                 <span key={day} className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                  {language === 'pl' ? (day === 'Mon' ? 'Pon' : day === 'Tue' ? 'Wt' : day === 'Wed' ? 'Śr' : day === 'Thu' ? 'Czw' : day === 'Fri' ? 'Pt' : day === 'Sat' ? 'Sob' : 'Nie') : day}
-                </span>
+                                    {language === 'pl' ? (day === 'Mon' ? 'Pon' : day === 'Tue' ? 'Wt' : day === 'Wed' ? 'Śr' : day === 'Thu' ? 'Czw' : day === 'Fri' ? 'Pt' : day === 'Sat' ? 'Sob' : 'Nie') : day}
+                                </span>
                             ))}
                         </div>
 
@@ -214,18 +247,18 @@ export default function SchedulePage() {
                                         )}
                                     >
                                         <div className="flex justify-between items-start">
-                      <span className={cn(
-                          "text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full transition-all",
-                          isToday ? "bg-emerald-600 text-white" : "text-stone-900",
-                          !isCurrentMonth && "text-stone-300",
-                          isSelected && !isToday && "bg-stone-100"
-                      )}>
-                        {format(day, 'd')}
-                      </span>
+                                            <span className={cn(
+                                                "text-sm font-bold w-7 h-7 flex items-center justify-center rounded-full transition-all",
+                                                isToday ? "bg-emerald-600 text-white" : "text-stone-900",
+                                                !isCurrentMonth && "text-stone-300",
+                                                isSelected && !isToday && "bg-stone-100"
+                                            )}>
+                                                {format(day, 'd')}
+                                            </span>
                                             {dayAppointments.length > 0 && (
                                                 <span className="text-[10px] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-md">
-                          {dayAppointments.length}
-                        </span>
+                                                    {dayAppointments.length}
+                                                </span>
                                             )}
                                         </div>
 
@@ -308,45 +341,82 @@ export default function SchedulePage() {
                                                             {app.ownerName}
                                                         </p>
                                                         <div className="mt-2 flex items-center gap-2">
-                              <span className="text-[10px] font-bold px-2 py-1 bg-stone-100 text-stone-600 rounded-lg uppercase tracking-wider">
-                                {app.type}
-                              </span>
+                                                            <span className="text-[10px] font-bold px-2 py-1 bg-stone-100 text-stone-600 rounded-lg uppercase tracking-wider">
+                                                                {app.type}
+                                                            </span>
                                                             <span className={cn(
                                                                 "text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider",
                                                                 app.status === 'confirmed' ? "bg-emerald-50 text-emerald-600" :
                                                                     app.status === 'cancelled' ? "bg-red-50 text-red-600" :
                                                                         "bg-amber-50 text-amber-600"
                                                             )}>
-                                {t.schedule[app.status]}
-                              </span>
+                                                                {t.schedule[app.status]}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                {app.status === 'pending' && (
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={() => handleStatusChange(app.id, 'confirmed')}
-                                                            className="p-2 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
-                                                            title={t.schedule.approve}
-                                                        >
-                                                            <Check className="h-4 w-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleStatusChange(app.id, 'cancelled')}
-                                                            className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
-                                                            title={t.schedule.reject}
-                                                        >
-                                                            <X className="h-4 w-4" />
-                                                        </button>
-                                                    </div>
-                                                )}
-
-                                                {app.status !== 'pending' && (
-                                                    <button className="p-2 text-stone-400 hover:bg-stone-50 rounded-xl transition-all">
+                                                {/* NEW: Universal dropdown menu for all statuses */}
+                                                <div className="relative">
+                                                    <button
+                                                        onClick={() => setOpenMenuId(openMenuId === app.id ? null : app.id)}
+                                                        className="p-2 text-stone-400 hover:bg-stone-50 rounded-xl transition-all"
+                                                    >
                                                         <MoreVertical className="h-4 w-4" />
                                                     </button>
-                                                )}
+
+                                                    {openMenuId === app.id && (
+                                                        <>
+                                                            <div
+                                                                className="fixed inset-0 z-10"
+                                                                onClick={() => setOpenMenuId(null)}
+                                                            />
+                                                            <motion.div
+                                                                initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                                                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                                                className="absolute right-0 top-12 z-20 bg-white rounded-2xl shadow-xl border border-stone-100 py-2 w-52 overflow-hidden"
+                                                            >
+                                                                {app.status !== 'confirmed' && (
+                                                                    <button
+                                                                        onClick={() => handleStatusChange(app.id, 'confirmed')}
+                                                                        className="w-full px-4 py-2.5 text-left text-sm font-medium text-stone-700 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-3 transition-all"
+                                                                    >
+                                                                        <Check className="h-4 w-4" />
+                                                                        {language === 'pl' ? 'Potwierdź' : 'Confirm'}
+                                                                    </button>
+                                                                )}
+
+                                                                <button
+                                                                    onClick={() => openReschedule(app)}
+                                                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-stone-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-all"
+                                                                >
+                                                                    <CalendarIcon className="h-4 w-4" />
+                                                                    {language === 'pl' ? 'Przebookuj' : 'Reschedule'}
+                                                                </button>
+
+                                                                {app.status !== 'cancelled' && (
+                                                                    <button
+                                                                        onClick={() => handleStatusChange(app.id, 'cancelled')}
+                                                                        className="w-full px-4 py-2.5 text-left text-sm font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-700 flex items-center gap-3 transition-all"
+                                                                    >
+                                                                        <X className="h-4 w-4" />
+                                                                        {language === 'pl' ? 'Anuluj wizytę' : 'Cancel visit'}
+                                                                    </button>
+                                                                )}
+
+                                                                <div className="border-t border-stone-100 my-1" />
+
+                                                                <button
+                                                                    onClick={() => handleDelete(app.id)}
+                                                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition-all"
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                    {language === 'pl' ? 'Usuń' : 'Delete'}
+                                                                </button>
+                                                            </motion.div>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                         </motion.div>
                                     ))
@@ -465,6 +535,81 @@ export default function SchedulePage() {
                                         className="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
                                     >
                                         {t.schedule.addVisit}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* NEW: Reschedule Modal */}
+            <AnimatePresence>
+                {rescheduleModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setRescheduleModal(null)}
+                            className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden border border-stone-100"
+                        >
+                            <div className="p-8 border-b border-stone-50 bg-stone-50/30">
+                                <h3 className="text-2xl font-bold text-stone-900">
+                                    {language === 'pl' ? 'Przebookuj wizytę' : 'Reschedule appointment'}
+                                </h3>
+                                <p className="text-stone-500 text-sm mt-1">
+                                    {rescheduleModal.patientName} · {rescheduleModal.ownerName}
+                                </p>
+                            </div>
+
+                            <form onSubmit={handleReschedule} className="p-8 space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">
+                                            {language === 'pl' ? 'Nowa data' : 'New date'}
+                                        </label>
+                                        <input
+                                            required
+                                            type="date"
+                                            value={rescheduleData.date}
+                                            onChange={e => setRescheduleData({ ...rescheduleData, date: e.target.value })}
+                                            className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">
+                                            {language === 'pl' ? 'Nowa godzina' : 'New time'}
+                                        </label>
+                                        <input
+                                            required
+                                            type="time"
+                                            value={rescheduleData.time}
+                                            onChange={e => setRescheduleData({ ...rescheduleData, time: e.target.value })}
+                                            className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRescheduleModal(null)}
+                                        className="flex-1 px-6 py-4 rounded-2xl font-bold text-stone-600 hover:bg-stone-50 transition-all border border-stone-100"
+                                    >
+                                        {language === 'pl' ? 'Anuluj' : 'Cancel'}
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
+                                    >
+                                        {language === 'pl' ? 'Zapisz zmiany' : 'Save changes'}
                                     </button>
                                 </div>
                             </form>

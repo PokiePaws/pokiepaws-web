@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { MapPin, Phone, Star, Clock, ChevronLeft, ShieldCheck, Users, Heart, Loader2 } from 'lucide-react';
 import Navbar from '../../../components/navbar';
-import { apiRequest } from '../../../lib/api';
+import { clinicsApi } from '../../../lib/features/clinics/clinics-api';
 import { useLanguageStore } from '../../../store/use-language-store';
 import { translations } from '../../../lib/translations';
 import Clinic from '../../../lib/types';
@@ -23,7 +23,7 @@ export default function ClinicDetailPage() {
     useEffect(() => {
         async function fetchClinic() {
             try {
-                const data = await apiRequest<Clinic>(`/api/clinics/${params.id}`);
+                const data = await clinicsApi.getClinic(String(params.id));
                 setClinic(data);
             } catch (e) {
                 console.error('Error fetching clinic:', e);

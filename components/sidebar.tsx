@@ -37,7 +37,6 @@ export default function Sidebar() {
         { name: t.sidebar.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
         { name: t.sidebar.labOrders, href: '/staff/labOrders', icon: Microscope },
         { name: t.sidebar.supplies, href: '/staff/supplies', icon: Package },
-        { name: t.sidebar.settings, href: '/staff/settings', icon: Settings },
     ];
 
     if (user.role === 'Admin' || user.role === 'SuperAdmin') {

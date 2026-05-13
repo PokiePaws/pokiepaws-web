@@ -7,7 +7,7 @@ import { Search, MapPin, Star, ChevronRight, Filter, Building2, Loader2 } from '
 import Navbar from '../../components/navbar';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
-import { apiRequest } from '../../lib/api';
+import { clinicsApi } from '../../lib/features/clinics/clinics-api';
 import Clinic from '../../lib/types';
 
 export default function ClinicsPage() {
@@ -22,11 +22,7 @@ export default function ClinicsPage() {
         async function fetchClinics() {
             try {
                 setLoading(true);
-                const endpoint = selectedCity === 'All'
-                    ? '/api/clinics'
-                    : `/api/clinics/city/${selectedCity}`;
-
-                const data = await apiRequest<Clinic[]>(endpoint);
+                const data = await clinicsApi.getClinics(selectedCity === 'All' ? undefined : selectedCity);
                 setClinics(data);
             } catch (error) {
                 console.error('Error fetching clinics:', error);

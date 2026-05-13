@@ -4,11 +4,35 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { PawPrint, Mail, Lock, ChevronRight, AlertCircle } from 'lucide-react';
+import { Mail, Lock, ChevronRight, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useAuthStore } from '../../store/use-auth-store';
+import { useAuthStore, type UserRole } from '../../store/use-auth-store';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
+import { authApi, type ApiRole } from '../../lib/features/auth/auth-api';
+
+function mapApiRole(role: ApiRole): UserRole {
+    switch (role) {
+        case 'ADMIN':
+            return 'Admin';
+        case 'VET':
+            return 'Staff';
+        case 'OWNER':
+            return 'Client';
+        case 'WAREHOUSE':
+            return 'Staff';
+        case 'GUEST':
+            return 'Client';
+        default:
+            return 'Client';
+    }
+}
+
+function getRedirectPath(role: UserRole) {
+    if (role === 'Admin' || role === 'SuperAdmin') return '/admin';
+    if (role === 'Staff') return '/staff';
+    return '/dashboard';
+}
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -26,22 +50,23 @@ export default function LoginPage() {
         setIsLoading(true);
         setError('');
 
-        // Mock login logic
-        setTimeout(() => {
-            if (email === 'super@pokiepaws.com' && password === 'super123') {
-                setUser({ id: '0', name: 'Super Admin', email, role: 'SuperAdmin' });
-                router.push('/staff');
-            } else if (email === 'admin@pokiepaws.com' && password === 'admin123') {
-                setUser({ id: '1', name: 'Clinic Admin', email, role: 'Admin', clinicId: 'c1' });
-                router.push('/admin');
-            } else if (email === 'staff@pokiepaws.com' && password === 'staff123') {
-                setUser({ id: '2', name: 'Dr. Jane Smith', email, role: 'Staff', clinicId: 'c1' });
-                router.push('/staff');
-            } else {
-                setError(t.login.error + ' Try admin@pokiepaws.com / admin123');
-            }
+        try {
+            const response = await authApi.login(email, password);
+            const role = mapApiRole(response.role);
+
+            setUser({
+                id: response.email,
+                name: response.email,
+                email: response.email,
+                role,
+            }, response.token);
+
+            router.push(getRedirectPath(role));
+        } catch (error) {
+            setError(error instanceof Error ? error.message : t.login.error);
+        } finally {
             setIsLoading(false);
-        }, 1000);
+        }
     };
 
     return (
@@ -170,12 +195,12 @@ export default function LoginPage() {
                                 <div className="w-full border-t border-slate-200" />
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-white text-slate-500">Demo Credentials</span>
+                                <span className="px-2 bg-white text-slate-500">API Credentials</span>
                             </div>
                         </div>
                         <div className="mt-4 grid grid-cols-1 gap-2 text-xs text-slate-500 bg-slate-50 p-3 rounded-xl">
-                            <p><strong>Staff:</strong> staff@pokiepaws.com / staff123</p>
-                            <p><strong>Admin:</strong> admin@pokiepaws.com / admin123</p>
+                            <p><strong>Local admin:</strong> admin@pokiepaws.pl / Admin1234!</p>
+                            <p>Uses {process.env.NEXT_PUBLIC_API_URL || 'NEXT_PUBLIC_API_URL'}</p>
                         </div>
                     </div>
                 </motion.div>
