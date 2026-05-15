@@ -7,10 +7,7 @@ import { useLanguageStore } from '../store/use-language-store';
 import { translations } from '../lib/translations';
 import {
     LayoutDashboard,
-    PawPrint,
     Calendar,
-    User,
-    Settings,
     LogOut,
     Users,
     ClipboardList,
@@ -37,12 +34,11 @@ export default function Sidebar() {
         { name: t.sidebar.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
         { name: t.sidebar.labOrders, href: '/staff/labOrders', icon: Microscope },
         { name: t.sidebar.supplies, href: '/staff/supplies', icon: Package },
+        { name: t.sidebar.management, href: '/staff/management', icon: Building2 },
     ];
 
     if (user.role === 'Admin' || user.role === 'SuperAdmin') {
-        links.push({ name: t.sidebar.adminPanel, href: '/staff/users', icon: ShieldCheck });
-        links.push({ name: language === 'pl' ? 'Kliniki' : 'Clinics', href: '/staff/clinics', icon: Building2 });
-        links.push({ name: language === 'pl' ? 'Statystyki' : 'Statistics', href: '/staff/stats', icon: LayoutDashboard });
+        links.push({ name: t.sidebar.adminPanel, href: '/admin', icon: ShieldCheck });
 
     }
 

@@ -6,21 +6,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAnimals } from '../../../lib/features/api-hooks';
 
-const mockWeightData = [
-    { date: 'Jan', weight: 28.5 },
-    { date: 'Feb', weight: 29.0 },
-    { date: 'Mar', weight: 28.8 },
-    { date: 'Apr', weight: 29.2 },
-    { date: 'May', weight: 29.5 },
-];
-
 export default function PetsPage() {
     const [selectedPet, setSelectedPet] = useState<string | null>(null);
     const { data: pets = [], isLoading } = useAnimals();
     const activePet = pets.find(p => String(p.id) === selectedPet) || pets[0];
     const activeWeightData = activePet?.weight
-        ? mockWeightData.map((point) => ({ ...point, weight: activePet.weight ?? point.weight }))
-        : mockWeightData;
+        ? [{ date: 'Current', weight: activePet.weight }]
+        : [];
 
     if (isLoading) {
         return (
@@ -153,22 +145,30 @@ export default function PetsPage() {
                                             <Activity className="h-5 w-5 text-emerald-600" />
                                             <h3 className="font-bold text-stone-900">Weight History</h3>
                                         </div>
-                                        <span className="text-xs font-medium text-stone-400">Last 5 months</span>
+                                        <span className="text-xs font-medium text-stone-400">API data</span>
                                     </div>
-                                    <div className="h-48 w-full">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <LineChart data={activeWeightData}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
-                                                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a8a29e' }} />
-                                                <YAxis hide />
-                                                <Tooltip
-                                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                                    labelStyle={{ fontWeight: 'bold', color: '#1c1917' }}
-                                                />
-                                                <Line type="monotone" dataKey="weight" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
-                                            </LineChart>
-                                        </ResponsiveContainer>
-                                    </div>
+                                    {activeWeightData.length > 0 ? (
+                                        <div className="h-48 w-full">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <LineChart data={activeWeightData}>
+                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f1f1" />
+                                                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#a8a29e' }} />
+                                                    <YAxis hide />
+                                                    <Tooltip
+                                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                                        labelStyle={{ fontWeight: 'bold', color: '#1c1917' }}
+                                                    />
+                                                    <Line type="monotone" dataKey="weight" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
+                                                </LineChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    ) : (
+                                        <div className="h-48 w-full rounded-2xl border border-dashed border-stone-200 bg-stone-50 flex items-center justify-center px-6 text-center">
+                                            <p className="text-sm text-stone-500">
+                                                Weight history is not available in the API yet.
+                                            </p>
+                                        </div>
+                                    )}
                                     <div className="pt-4 border-t border-stone-50 flex justify-between items-center">
                                         <p className="text-sm text-stone-500">Current Weight</p>
                                         <p className="text-lg font-bold text-stone-900">{activePet.weight ? `${activePet.weight} kg` : '-'}</p>

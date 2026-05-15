@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminApi, animalsApi, vetsApi, visitsApi } from './api';
-import type { AnimalRequest, ClinicRequest, CreateVisitRequest, UserAdminRequest } from './api-schemas';
+import type {
+    AnimalRequest,
+    ClinicRequest,
+    CreatePrescriptionRequest,
+    CreateVisitRequest,
+    UpdateVisitMedicalDataRequest,
+    UserAdminRequest,
+} from './api-schemas';
 
 export const apiQueryKeys = {
     animals: ['animals'] as const,
@@ -15,6 +22,8 @@ export const apiQueryKeys = {
     adminUsers: ['admin', 'users'] as const,
     adminClinics: ['admin', 'clinics'] as const,
     adminLogs: ['admin', 'logs'] as const,
+    adminLogStats: ['admin', 'logs', 'stats'] as const,
+    prescription: (visitId?: number) => ['visits', visitId ?? 'none', 'prescription'] as const,
 };
 
 export function useAnimals() {
@@ -79,6 +88,36 @@ export function useConfirmVetVisit() {
     });
 }
 
+export function useUpdateVisitMedicalData() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: number; payload: UpdateVisitMedicalDataRequest }) =>
+            visitsApi.updateMedicalData(id, payload),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visits'] }),
+    });
+}
+
+export function usePrescription(visitId?: number) {
+    return useQuery({
+        queryKey: apiQueryKeys.prescription(visitId),
+        queryFn: () => visitsApi.getPrescription(visitId as number),
+        enabled: typeof visitId === 'number',
+        retry: false,
+    });
+}
+
+export function useCreatePrescription() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ visitId, payload }: { visitId: number; payload: CreatePrescriptionRequest }) =>
+            visitsApi.createPrescription(visitId, payload),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: apiQueryKeys.prescription(variables.visitId) });
+            queryClient.invalidateQueries({ queryKey: ['visits'] });
+        },
+    });
+}
+
 export function useVets() {
     return useQuery({
         queryKey: apiQueryKeys.vets,
@@ -117,6 +156,22 @@ export function useCreateAdminUser() {
     });
 }
 
+export function useUpdateAdminUser() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: number; payload: UserAdminRequest }) => adminApi.updateUser(id, payload),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.adminUsers }),
+    });
+}
+
+export function useDeleteAdminUser() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => adminApi.deleteUser(id),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.adminUsers }),
+    });
+}
+
 export function useAdminClinics() {
     return useQuery({
         queryKey: apiQueryKeys.adminClinics,
@@ -132,9 +187,32 @@ export function useCreateAdminClinic() {
     });
 }
 
+export function useUpdateAdminClinic() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: number; payload: ClinicRequest }) => adminApi.updateClinic(id, payload),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.adminClinics }),
+    });
+}
+
+export function useDeleteAdminClinic() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => adminApi.deleteClinic(id),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.adminClinics }),
+    });
+}
+
 export function useAdminLogs() {
     return useQuery({
         queryKey: apiQueryKeys.adminLogs,
         queryFn: () => adminApi.getLogs(20),
+    });
+}
+
+export function useAdminLogStats() {
+    return useQuery({
+        queryKey: apiQueryKeys.adminLogStats,
+        queryFn: adminApi.getLogStats,
     });
 }

@@ -3,12 +3,14 @@ import { NextResponse } from 'next/server';
 import { getServerApiBaseUrl } from '../../../../lib/config/env';
 import {
     AUTH_ACCESS_TOKEN_COOKIE,
+    AUTH_MFA_PENDING_EMAIL_COOKIE,
     AUTH_USER_EMAIL_COOKIE,
     AUTH_USER_ROLE_COOKIE,
     authCookieOptions,
 } from '../../../../lib/features/auth/auth-cookies';
 import {
     type BackendLoginResponse,
+    type BackendMfaRequiredResponse,
     mapApiRole,
 } from '../../../../lib/features/auth/auth-types';
 import { loginRequestSchema } from '../../../../lib/features/auth/auth-schema';
@@ -22,12 +24,32 @@ export async function POST(request: Request) {
     }
 
     try {
-        const backendResponse = await axios.post<BackendLoginResponse>(
+        const backendResponse = await axios.post<BackendLoginResponse | BackendMfaRequiredResponse>(
             `${getServerApiBaseUrl()}/api/auth/login`,
             parsedCredentials.data,
         );
 
-        const { token, email, role } = backendResponse.data;
+        if ('mfaRequired' in backendResponse.data && backendResponse.data.mfaRequired) {
+            const pendingEmail = backendResponse.data.email ?? parsedCredentials.data.email;
+            const response = NextResponse.json(
+                {
+                    mfaRequired: true,
+                    email: pendingEmail,
+                    message: backendResponse.data.message ?? 'Check your email to finish signing in.',
+                },
+                { status: 202 },
+            );
+
+            response.cookies.set(AUTH_MFA_PENDING_EMAIL_COOKIE, pendingEmail, {
+                ...authCookieOptions,
+                maxAge: 15 * 60,
+            });
+
+            return response;
+        }
+
+        const loginData = backendResponse.data as BackendLoginResponse;
+        const { token, email, role } = loginData;
         const userRole = mapApiRole(role);
         const response = NextResponse.json({
             user: {
@@ -41,6 +63,7 @@ export async function POST(request: Request) {
         response.cookies.set(AUTH_ACCESS_TOKEN_COOKIE, token, authCookieOptions);
         response.cookies.set(AUTH_USER_EMAIL_COOKIE, email, authCookieOptions);
         response.cookies.set(AUTH_USER_ROLE_COOKIE, userRole, authCookieOptions);
+        response.cookies.delete(AUTH_MFA_PENDING_EMAIL_COOKIE);
 
         return response;
     } catch (error) {

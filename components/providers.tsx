@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import AuthSessionProvider from './auth-session-provider';
+import RealtimeNotificationsProvider from './realtime-notifications-provider';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
     const [queryClient] = useState(() => new QueryClient({
@@ -15,7 +16,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <AuthSessionProvider>{children}</AuthSessionProvider>
+            <AuthSessionProvider>
+                <RealtimeNotificationsProvider />
+                {children}
+            </AuthSessionProvider>
         </QueryClientProvider>
     );
 }

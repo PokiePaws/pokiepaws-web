@@ -31,5 +31,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
             isAuthenticated: false,
             isSessionResolved: true,
         });
+        if (typeof window !== 'undefined') {
+            window.location.href = '/';
+        }
     },
 }));

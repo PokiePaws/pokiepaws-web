@@ -1,39 +1,76 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuthStore } from '../../../store/use-auth-store';
+import { useMemo, useState } from 'react';
+import { format, subMonths, addMonths, parseISO } from 'date-fns';
+import { FileText, Plus, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useLanguageStore } from '../../../store/use-language-store';
 import { translations } from '../../../lib/translations';
-import { Plus, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { mockMedicines, mockDiagnoses } from '../../../lib/mock-data';
 import { useNotificationStore } from '../../../store/use-notification-store';
+import {
+    useCreatePrescription,
+    usePrescription,
+    useVetVisitsRange,
+} from '../../../lib/features/api-hooks';
+import type { Visit } from '../../../lib/features/api-schemas';
+
+function PrescriptionStatus({ visit }: { visit: Visit }) {
+    const { data: prescription, isLoading, isError } = usePrescription(visit.id);
+
+    if (isLoading) return <span className="text-xs text-slate-400">Checking...</span>;
+    if (isError || !prescription) return <span className="text-xs font-bold text-amber-600">No prescription</span>;
+
+    return (
+        <div className="space-y-1">
+            <span className="text-xs font-bold text-emerald-600">Prescription #{prescription.id}</span>
+            <p className="text-xs text-slate-500">{prescription.items.length} item(s)</p>
+        </div>
+    );
+}
 
 export default function PrescriptionsPage() {
-    const [showForm, setShowForm] = useState(false);
-    const { user } = useAuthStore();
     const { language } = useLanguageStore();
     const t = translations[language];
-    const addNotification = useNotificationStore(state => state.addNotification);
-
+    const addNotification = useNotificationStore((state) => state.addNotification);
+    const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({
-        patientId: '1',
-        diagnosisCode: '',
-        medicineId: '',
+        visitId: '',
+        productId: '',
+        quantityPackages: '1',
         dosage: '',
-        frequency: '',
-        notes: ''
+        treatmentTime: '',
     });
 
-    const prescriptions = [
-        { id: 'p1', patient: 'Buddy', medicine: 'Amoxicillin', dosage: '250mg', frequency: '2x daily', date: '2024-05-10', status: 'Active' },
-        { id: 'p2', patient: 'Luna', medicine: 'Carprofen', dosage: '20mg', frequency: '1x daily', date: '2024-05-12', status: 'Active' },
-    ];
+    const from = format(subMonths(new Date(), 6), 'yyyy-MM-dd');
+    const to = format(addMonths(new Date(), 6), 'yyyy-MM-dd');
+    const { data: visits = [], isLoading } = useVetVisitsRange(from, to);
+    const createPrescription = useCreatePrescription();
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const prescriptionCandidates = useMemo(
+        () => visits.filter((visit) => visit.status !== 'CANCELLED'),
+        [visits],
+    );
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        await createPrescription.mutateAsync({
+            visitId: Number(formData.visitId),
+            payload: {
+                recommendationDate: format(new Date(), 'yyyy-MM-dd'),
+                items: [
+                    {
+                        productId: Number(formData.productId),
+                        quantityPackages: Number(formData.quantityPackages) || 1,
+                        dosage: formData.dosage || undefined,
+                        treatmentTime: formData.treatmentTime || undefined,
+                    },
+                ],
+            },
+        });
+
         addNotification({ message: t.prescriptions.successNotification, type: 'success' });
         setShowForm(false);
+        setFormData({ visitId: '', productId: '', quantityPackages: '1', dosage: '', treatmentTime: '' });
     };
 
     return (
@@ -56,39 +93,38 @@ export default function PrescriptionsPage() {
                 <table className="w-full text-left">
                     <thead>
                     <tr className="bg-slate-50 border-b border-slate-100">
+                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visit</th>
                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.prescriptions.table.patient}</th>
-                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.prescriptions.table.medication}</th>
-                        <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.prescriptions.table.dosage}</th>
                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.prescriptions.table.date}</th>
                         <th className="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.prescriptions.table.status}</th>
                     </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                    {prescriptions.map((p) => (
-                        <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-6 py-4"><span className="text-sm font-bold text-slate-900">{p.patient}</span></td>
-                            <td className="px-6 py-4"><span className="text-sm text-slate-600">{p.medicine}</span></td>
+                    {prescriptionCandidates.map((visit) => (
+                        <tr key={visit.id} className="hover:bg-slate-50 transition-colors">
                             <td className="px-6 py-4">
-                                <div className="flex flex-col">
-                                    <span className="text-sm text-slate-900">{p.dosage}</span>
-                                    <span className="text-xs text-slate-400">{p.frequency}</span>
-                                </div>
+                                <span className="text-sm font-bold text-slate-900">#{visit.id}</span>
+                                <p className="text-xs text-slate-500">{visit.description || visit.diagnosis || 'Visit'}</p>
                             </td>
-                            <td className="px-6 py-4"><span className="text-sm text-slate-500">{p.date}</span></td>
-                            <td className="px-6 py-4">
-                                <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider">{p.status}</span>
-                            </td>
+                            <td className="px-6 py-4 text-sm text-slate-600">Patient #{visit.animalId}</td>
+                            <td className="px-6 py-4 text-sm text-slate-500">{format(parseISO(visit.startsAt), 'yyyy-MM-dd HH:mm')}</td>
+                            <td className="px-6 py-4"><PrescriptionStatus visit={visit} /></td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
+                {!isLoading && prescriptionCandidates.length === 0 && (
+                    <div className="p-10 text-center text-slate-500">No visits available for prescriptions.</div>
+                )}
             </div>
 
             <AnimatePresence>
                 {showForm && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
                         <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                             onClick={() => setShowForm(false)}
                             className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
                         />
@@ -100,7 +136,10 @@ export default function PrescriptionsPage() {
                         >
                             <div className="p-8 sm:p-12">
                                 <div className="flex justify-between items-center mb-8">
-                                    <h2 className="text-2xl font-display font-bold text-slate-900">{t.prescriptions.newPrescription}</h2>
+                                    <div className="flex items-center gap-3">
+                                        <FileText className="h-6 w-6 text-blue-600" />
+                                        <h2 className="text-2xl font-display font-bold text-slate-900">{t.prescriptions.newPrescription}</h2>
+                                    </div>
                                     <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-50 rounded-full transition-colors">
                                         <X className="h-6 w-6 text-slate-400" />
                                     </button>
@@ -109,50 +148,55 @@ export default function PrescriptionsPage() {
                                 <form className="space-y-6" onSubmit={handleSubmit}>
                                     <div className="grid sm:grid-cols-2 gap-6">
                                         <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">{t.prescriptions.form.selectPatient}</label>
-                                            <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                                                <option>Buddy (Golden Retriever)</option>
-                                                <option>Luna (Siamese)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">{t.prescriptions.form.diagnosis}</label>
-                                            <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                                                {mockDiagnoses.map(d => (
-                                                    <option key={d.code} value={d.code}>
-                                                        {d.code} - {language === 'pl' && d.namePl ? d.namePl : d.name}
+                                            <label className="block text-sm font-bold text-slate-700 mb-2">Visit</label>
+                                            <select
+                                                required
+                                                value={formData.visitId}
+                                                onChange={(e) => setFormData({ ...formData, visitId: e.target.value })}
+                                                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            >
+                                                <option value="">Select visit</option>
+                                                {prescriptionCandidates.map((visit) => (
+                                                    <option key={visit.id} value={visit.id}>
+                                                        #{visit.id} - Patient #{visit.animalId} - {format(parseISO(visit.startsAt), 'yyyy-MM-dd HH:mm')}
                                                     </option>
                                                 ))}
                                             </select>
                                         </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-slate-700 mb-2">Product ID</label>
+                                            <input
+                                                required
+                                                type="number"
+                                                min="1"
+                                                value={formData.productId}
+                                                onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
+                                                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div className="grid sm:grid-cols-2 gap-6">
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-2">{t.prescriptions.form.medication}</label>
-                                                <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                                                        {mockMedicines.map(m => (
-                                                                <option key={m.id} value={m.id}>
-                                                                    {language === 'pl' && m.namePl ? m.namePl : m.name}
-                                                                </option>
-                                                            ))}
-
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-bold text-slate-700 mb-2">{t.prescriptions.form.dosage}</label>
-                                                <input type="text" placeholder="np. 250mg" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">{t.prescriptions.form.frequency}</label>
-                                            <input type="text" placeholder="np. 2x dziennie po jedzeniu" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-bold text-slate-700 mb-2">{t.prescriptions.form.notes}</label>
-                                            <textarea rows={4} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none" placeholder="..."></textarea>
-                                        </div>
+                                    <div className="grid sm:grid-cols-3 gap-6">
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={formData.quantityPackages}
+                                            onChange={(e) => setFormData({ ...formData, quantityPackages: e.target.value })}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            placeholder="Packages"
+                                        />
+                                        <input
+                                            value={formData.dosage}
+                                            onChange={(e) => setFormData({ ...formData, dosage: e.target.value })}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            placeholder={t.prescriptions.form.dosage}
+                                        />
+                                        <input
+                                            value={formData.treatmentTime}
+                                            onChange={(e) => setFormData({ ...formData, treatmentTime: e.target.value })}
+                                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                            placeholder="Treatment time"
+                                        />
                                     </div>
 
                                     <div className="flex gap-4">
@@ -164,8 +208,9 @@ export default function PrescriptionsPage() {
                                             {t.prescriptions.form.cancel}
                                         </button>
                                         <button
+                                            disabled={createPrescription.isPending}
                                             type="submit"
-                                            className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                                            className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 disabled:opacity-60"
                                         >
                                             {t.prescriptions.form.submit}
                                         </button>

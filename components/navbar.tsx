@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
@@ -31,7 +31,7 @@ export default function Navbar() {
         { name: t.staffNav.schedule, href: '/staff', icon: Calendar },
         { name: t.staffNav.patients, href: '/staff/patients', icon: PawPrint },
         { name: t.staffNav.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
-        { name: t.staffNav.labOrders, href: '/staff/lab-orders', icon: Microscope },
+        { name: t.staffNav.labOrders, href: '/staff/labOrders', icon: Microscope },
         { name: t.staffNav.supplies, href: '/staff/supplies', icon: Package },
         { name: t.staffNav.management, href: '/staff/management', icon: User },
     ];

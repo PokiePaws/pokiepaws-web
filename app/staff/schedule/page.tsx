@@ -15,7 +15,8 @@ import {
     MoreVertical,
     CalendarDays,
     Trash2,
-    AlertCircle
+    AlertCircle,
+    Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -33,7 +34,16 @@ import {
 } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { cn } from '../../../lib/utils';
-import { useCancelVisit, useConfirmVetVisit, useVetVisitsRange } from '../../../lib/features/api-hooks';
+import {
+    useCancelVisit,
+    useCreateVisit,
+    useConfirmVetVisit,
+    useCreatePrescription,
+    usePrescription,
+    useUpdateVisitMedicalData,
+    useVetVisitsRange,
+} from '../../../lib/features/api-hooks';
+import type { Visit } from '../../../lib/features/api-schemas';
 
 interface Appointment {
     id: string;
@@ -43,6 +53,7 @@ interface Appointment {
     time: string;
     date: string;
     status: 'pending' | 'confirmed' | 'cancelled';
+    visit: Visit;
 }
 
 export default function SchedulePage() {
@@ -54,9 +65,10 @@ export default function SchedulePage() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [newAppointment, setNewAppointment] = useState({
-        patientName: '',
-        ownerName: '',
-        type: 'General Check-up',
+        animalId: '',
+        clinicId: '',
+        vetUserId: '',
+        description: '',
         time: '10:00',
         date: format(new Date(), 'yyyy-MM-dd')
     });
@@ -64,7 +76,15 @@ export default function SchedulePage() {
     // NEW: state for dropdown menu and reschedule modal
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [rescheduleModal, setRescheduleModal] = useState<Appointment | null>(null);
+    const [medicalVisit, setMedicalVisit] = useState<Visit | null>(null);
     const [rescheduleData, setRescheduleData] = useState({ date: '', time: '' });
+    const [medicalForm, setMedicalForm] = useState({ disease: '', diagnosis: '', recommendations: '' });
+    const [prescriptionForm, setPrescriptionForm] = useState({
+        productId: '',
+        quantityPackages: '1',
+        dosage: '',
+        treatmentTime: '',
+    });
 
     const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
     const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
@@ -78,8 +98,12 @@ export default function SchedulePage() {
     const rangeFrom = format(startDate, 'yyyy-MM-dd');
     const rangeTo = format(endDate, 'yyyy-MM-dd');
     const { data: apiVisits = [] } = useVetVisitsRange(rangeFrom, rangeTo);
+    const createVisit = useCreateVisit();
     const confirmVisit = useConfirmVetVisit();
     const cancelVisit = useCancelVisit();
+    const updateMedicalData = useUpdateVisitMedicalData();
+    const createPrescription = useCreatePrescription();
+    const { data: prescription } = usePrescription(medicalVisit?.id);
     const appointments: Appointment[] = apiVisits.map((visit) => {
         const startsAt = parseISO(visit.startsAt);
 
@@ -91,6 +115,7 @@ export default function SchedulePage() {
             time: format(startsAt, 'HH:mm'),
             date: format(startsAt, 'yyyy-MM-dd'),
             status: visit.status === 'CANCELLED' ? 'cancelled' : visit.status === 'CONFIRMED' ? 'confirmed' : 'pending',
+            visit,
         };
     });
 
@@ -134,14 +159,57 @@ export default function SchedulePage() {
         setRescheduleModal(null);
     };
 
-    const handleAddAppointment = (e: React.FormEvent) => {
+    const openMedicalData = (app: Appointment) => {
+        setMedicalVisit(app.visit);
+        setMedicalForm({
+            disease: app.visit.disease || '',
+            diagnosis: app.visit.diagnosis || '',
+            recommendations: app.visit.recommendations || '',
+        });
+        setPrescriptionForm({ productId: '', quantityPackages: '1', dosage: '', treatmentTime: '' });
+        setOpenMenuId(null);
+    };
+
+    const handleMedicalSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!medicalVisit) return;
+
+        await updateMedicalData.mutateAsync({
+            id: medicalVisit.id,
+            payload: medicalForm,
+        });
+        if (prescriptionForm.productId) {
+            await createPrescription.mutateAsync({
+                visitId: medicalVisit.id,
+                payload: {
+                    recommendationDate: format(new Date(), 'yyyy-MM-dd'),
+                    items: [{
+                        productId: Number(prescriptionForm.productId),
+                        quantityPackages: Number(prescriptionForm.quantityPackages) || 1,
+                        dosage: prescriptionForm.dosage || undefined,
+                        treatmentTime: prescriptionForm.treatmentTime || undefined,
+                    }],
+                },
+            });
+        }
+        setMedicalVisit(null);
+    };
+
+    const handleAddAppointment = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await createVisit.mutateAsync({
+            animalId: Number(newAppointment.animalId),
+            clinicId: Number(newAppointment.clinicId),
+            vetUserId: Number(newAppointment.vetUserId),
+            startsAt: `${newAppointment.date}T${newAppointment.time}:00`,
+            description: newAppointment.description || undefined,
+        });
         setIsAddModalOpen(false);
-        alert(language === 'pl' ? 'Dodawanie wizyt odbywa siÄ™ z panelu klienta przez endpoint rezerwacji.' : 'New visits are booked from the client panel via the booking endpoint.');
         setNewAppointment({
-            patientName: '',
-            ownerName: '',
-            type: 'General Check-up',
+            animalId: '',
+            clinicId: '',
+            vetUserId: '',
+            description: '',
             time: '10:00',
             date: format(new Date(), 'yyyy-MM-dd')
         });
@@ -363,6 +431,14 @@ export default function SchedulePage() {
                                                                 )}
 
                                                                 <button
+                                                                    onClick={() => openMedicalData(app)}
+                                                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-stone-700 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-3 transition-all"
+                                                                >
+                                                                    <CalendarIcon className="h-4 w-4" />
+                                                                    {language === 'pl' ? 'Kartoteka i recepta' : 'Medical record'}
+                                                                </button>
+
+                                                                <button
                                                                     onClick={() => openReschedule(app)}
                                                                     className="w-full px-4 py-2.5 text-left text-sm font-medium text-stone-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-all"
                                                                 >
@@ -414,6 +490,80 @@ export default function SchedulePage() {
 
             {/* Add Appointment Modal */}
             <AnimatePresence>
+                {medicalVisit && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setMedicalVisit(null)}
+                            className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative bg-white rounded-[3rem] shadow-2xl w-full max-w-3xl overflow-hidden border border-stone-100"
+                        >
+                            <div className="p-8 border-b border-stone-50 bg-stone-50/30 flex justify-between gap-4">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-stone-900">
+                                        {language === 'pl' ? 'Kartoteka wizyty' : 'Visit medical record'}
+                                    </h3>
+                                    <p className="text-stone-500 text-sm mt-1">
+                                        #{medicalVisit.id} · {format(parseISO(medicalVisit.startsAt), 'yyyy-MM-dd HH:mm')}
+                                    </p>
+                                </div>
+                                <button onClick={() => setMedicalVisit(null)} className="p-2 hover:bg-white rounded-full">
+                                    <X className="h-6 w-6 text-stone-400" />
+                                </button>
+                            </div>
+                            <form onSubmit={handleMedicalSubmit} className="p-8 space-y-6">
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Disease</label>
+                                        <input value={medicalForm.disease} onChange={e => setMedicalForm({ ...medicalForm, disease: e.target.value })} className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500" />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Diagnosis</label>
+                                        <input value={medicalForm.diagnosis} onChange={e => setMedicalForm({ ...medicalForm, diagnosis: e.target.value })} className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Recommendations</label>
+                                    <textarea value={medicalForm.recommendations} onChange={e => setMedicalForm({ ...medicalForm, recommendations: e.target.value })} rows={4} className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 resize-none" />
+                                </div>
+
+                                <div className="rounded-3xl border border-stone-100 p-5 space-y-4">
+                                    <div>
+                                        <h4 className="font-bold text-stone-900">Prescription</h4>
+                                        {prescription?.items?.length ? (
+                                            <p className="text-xs text-stone-500 mt-1">{prescription.items.length} item(s) already attached.</p>
+                                        ) : (
+                                            <p className="text-xs text-stone-500 mt-1">Add an item by product ID from central catalog.</p>
+                                        )}
+                                    </div>
+                                    <div className="grid md:grid-cols-4 gap-4">
+                                        <input placeholder="Product ID" value={prescriptionForm.productId} onChange={e => setPrescriptionForm({ ...prescriptionForm, productId: e.target.value })} className="bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500" />
+                                        <input placeholder="Packages" type="number" min="1" value={prescriptionForm.quantityPackages} onChange={e => setPrescriptionForm({ ...prescriptionForm, quantityPackages: e.target.value })} className="bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500" />
+                                        <input placeholder="Dosage" value={prescriptionForm.dosage} onChange={e => setPrescriptionForm({ ...prescriptionForm, dosage: e.target.value })} className="bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500" />
+                                        <input placeholder="Treatment time" value={prescriptionForm.treatmentTime} onChange={e => setPrescriptionForm({ ...prescriptionForm, treatmentTime: e.target.value })} className="bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500" />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-4 pt-2">
+                                    <button type="button" onClick={() => setMedicalVisit(null)} className="px-6 py-4 rounded-2xl font-bold text-stone-600 hover:bg-stone-50 border border-stone-100">
+                                        {language === 'pl' ? 'Anuluj' : 'Cancel'}
+                                    </button>
+                                    <button disabled={updateMedicalData.isPending || createPrescription.isPending} type="submit" className="px-8 py-4 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-100">
+                                        {language === 'pl' ? 'Zapisz' : 'Save'}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+
                 {isAddModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                         <motion.div
@@ -431,48 +581,58 @@ export default function SchedulePage() {
                         >
                             <div className="p-8 border-b border-stone-50 bg-stone-50/30">
                                 <h3 className="text-2xl font-bold text-stone-900">{t.schedule.addVisit}</h3>
-                                <p className="text-stone-500 text-sm mt-1">Schedule a new appointment for a patient.</p>
+                                <p className="text-stone-500 text-sm mt-1">Create a visit using backend identifiers.</p>
                             </div>
 
                             <form onSubmit={handleAddAppointment} className="p-8 space-y-6">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">{t.schedule.patientName}</label>
+                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Animal ID</label>
                                         <input
                                             required
-                                            type="text"
-                                            value={newAppointment.patientName}
-                                            onChange={e => setNewAppointment({...newAppointment, patientName: e.target.value})}
+                                            min="1"
+                                            type="number"
+                                            value={newAppointment.animalId}
+                                            onChange={e => setNewAppointment({...newAppointment, animalId: e.target.value})}
                                             className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
-                                            placeholder="e.g. Buddy"
+                                            placeholder="123"
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">{t.schedule.ownerName}</label>
+                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Clinic ID</label>
                                         <input
                                             required
-                                            type="text"
-                                            value={newAppointment.ownerName}
-                                            onChange={e => setNewAppointment({...newAppointment, ownerName: e.target.value})}
+                                            min="1"
+                                            type="number"
+                                            value={newAppointment.clinicId}
+                                            onChange={e => setNewAppointment({...newAppointment, clinicId: e.target.value})}
                                             className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
-                                            placeholder="e.g. John Doe"
+                                            placeholder="1"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Vet user ID</label>
+                                        <input
+                                            required
+                                            min="1"
+                                            type="number"
+                                            value={newAppointment.vetUserId}
+                                            onChange={e => setNewAppointment({...newAppointment, vetUserId: e.target.value})}
+                                            className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
+                                            placeholder="7"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">{t.schedule.visitType}</label>
-                                    <select
-                                        value={newAppointment.type}
-                                        onChange={e => setNewAppointment({...newAppointment, type: e.target.value})}
-                                        className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none appearance-none"
-                                    >
-                                        <option value="General Check-up">General Check-up</option>
-                                        <option value="Vaccination">Vaccination</option>
-                                        <option value="Surgery Consultation">Surgery Consultation</option>
-                                        <option value="Dental Cleaning">Dental Cleaning</option>
-                                        <option value="Lab Results Review">Lab Results Review</option>
-                                    </select>
+                                    <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Description</label>
+                                    <input
+                                        type="text"
+                                        value={newAppointment.description}
+                                        onChange={e => setNewAppointment({...newAppointment, description: e.target.value})}
+                                        className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 text-stone-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none"
+                                        placeholder="Visit reason"
+                                    />
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
@@ -508,8 +668,10 @@ export default function SchedulePage() {
                                     </button>
                                     <button
                                         type="submit"
-                                        className="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
+                                        disabled={createVisit.isPending}
+                                        className="flex-1 bg-emerald-600 text-white px-6 py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
                                     >
+                                        {createVisit.isPending && <Loader2 className="h-5 w-5 animate-spin" />}
                                         {t.schedule.addVisit}
                                     </button>
                                 </div>

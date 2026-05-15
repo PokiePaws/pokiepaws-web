@@ -14,8 +14,26 @@ export interface BackendLoginResponse {
     role: ApiRole;
 }
 
+export interface BackendMfaRequiredResponse {
+    mfaRequired: true;
+    email?: string;
+    message?: string;
+}
+
 export interface AuthSession {
     user: User;
+}
+
+export interface MfaPendingSession {
+    mfaRequired: true;
+    email: string;
+    message?: string;
+}
+
+export type LoginResult = AuthSession | MfaPendingSession;
+
+export function isMfaPendingSession(session: LoginResult): session is MfaPendingSession {
+    return 'mfaRequired' in session && session.mfaRequired;
 }
 
 export function mapApiRole(role: ApiRole): UserRole {

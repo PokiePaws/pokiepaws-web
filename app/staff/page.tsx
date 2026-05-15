@@ -3,30 +3,37 @@
 import { useAuthStore } from '../../store/use-auth-store';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
-import { Calendar, Users, Clock, Check, X, ChevronRight, AlertCircle, TrendingUp, Search, Package, Microscope } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Calendar, Users, ChevronRight, Search, Package, Microscope, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useVetVisitsRange } from '../../lib/features/api-hooks';
+
+const toDateInputValue = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
+const formatVisitTime = (startsAt: string) =>
+    new Intl.DateTimeFormat('en', {
+        hour: '2-digit',
+        minute: '2-digit',
+    }).format(new Date(startsAt));
 
 export default function StaffDashboard() {
     const { user } = useAuthStore();
     const { language } = useLanguageStore();
     const t = translations[language];
+    const today = toDateInputValue(new Date());
+    const { data: todaySchedule = [], isLoading } = useVetVisitsRange(today, today);
+    const patientCount = new Set(todaySchedule.map((visit) => visit.animalId)).size;
 
     const stats = [
-        { name: t.dashboard.stats.visits, value: '12', icon: Calendar, color: 'bg-blue-100 text-blue-600' },
-        { name: t.dashboard.stats.patients, value: '842', icon: Users, color: 'bg-emerald-100 text-emerald-600' },
-        { name: t.dashboard.stats.orders, value: '5', icon: Package, color: 'bg-amber-100 text-amber-600' },
-        { name: t.dashboard.stats.results, value: '8', icon: Microscope, color: 'bg-purple-100 text-purple-600' },
-    ];
-
-    const todaySchedule = [
-        { id: '1', time: '09:00 AM', pet: 'Buddy', owner: 'John Doe', service: 'Vaccination', status: t.dashboard.schedule.statuses.inProgress },
-        { id: '2', time: '10:30 AM', pet: 'Luna', owner: 'Jane Smith', service: 'Checkup', status: t.dashboard.schedule.statuses.waiting },
-        { id: '3', time: '11:45 AM', pet: 'Max', owner: 'Robert Brown', service: 'Surgery', status: t.dashboard.schedule.statuses.upcoming },
-    ];
-
-    const pendingRequests = [
-        { id: '4', pet: 'Bella', owner: 'Sarah Wilson', service: 'Dental Cleaning', date: 'May 18', time: '02:00 PM' },
+        { name: t.dashboard.stats.visits, value: String(todaySchedule.length), icon: Calendar, color: 'bg-blue-100 text-blue-600' },
+        { name: t.dashboard.stats.patients, value: String(patientCount), icon: Users, color: 'bg-emerald-100 text-emerald-600' },
+        { name: t.dashboard.stats.orders, value: '0', icon: Package, color: 'bg-amber-100 text-amber-600' },
+        { name: t.dashboard.stats.results, value: '0', icon: Microscope, color: 'bg-purple-100 text-purple-600' },
     ];
 
     return (
@@ -81,24 +88,31 @@ export default function StaffDashboard() {
                                 </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-50">
-                                {todaySchedule.map((item) => (
+                                {isLoading && (
+                                    <tr>
+                                        <td className="px-6 py-12 text-center" colSpan={5}>
+                                            <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+                                        </td>
+                                    </tr>
+                                )}
+                                {!isLoading && todaySchedule.map((item) => (
                                     <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
                                         <td className="px-6 py-4">
-                                            <span className="text-sm font-bold text-slate-900">{item.time}</span>
+                                            <span className="text-sm font-bold text-slate-900">{formatVisitTime(item.startsAt)}</span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-slate-900">{item.pet}</span>
-                                                <span className="text-xs text-slate-400">{item.owner}</span>
+                                                <span className="text-sm font-bold text-slate-900">Animal #{item.animalId}</span>
+                                                <span className="text-xs text-slate-400">Clinic #{item.clinicId}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-sm text-slate-600">{item.service}</span>
+                                            <span className="text-sm text-slate-600">{item.description || '-'}</span>
                                         </td>
                                         <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                            item.status === t.dashboard.schedule.statuses.inProgress ? 'bg-blue-100 text-blue-700' :
-                                item.status === t.dashboard.schedule.statuses.waiting ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'
+                            item.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                                item.status === 'CONFIRMED' || item.status === 'SCHEDULED' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'
                         }`}>
                           {item.status}
                         </span>
@@ -110,6 +124,13 @@ export default function StaffDashboard() {
                                         </td>
                                     </tr>
                                 ))}
+                                {!isLoading && todaySchedule.length === 0 && (
+                                    <tr>
+                                        <td className="px-6 py-12 text-center text-sm text-slate-400" colSpan={5}>
+                                            {t.schedule.noVisits}
+                                        </td>
+                                    </tr>
+                                )}
                                 </tbody>
                             </table>
                         </div>
@@ -120,38 +141,9 @@ export default function StaffDashboard() {
                 <div className="space-y-6">
                     <h2 className="text-xl font-bold text-slate-900">{t.dashboard.requests.title}</h2>
                     <div className="space-y-4">
-                        {pendingRequests.map((req) => (
-                            <div key={req.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-blue-100 p-2 rounded-xl">
-                                            <Calendar className="h-5 w-5 text-blue-600" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-slate-900">{req.pet}</h4>
-                                            <p className="text-xs text-slate-500">{req.owner}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-slate-50 p-3 rounded-xl space-y-1">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{req.service}</p>
-                                    <p className="text-sm text-slate-700">{req.date} at {req.time}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <button className="flex items-center justify-center gap-2 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-colors">
-                                        <Check className="h-4 w-4" /> {t.dashboard.requests.approve}
-                                    </button>
-                                    <button className="flex items-center justify-center gap-2 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-50 transition-colors">
-                                        <X className="h-4 w-4" /> {t.dashboard.requests.decline}
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                        {pendingRequests.length === 0 && (
-                            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center">
-                                <p className="text-slate-400 text-sm italic">{t.dashboard.requests.empty}</p>
-                            </div>
-                        )}
+                        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center">
+                            <p className="text-slate-400 text-sm italic">{t.dashboard.requests.empty}</p>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import {
     AUTH_ACCESS_TOKEN_COOKIE,
+    AUTH_MFA_PENDING_EMAIL_COOKIE,
     AUTH_USER_ROLE_COOKIE,
 } from './lib/features/auth/auth-cookies';
 import type { UserRole } from './lib/features/auth/auth-types';
@@ -21,7 +22,14 @@ export function proxy(request: NextRequest) {
     }
 
     const token = request.cookies.get(AUTH_ACCESS_TOKEN_COOKIE)?.value;
+    const pendingMfaEmail = request.cookies.get(AUTH_MFA_PENDING_EMAIL_COOKIE)?.value;
     const role = request.cookies.get(AUTH_USER_ROLE_COOKIE)?.value as UserRole | undefined;
+
+    if (!token && pendingMfaEmail) {
+        const pendingUrl = new URL('/auth/2fa/pending', request.url);
+        pendingUrl.searchParams.set('email', pendingMfaEmail);
+        return NextResponse.redirect(pendingUrl);
+    }
 
     if (!token || !role) {
         return redirectToLogin(request);

@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Navbar from '../../components/navbar';
 import Sidebar from '../../components/sidebar';
-import { useNotificationStore } from '../../store/use-notification-store';
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
     const { user, isSessionResolved } = useAuthStore();
     const router = useRouter();
-    const addNotification = useNotificationStore(state => state.addNotification);
 
     useEffect(() => {
         if (!isSessionResolved) return;
@@ -18,23 +16,6 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
             router.push('/login');
         }
     }, [isSessionResolved, user, router]);
-
-    // Simulate WebSocket notifications
-    useEffect(() => {
-        if (!user) return;
-
-        const interval = setInterval(() => {
-            const rand = Math.random();
-            if (rand > 0.8) {
-                addNotification({
-                    message: rand > 0.9 ? 'New appointment request from John Doe' : 'Buddy\'s vaccination confirmed',
-                    type: 'info'
-                });
-            }
-        }, 30000); // Every 30 seconds
-
-        return () => clearInterval(interval);
-    }, [user, addNotification]);
 
     if (!isSessionResolved || !user) return null;
 

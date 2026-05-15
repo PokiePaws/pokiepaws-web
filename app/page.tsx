@@ -7,6 +7,7 @@ import Navbar from '../components/navbar';
 import { useLanguageStore } from '../store/use-language-store';
 import { translations } from '../lib/translations';
 import { useClinics } from '../lib/features/clinics/use-clinics';
+import { franchiseSteps, networkBenefits } from '../lib/features/content/public-content';
 
 export default function Home() {
     const { language } = useLanguageStore();
@@ -182,6 +183,44 @@ export default function Home() {
                     </div>
                 </section>
 
+                <section className="bg-white py-20">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+                            <div>
+                                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d4585b]">
+                                    Model franczyzowy
+                                </p>
+                                <h2 className="text-3xl font-display font-bold text-slate-950">
+                                    Dolacz do sieci gabinetow PokiePaws
+                                </h2>
+                                <p className="mt-4 text-slate-600 leading-7">
+                                    PokiePaws laczy lokalna relacje z pacjentem z centralnym wsparciem operacyjnym:
+                                    wspolnym REST API, panelem lekarza, standardami medycznymi i zakupami sieciowymi.
+                                </p>
+                                <Link
+                                    href="/contact"
+                                    className="mt-8 inline-flex items-center gap-2 rounded-lg bg-[#d4585b] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#b9474d]"
+                                >
+                                    Porozmawiaj o franczyzie
+                                    <ChevronRight className="h-4 w-4" />
+                                </Link>
+                            </div>
+
+                            <div className="grid gap-4 sm:grid-cols-3">
+                                {franchiseSteps.map((step) => (
+                                    <div key={step.title} className="rounded-lg border border-slate-100 bg-slate-50 p-5">
+                                        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-white text-[#68b9dc] shadow-sm">
+                                            <step.icon className="h-5 w-5" />
+                                        </div>
+                                        <h3 className="font-bold text-slate-950">{step.title}</h3>
+                                        <p className="mt-2 text-sm leading-6 text-slate-600">{step.description}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 {/* Why Choose Our Network */}
                 <section className="py-24 bg-blue-50/50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -215,6 +254,30 @@ export default function Home() {
                         </div>
                     </div>
                 </section>
+
+                <section className="bg-white py-20">
+                    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                        <div className="mb-10">
+                            <div>
+                                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-[#d4585b]">
+                                    Platforma
+                                </p>
+                                <h2 className="text-3xl font-display font-bold text-slate-950">
+                                    Jeden system dla opiekuna, lekarza i centrali
+                                </h2>
+                            </div>
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-3">
+                            {networkBenefits.map((benefit) => (
+                                <div key={benefit.title} className="rounded-lg border border-slate-100 bg-slate-50 p-6">
+                                    <benefit.icon className="mb-5 h-7 w-7 text-[#68b9dc]" />
+                                    <h3 className="font-bold text-slate-950">{benefit.title}</h3>
+                                    <p className="mt-2 text-sm leading-6 text-slate-600">{benefit.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
             </main>
 
             <footer className="bg-slate-900 text-slate-400 py-12">
@@ -237,7 +300,7 @@ export default function Home() {
                     <p className="mb-8 max-w-md mx-auto">{t.home.footerDesc}</p>
                     <div className="flex justify-center gap-8 mb-8">
                         <Link href="/clinics" className="hover:text-white transition-colors">{t.nav.clinics}</Link>
-                        <Link href="/blog" className="hover:text-white transition-colors">{t.nav.blog}</Link>
+                        <Link href="/contact" className="hover:text-white transition-colors">{t.nav.contact}</Link>
                     </div>
                     <p className="text-sm">© 2026 Pokie Paws Network. All rights reserved.</p>
                 </div>

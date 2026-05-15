@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
-import { Sparkles, Send, AlertTriangle, Info, ArrowLeft, Heart, ShieldAlert } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { Sparkles, Send, AlertTriangle, ArrowLeft, Heart, ShieldAlert } from 'lucide-react';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import Navbar from '../../components/navbar';
 import { GoogleGenAI } from "@google/genai";

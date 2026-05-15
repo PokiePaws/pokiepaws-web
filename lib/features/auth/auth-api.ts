@@ -1,8 +1,8 @@
 import axios, { AxiosError } from 'axios';
-import type { AuthSession } from './auth-types';
+import type { AuthSession, LoginResult } from './auth-types';
 
 export interface AuthApi {
-    login(email: string, password: string): Promise<AuthSession>;
+    login(email: string, password: string): Promise<LoginResult>;
     logout(): Promise<void>;
     getSession(): Promise<AuthSession | null>;
 }
@@ -11,7 +11,7 @@ function createAuthApi(): AuthApi {
     return {
         async login(email, password) {
             try {
-                const response = await axios.post<AuthSession>('/api/auth/login', { email, password });
+                const response = await axios.post<LoginResult>('/api/auth/login', { email, password });
                 return response.data;
             } catch (error) {
                 throw toAuthError(error);

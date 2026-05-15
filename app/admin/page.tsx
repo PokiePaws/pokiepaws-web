@@ -7,10 +7,15 @@ import { useNotificationStore } from 'store/use-notification-store';
 import { cn } from 'lib/utils';
 import {
     useAdminClinics,
+    useAdminLogStats,
     useAdminLogs,
     useAdminUsers,
     useCreateAdminClinic,
     useCreateAdminUser,
+    useDeleteAdminClinic,
+    useDeleteAdminUser,
+    useUpdateAdminClinic,
+    useUpdateAdminUser,
 } from 'lib/features/api-hooks';
 import { authApi } from 'lib/features/auth/auth-api';
 
@@ -46,11 +51,18 @@ export default function AdminPanelPage() {
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [showClinicForm, setShowClinicForm] = useState(false);
     const [showUserForm, setShowUserForm] = useState(false);
+    const [editingClinicId, setEditingClinicId] = useState<number | null>(null);
+    const [editingUserId, setEditingUserId] = useState<number | null>(null);
     const { data: clinics = [] } = useAdminClinics();
     const { data: users = [] } = useAdminUsers();
     const { data: logs = [] } = useAdminLogs();
+    const { data: logStats = {} } = useAdminLogStats();
     const createClinic = useCreateAdminClinic();
     const createUser = useCreateAdminUser();
+    const updateClinic = useUpdateAdminClinic();
+    const updateUser = useUpdateAdminUser();
+    const deleteClinic = useDeleteAdminClinic();
+    const deleteUser = useDeleteAdminUser();
     const [clinicForm, setClinicForm] = useState({
         clinicName: '',
         street: '',
@@ -78,6 +90,40 @@ export default function AdminPanelPage() {
         active: true,
     });
 
+    const resetClinicForm = () => {
+        setEditingClinicId(null);
+        setClinicForm({
+            clinicName: '',
+            street: '',
+            houseNumber: '',
+            postalCode: '',
+            city: '',
+            country: 'Polska',
+            nip: '',
+            regon: '',
+            workingHours: '',
+            phone: '',
+            email: '',
+            active: true,
+        });
+    };
+
+    const resetUserForm = () => {
+        setEditingUserId(null);
+        setUserForm({
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            role: 'VET',
+            clinicId: '',
+            npwz: '',
+            phone: '',
+            specialization: '',
+            active: true,
+        });
+    };
+
     const handleClinicSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!validateNIP(clinicForm.nip)) {
@@ -85,9 +131,14 @@ export default function AdminPanelPage() {
             return;
         }
 
-        await createClinic.mutateAsync(clinicForm);
+        if (editingClinicId) {
+            await updateClinic.mutateAsync({ id: editingClinicId, payload: clinicForm });
+        } else {
+            await createClinic.mutateAsync(clinicForm);
+        }
         setShowClinicForm(false);
-        addNotification({ message: 'Klinika dodana', type: 'success' });
+        resetClinicForm();
+        addNotification({ message: editingClinicId ? 'Klinika zaktualizowana' : 'Klinika dodana', type: 'success' });
     };
 
     const handleUserSubmit = async (e: React.FormEvent) => {
@@ -97,18 +148,111 @@ export default function AdminPanelPage() {
             return;
         }
 
-        await createUser.mutateAsync({
+        const payload = {
             ...userForm,
             clinicId: userForm.clinicId ? Number(userForm.clinicId) : undefined,
-        });
+        };
+
+        if (editingUserId) {
+            await updateUser.mutateAsync({ id: editingUserId, payload });
+        } else {
+            await createUser.mutateAsync(payload);
+        }
         setShowUserForm(false);
-        addNotification({ message: 'Pracownik dodany', type: 'success' });
+        resetUserForm();
+        addNotification({ message: editingUserId ? 'Uzytkownik zaktualizowany' : 'Pracownik dodany', type: 'success' });
+    };
+
+    const openClinicForm = () => {
+        resetClinicForm();
+        setShowClinicForm(true);
+    };
+
+    const openUserForm = () => {
+        resetUserForm();
+        setShowUserForm(true);
+    };
+
+    const editClinic = (clinic: typeof clinics[number]) => {
+        setEditingClinicId(clinic.id);
+        setClinicForm({
+            clinicName: clinic.clinicName,
+            street: clinic.street,
+            houseNumber: clinic.houseNumber,
+            postalCode: clinic.postalCode,
+            city: clinic.city,
+            country: clinic.country,
+            nip: clinic.nip || '',
+            regon: clinic.regon || '',
+            workingHours: clinic.workingHours || '',
+            phone: clinic.phone || '',
+            email: clinic.email || '',
+            active: clinic.active,
+        });
+        setShowClinicForm(true);
+    };
+
+    const editUser = (user: typeof users[number]) => {
+        setEditingUserId(user.id);
+        setUserForm({
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            email: user.email,
+            password: '',
+            role: user.role,
+            clinicId: user.clinicId ? String(user.clinicId) : '',
+            npwz: user.npwz || '',
+            phone: user.phone || '',
+            specialization: user.specialization || '',
+            active: user.active ?? true,
+        });
+        setShowUserForm(true);
+    };
+
+    const toggleClinicActive = async (clinic: typeof clinics[number]) => {
+        await updateClinic.mutateAsync({
+            id: clinic.id,
+            payload: {
+                clinicName: clinic.clinicName,
+                street: clinic.street,
+                houseNumber: clinic.houseNumber,
+                apartmentNumber: clinic.apartmentNumber || undefined,
+                postalCode: clinic.postalCode,
+                city: clinic.city,
+                country: clinic.country,
+                nip: clinic.nip || undefined,
+                regon: clinic.regon || undefined,
+                workingHours: clinic.workingHours || undefined,
+                phone: clinic.phone || undefined,
+                email: clinic.email || undefined,
+                active: !clinic.active,
+            },
+        });
+        addNotification({ message: clinic.active ? 'Klinika zawieszona' : 'Klinika aktywowana', type: 'success' });
+    };
+
+    const toggleUserActive = async (user: typeof users[number]) => {
+        await updateUser.mutateAsync({
+            id: user.id,
+            payload: {
+                firstName: user.firstName || '',
+                lastName: user.lastName || '',
+                email: user.email,
+                role: user.role,
+                clinicId: user.clinicId || undefined,
+                npwz: user.npwz || undefined,
+                phone: user.phone || undefined,
+                specialization: user.specialization || undefined,
+                active: !(user.active ?? true),
+            },
+        });
+        addNotification({ message: user.active ? 'Uzytkownik zawieszony' : 'Uzytkownik aktywowany', type: 'success' });
     };
 
     const handleLogout = async () => {
         await authApi.logout();
         addNotification({ message: 'Wylogowano pomyslnie', type: 'success' });
-        window.location.href = '/login';
+        window.location.href = '/';
     };
 
     return (
@@ -171,6 +315,17 @@ export default function AdminPanelPage() {
                             <p className="text-sm text-stone-400 font-bold uppercase">Logi</p>
                             <p className="text-4xl font-bold mt-2">{logs.length}</p>
                         </div>
+                        <div className="col-span-3 bg-white p-8 rounded-[2rem] border border-stone-100 shadow-sm">
+                            <h2 className="text-xl font-bold mb-4">Statystyki zdarzen</h2>
+                            <div className="grid grid-cols-4 gap-3">
+                                {Object.entries(logStats).map(([type, count]) => (
+                                    <div key={type} className="rounded-2xl bg-stone-50 p-4">
+                                        <p className="text-[10px] font-bold uppercase text-stone-400">{type}</p>
+                                        <p className="text-2xl font-bold text-stone-900">{count}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </section>
                 )}
 
@@ -180,7 +335,7 @@ export default function AdminPanelPage() {
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <Users className="text-emerald-500" /> Katalog Personelu
                             </h2>
-                            <button onClick={() => setShowUserForm(true)} className="bg-emerald-500 text-white px-6 py-3 rounded-2xl font-bold hover:shadow-lg transition-all">
+                            <button onClick={openUserForm} className="bg-emerald-500 text-white px-6 py-3 rounded-2xl font-bold hover:shadow-lg transition-all">
                                 + Nowy Pracownik
                             </button>
                         </div>
@@ -213,8 +368,11 @@ export default function AdminPanelPage() {
                                     </td>
                                     <td className="px-8 py-5 font-medium text-stone-600">{user.clinicName || '-'}</td>
                                     <td className="px-8 py-5 text-right">
-                                        <button className="p-2 text-stone-300 hover:text-stone-600"><Pencil size={18}/></button>
-                                        <button className="p-2 text-stone-300 hover:text-red-500"><Trash2 size={18}/></button>
+                                        <button onClick={() => editUser(user)} className="p-2 text-stone-300 hover:text-stone-600"><Pencil size={18}/></button>
+                                        <button onClick={() => toggleUserActive(user)} className="px-3 py-2 text-xs font-bold text-stone-500 hover:text-amber-600">
+                                            {user.active === false ? 'Aktywuj' : 'Zawies'}
+                                        </button>
+                                        <button onClick={() => deleteUser.mutate(user.id)} className="p-2 text-stone-300 hover:text-red-500"><Trash2 size={18}/></button>
                                     </td>
                                 </tr>
                             ))}
@@ -227,7 +385,7 @@ export default function AdminPanelPage() {
                     <div className="space-y-6">
                         <div className="flex justify-between items-center">
                             <h2 className="text-2xl font-bold">Zarzadzanie Siecia</h2>
-                            <button onClick={() => setShowClinicForm(true)} className="bg-[#68b9dc] text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-100">
+                            <button onClick={openClinicForm} className="bg-[#68b9dc] text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-blue-100">
                                 + Dodaj Klinike
                             </button>
                         </div>
@@ -242,6 +400,13 @@ export default function AdminPanelPage() {
                                         <span>NIP: {clinic.nip || '-'}</span>
                                         <span>REGON: {clinic.regon || '-'}</span>
                                     </div>
+                                    <div className="mt-5 flex justify-end gap-2">
+                                        <button onClick={() => editClinic(clinic)} className="px-3 py-2 rounded-xl bg-stone-50 text-stone-600 text-xs font-bold">Edytuj</button>
+                                        <button onClick={() => toggleClinicActive(clinic)} className="px-3 py-2 rounded-xl bg-amber-50 text-amber-700 text-xs font-bold">
+                                            {clinic.active ? 'Zawies' : 'Aktywuj'}
+                                        </button>
+                                        <button onClick={() => deleteClinic.mutate(clinic.id)} className="px-3 py-2 rounded-xl bg-red-50 text-red-600 text-xs font-bold">Usun</button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -251,9 +416,9 @@ export default function AdminPanelPage() {
 
             <AnimatePresence>
                 {showClinicForm && (
-                    <AdminModal onClose={() => setShowClinicForm(false)}>
+                    <AdminModal onClose={() => { setShowClinicForm(false); resetClinicForm(); }}>
                         <div className="p-10">
-                            <h2 className="text-3xl font-bold mb-2">Dodaj Klinike</h2>
+                            <h2 className="text-3xl font-bold mb-2">{editingClinicId ? 'Edytuj Klinike' : 'Dodaj Klinike'}</h2>
                             <form onSubmit={handleClinicSubmit} className="space-y-4 mt-8">
                                 <input required placeholder="Nazwa kliniki" className={INPUT_CLS} value={clinicForm.clinicName} onChange={e => setClinicForm({ ...clinicForm, clinicName: e.target.value })} />
                                 <div className="grid grid-cols-2 gap-4">
@@ -269,8 +434,12 @@ export default function AdminPanelPage() {
                                     <input placeholder="REGON" className={INPUT_CLS} value={clinicForm.regon} onChange={e => setClinicForm({ ...clinicForm, regon: e.target.value })} />
                                 </div>
                                 <input placeholder="Godziny pracy" className={INPUT_CLS} value={clinicForm.workingHours} onChange={e => setClinicForm({ ...clinicForm, workingHours: e.target.value })} />
-                                <button disabled={createClinic.isPending} type="submit" className="w-full py-5 bg-[#68b9dc] text-white rounded-3xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-500 transition-all">
-                                    Zapisz Klinike
+                                <label className="flex items-center gap-3 text-sm font-bold text-stone-600">
+                                    <input type="checkbox" checked={clinicForm.active} onChange={e => setClinicForm({ ...clinicForm, active: e.target.checked })} />
+                                    Klinika aktywna
+                                </label>
+                                <button disabled={createClinic.isPending || updateClinic.isPending} type="submit" className="w-full py-5 bg-[#68b9dc] text-white rounded-3xl font-bold shadow-xl shadow-blue-100 hover:bg-blue-500 transition-all">
+                                    {editingClinicId ? 'Zapisz zmiany' : 'Zapisz Klinike'}
                                 </button>
                             </form>
                         </div>
@@ -278,9 +447,9 @@ export default function AdminPanelPage() {
                 )}
 
                 {showUserForm && (
-                    <AdminModal onClose={() => setShowUserForm(false)}>
+                    <AdminModal onClose={() => { setShowUserForm(false); resetUserForm(); }}>
                         <div className="p-10">
-                            <h2 className="text-3xl font-bold mb-2">Dodaj Pracownika</h2>
+                            <h2 className="text-3xl font-bold mb-2">{editingUserId ? 'Edytuj Uzytkownika' : 'Dodaj Pracownika'}</h2>
                             <form onSubmit={handleUserSubmit} className="space-y-4 mt-8">
                                 <div className="grid grid-cols-2 gap-4">
                                     <input required placeholder="Imie" className={INPUT_CLS} value={userForm.firstName} onChange={e => setUserForm({ ...userForm, firstName: e.target.value })} />
@@ -304,8 +473,12 @@ export default function AdminPanelPage() {
                                     <input placeholder="Telefon" className={INPUT_CLS} value={userForm.phone} onChange={e => setUserForm({ ...userForm, phone: e.target.value })} />
                                 </div>
                                 <input placeholder="Specjalizacja" className={INPUT_CLS} value={userForm.specialization} onChange={e => setUserForm({ ...userForm, specialization: e.target.value })} />
-                                <button disabled={createUser.isPending} type="submit" className="w-full py-5 bg-emerald-500 text-white rounded-3xl font-bold shadow-xl shadow-emerald-100 hover:bg-emerald-600 transition-all">
-                                    Zatwierdz Pracownika
+                                <label className="flex items-center gap-3 text-sm font-bold text-stone-600">
+                                    <input type="checkbox" checked={userForm.active} onChange={e => setUserForm({ ...userForm, active: e.target.checked })} />
+                                    Uzytkownik aktywny
+                                </label>
+                                <button disabled={createUser.isPending || updateUser.isPending} type="submit" className="w-full py-5 bg-emerald-500 text-white rounded-3xl font-bold shadow-xl shadow-emerald-100 hover:bg-emerald-600 transition-all">
+                                    {editingUserId ? 'Zapisz zmiany' : 'Zatwierdz Pracownika'}
                                 </button>
                             </form>
                         </div>

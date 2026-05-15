@@ -10,7 +10,7 @@ import { useAuthStore } from '../../store/use-auth-store';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
 import { authApi } from '../../lib/features/auth/auth-api';
-import { getRedirectPath } from '../../lib/features/auth/auth-types';
+import { getRedirectPath, isMfaPendingSession } from '../../lib/features/auth/auth-types';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -30,6 +30,10 @@ export default function LoginPage() {
 
         try {
             const session = await authApi.login(email, password);
+            if (isMfaPendingSession(session)) {
+                router.push(`/auth/2fa/pending?email=${encodeURIComponent(session.email)}`);
+                return;
+            }
             setUser(session.user);
             router.push(getRedirectPath(session.user.role));
         } catch (error) {

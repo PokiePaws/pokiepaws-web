@@ -254,7 +254,6 @@ export default function ContactPage() {
                     <p className="mb-8 max-w-md mx-auto">{t.home.footerDesc}</p>
                     <div className="flex justify-center gap-8 mb-8">
                         <Link href="/clinics" className="hover:text-white transition-colors">{t.nav.clinics}</Link>
-                        <Link href="/blog" className="hover:text-white transition-colors">{t.nav.blog}</Link>
                         <Link href="/contact" className="hover:text-white transition-colors">{t.nav.contact}</Link>
                     </div>
                     <p className="text-sm">© 2024 Pokie Paws Network. All rights reserved.</p>

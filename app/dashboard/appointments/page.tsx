@@ -5,13 +5,23 @@ import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, X, PawPrint 
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameMonth, isSameDay, eachDayOfInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNotificationStore } from '../../../store/use-notification-store';
-import { useAnimals, useAvailableSlots, useCreateVisit, useOwnerVisitsRange, useVetsByClinic } from '../../../lib/features/api-hooks';
+import {
+    useAnimals,
+    useAvailableSlots,
+    useCancelVisit,
+    useCreateVisit,
+    useOwnerVisitsRange,
+    usePrescription,
+    useVetsByClinic,
+} from '../../../lib/features/api-hooks';
 import { useClinics } from '../../../lib/features/clinics/use-clinics';
+import type { Visit } from '../../../lib/features/api-schemas';
 
 export default function AppointmentsPage() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [showBooking, setShowBooking] = useState(false);
+    const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
     const [booking, setBooking] = useState({
         animalId: '',
         clinicId: '',
@@ -31,7 +41,14 @@ export default function AppointmentsPage() {
     const { data: vets = [] } = useVetsByClinic(selectedClinicId);
     const { data: slots } = useAvailableSlots(selectedClinicId, selectedVetId, booking.date);
     const createVisit = useCreateVisit();
+    const cancelVisit = useCancelVisit();
+    const { data: prescription } = usePrescription(selectedVisit?.id);
     const petNameById = new Map(pets.map((pet) => [pet.id, pet.name]));
+
+    const handleCancelVisit = async (id: number) => {
+        await cancelVisit.mutateAsync(id);
+        addNotification({ message: 'Visit cancelled.', type: 'success' });
+    };
 
     const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
     const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -138,7 +155,9 @@ export default function AppointmentsPage() {
                                     <CalendarIcon className="h-6 w-6 text-stone-400" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-stone-900">{apt.description || 'Veterinary visit'}</h4>
+                                    <button onClick={() => setSelectedVisit(apt)} className="font-bold text-stone-900 text-left hover:text-emerald-600">
+                                        {apt.description || 'Veterinary visit'}
+                                    </button>
                                     <p className="text-sm text-stone-500">for {petNameById.get(apt.animalId) || `Pet #${apt.animalId}`}</p>
                                 </div>
                             </div>
@@ -153,7 +172,7 @@ export default function AppointmentsPage() {
                   }`}>
                     {apt.status}
                   </span>
-                                    <button className="p-2 text-stone-300 hover:text-red-500 transition-colors">
+                                    <button onClick={() => handleCancelVisit(apt.id)} disabled={apt.status === 'CANCELLED' || cancelVisit.isPending} className="p-2 text-stone-300 hover:text-red-500 transition-colors disabled:opacity-40">
                                         <X className="h-5 w-5" />
                                     </button>
                                 </div>
@@ -191,6 +210,75 @@ export default function AppointmentsPage() {
             </div>
 
             <AnimatePresence>
+                {selectedVisit && (
+                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedVisit(null)}
+                            className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-stone-100"
+                        >
+                            <div className="p-8 border-b border-stone-100 flex items-start justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-display font-bold text-stone-900">Visit details</h2>
+                                    <p className="text-stone-500 mt-1">
+                                        {format(new Date(selectedVisit.startsAt), 'PPpp')} · {selectedVisit.status}
+                                    </p>
+                                </div>
+                                <button onClick={() => setSelectedVisit(null)} className="p-2 hover:bg-stone-50 rounded-full">
+                                    <X className="h-6 w-6 text-stone-400" />
+                                </button>
+                            </div>
+                            <div className="p-8 space-y-6">
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div className="rounded-2xl bg-stone-50 p-4">
+                                        <p className="text-[10px] font-bold uppercase text-stone-400">Pet</p>
+                                        <p className="font-bold text-stone-900">{petNameById.get(selectedVisit.animalId) || `Pet #${selectedVisit.animalId}`}</p>
+                                    </div>
+                                    <div className="rounded-2xl bg-stone-50 p-4">
+                                        <p className="text-[10px] font-bold uppercase text-stone-400">Reason</p>
+                                        <p className="font-bold text-stone-900">{selectedVisit.description || '-'}</p>
+                                    </div>
+                                </div>
+                                <div className="grid md:grid-cols-3 gap-4">
+                                    {[
+                                        ['Disease', selectedVisit.disease],
+                                        ['Diagnosis', selectedVisit.diagnosis],
+                                        ['Recommendations', selectedVisit.recommendations],
+                                    ].map(([label, value]) => (
+                                        <div key={label} className="rounded-2xl border border-stone-100 p-4">
+                                            <p className="text-[10px] font-bold uppercase text-stone-400 mb-2">{label}</p>
+                                            <p className="text-sm text-stone-700">{value || '-'}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="rounded-2xl border border-stone-100 p-4">
+                                    <p className="text-[10px] font-bold uppercase text-stone-400 mb-3">Prescription</p>
+                                    {prescription?.items?.length ? (
+                                        <div className="space-y-2">
+                                            {prescription.items.map((item) => (
+                                                <div key={item.id} className="flex justify-between gap-4 text-sm">
+                                                    <span className="font-medium text-stone-900">{item.productName || `Product #${item.productId}`}</span>
+                                                    <span className="text-stone-500">{item.dosage || '-'} · {item.treatmentTime || '-'}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-stone-400">No prescription attached.</p>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+
                 {showBooking && (
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
                         <motion.div

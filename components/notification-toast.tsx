@@ -2,8 +2,7 @@
 
 import { useNotificationStore } from '../store/use-notification-store';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Bell, CheckCircle, AlertCircle, Info } from 'lucide-react';
-import { useEffect } from 'react';
+import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 
 export default function NotificationToast() {
     const { notifications, removeNotification } = useNotificationStore();

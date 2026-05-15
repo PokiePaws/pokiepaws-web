@@ -74,6 +74,25 @@ export const activityLogSchema = z.object({
 
 export const activityLogsSchema = z.array(activityLogSchema);
 
+export const prescriptionItemSchema = z.object({
+    id: z.number(),
+    productId: z.number(),
+    productName: z.string().nullable().optional(),
+    quantityPackages: z.number().nullable().optional(),
+    dosage: z.string().nullable().optional(),
+    treatmentTime: z.string().nullable().optional(),
+});
+
+export const prescriptionSchema = z.object({
+    id: z.number(),
+    visitId: z.number(),
+    vetUserId: z.number(),
+    clinicId: z.number(),
+    recommendationDate: z.string().nullable().optional(),
+    creationDate: z.string().nullable().optional(),
+    items: z.array(prescriptionItemSchema).default([]),
+});
+
 export const availableSlotsSchema = z.object({
     clinicId: z.number(),
     vetUserId: z.number(),
@@ -89,6 +108,7 @@ export type Visit = z.infer<typeof visitSchema>;
 export type Vet = z.infer<typeof vetSchema>;
 export type UserAdmin = z.infer<typeof userAdminSchema>;
 export type ActivityLog = z.infer<typeof activityLogSchema>;
+export type Prescription = z.infer<typeof prescriptionSchema>;
 export type AvailableSlots = z.infer<typeof availableSlotsSchema>;
 
 export type AnimalRequest = {
@@ -109,6 +129,22 @@ export type CreateVisitRequest = {
     vetUserId: number;
     startsAt: string;
     description?: string;
+};
+
+export type UpdateVisitMedicalDataRequest = {
+    disease?: string;
+    diagnosis?: string;
+    recommendations?: string;
+};
+
+export type CreatePrescriptionRequest = {
+    recommendationDate?: string;
+    items: Array<{
+        productId: number;
+        quantityPackages?: number;
+        dosage?: string;
+        treatmentTime?: string;
+    }>;
 };
 
 export type ClinicRequest = {
