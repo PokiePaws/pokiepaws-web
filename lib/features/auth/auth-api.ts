@@ -5,6 +5,7 @@ export interface AuthApi {
     login(email: string, password: string): Promise<LoginResult>;
     logout(): Promise<void>;
     getSession(): Promise<AuthSession | null>;
+    resendMfa(email: string): Promise<void>;
 }
 
 function createAuthApi(): AuthApi {
@@ -23,6 +24,9 @@ function createAuthApi(): AuthApi {
         async getSession() {
             const response = await axios.get<AuthSession | null>('/api/auth/session');
             return response.data;
+        },
+        async resendMfa(email) {
+            await axios.post('/api/auth/2fa/resend', { email });
         },
     };
 }
