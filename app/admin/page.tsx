@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Activity, Building2, LogOut, Pencil, ShieldCheck, Trash2, Users } from 'lucide-react';
+import { Activity, Building2, LogOut, Package, Pencil, ShieldCheck, Trash2, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNotificationStore } from 'store/use-notification-store';
 import { cn } from 'lib/utils';
@@ -16,8 +16,24 @@ import {
     useDeleteAdminUser,
     useUpdateAdminClinic,
     useUpdateAdminUser,
+    useUpdateOrderStatus,
+    useWarehouseOrders,
 } from 'lib/features/api-hooks';
 import { authApi } from 'lib/features/auth/auth-api';
+
+const ORDER_STATUS_LABELS: Record<string, string> = {
+    PENDING: 'Oczekuje',
+    APPROVED: 'Zatwierdzone',
+    REJECTED: 'Odrzucone',
+    COMPLETED: 'Zrealizowane',
+};
+
+const ORDER_STATUS_COLORS: Record<string, string> = {
+    PENDING: 'bg-amber-100 text-amber-700',
+    APPROVED: 'bg-emerald-100 text-emerald-700',
+    REJECTED: 'bg-red-100 text-red-600',
+    COMPLETED: 'bg-blue-100 text-blue-700',
+};
 
 const validateNIP = (nip: string) => !nip || /^\d{10}$/.test(nip);
 const validateNPWZ = (npwz: string) => !npwz || /^\d{7}$/.test(npwz);
@@ -57,6 +73,8 @@ export default function AdminPanelPage() {
     const { data: users = [] } = useAdminUsers();
     const { data: logs = [] } = useAdminLogs();
     const { data: logStats = {} } = useAdminLogStats();
+    const { data: orders = [], isError: ordersError } = useWarehouseOrders();
+    const updateOrderStatus = useUpdateOrderStatus();
     const createClinic = useCreateAdminClinic();
     const createUser = useCreateAdminUser();
     const updateClinic = useUpdateAdminClinic();
@@ -267,6 +285,7 @@ export default function AdminPanelPage() {
                             { id: 'dashboard', icon: Activity, label: 'Panel Glowny' },
                             { id: 'clinics', icon: Building2, label: 'Kliniki' },
                             { id: 'users', icon: Users, label: 'Personel' },
+                            { id: 'orders', icon: Package, label: 'Zamowienia' },
                         ].map(item => (
                             <button
                                 key={item.id}
@@ -293,7 +312,7 @@ export default function AdminPanelPage() {
                 <header className="flex justify-between items-center mb-12">
                     <div>
                         <h1 className="text-4xl font-bold text-stone-900">
-                            {activeTab === 'users' ? 'Personel' : activeTab === 'clinics' ? 'Kliniki' : 'Panel'}
+                            {activeTab === 'users' ? 'Personel' : activeTab === 'clinics' ? 'Kliniki' : activeTab === 'orders' ? 'Zamowienia' : 'Panel'}
                         </h1>
                         <p className="text-stone-500 uppercase text-[10px] font-bold tracking-widest mt-1">
                             Produkcyjne dane z PokiePaws API
@@ -411,6 +430,60 @@ export default function AdminPanelPage() {
                             ))}
                         </div>
                     </div>
+                )}
+                {activeTab === 'orders' && (
+                    <section className="bg-white rounded-[2.5rem] border border-stone-100 shadow-sm overflow-hidden">
+                        <div className="p-8 border-b border-stone-50">
+                            <h2 className="text-xl font-bold flex items-center gap-2">
+                                <Package className="text-[#68b9dc]" /> Zamowienia od gabinetow
+                            </h2>
+                        </div>
+                        {ordersError ? (
+                            <div className="py-16 text-center text-stone-400 text-sm">
+                                Brak dostepu do zamowien. Endpointy magazynu wymagaja roli WAREHOUSE.
+                            </div>
+                        ) : orders.length === 0 ? (
+                            <div className="py-16 text-center text-stone-400 text-sm">Brak zamowien</div>
+                        ) : (
+                            <div className="divide-y divide-stone-50">
+                                {orders.map((order) => (
+                                    <div key={order.id} className="px-8 py-5 flex items-center justify-between gap-6">
+                                        <div>
+                                            <p className="font-bold text-stone-900">{order.name}</p>
+                                            <p className="text-sm text-stone-400 mt-0.5">
+                                                {order.clinicName ?? `Gabinet #${order.clinicId}`}
+                                                {' · '}{order.amount}{order.unit ? ` ${order.unit}` : ''}
+                                                {order.category ? ` · ${order.category}` : ''}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-3 shrink-0">
+                                            <span className={cn('px-3 py-1 rounded-xl text-xs font-bold', ORDER_STATUS_COLORS[order.status] ?? 'bg-stone-100 text-stone-600')}>
+                                                {ORDER_STATUS_LABELS[order.status] ?? order.status}
+                                            </span>
+                                            {order.status === 'PENDING' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => updateOrderStatus.mutate({ id: order.id, status: 'APPROVED' })}
+                                                        disabled={updateOrderStatus.isPending}
+                                                        className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                                                    >
+                                                        Zatwierdz
+                                                    </button>
+                                                    <button
+                                                        onClick={() => updateOrderStatus.mutate({ id: order.id, status: 'REJECTED' })}
+                                                        disabled={updateOrderStatus.isPending}
+                                                        className="px-3 py-1 rounded-xl text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+                                                    >
+                                                        Odrzuc
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </section>
                 )}
             </main>
 

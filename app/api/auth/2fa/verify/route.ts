@@ -23,14 +23,14 @@ export async function POST(request: Request) {
             { token },
         );
 
-        const { token: jwt, email, role } = backendResponse.data;
+        const { accessToken, email, role } = backendResponse.data;
         const userRole = mapApiRole(role);
 
         const response = NextResponse.json({
             user: { id: email, name: email, email, role: userRole },
         });
 
-        response.cookies.set(AUTH_ACCESS_TOKEN_COOKIE, jwt, authCookieOptions);
+        response.cookies.set(AUTH_ACCESS_TOKEN_COOKIE, accessToken, authCookieOptions);
         response.cookies.set(AUTH_USER_EMAIL_COOKIE, email, authCookieOptions);
         response.cookies.set(AUTH_USER_ROLE_COOKIE, userRole, authCookieOptions);
         response.cookies.delete(AUTH_MFA_PENDING_EMAIL_COOKIE);

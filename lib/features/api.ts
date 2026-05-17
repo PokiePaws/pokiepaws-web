@@ -6,17 +6,26 @@ import {
     animalSchema,
     animalsSchema,
     availableSlotsSchema,
+    clinicOrderSchema,
+    clinicOrdersSchema,
     prescriptionSchema,
     userAdminSchema,
     usersAdminSchema,
+    vetMeResponseSchema,
+    vetSchema,
     vetsSchema,
     visitSchema,
     visitsSchema,
+    warehouseStockItemSchema,
+    warehouseStockSchema,
+    warehouseWorkerMeSchema,
     type ActivityLog,
     type Animal,
     type AnimalRequest,
     type AvailableSlots,
+    type ClinicOrder,
     type ClinicRequest,
+    type CreateOrderRequest,
     type CreatePrescriptionRequest,
     type CreateVisitRequest,
     type Prescription,
@@ -25,6 +34,10 @@ import {
     type UserAdminRequest,
     type Vet,
     type Visit,
+    type WarehouseStockItem,
+    type WarehouseStockItemRequest,
+    type VetMeResponse,
+    type WarehouseWorkerMe,
 } from './api-schemas';
 
 export const animalsApi = {
@@ -86,12 +99,60 @@ export const vetsApi = {
     getByClinic(clinicId: number): Promise<Vet[]> {
         return httpClient.get<Vet[]>(`/api/vets/clinic/${clinicId}`).then((data) => vetsSchema.parse(data));
     },
+    getMe(): Promise<VetMeResponse> {
+        return httpClient.get<VetMeResponse>('/api/vets/me').then((data) => vetMeResponseSchema.parse(data));
+    },
     getAvailableSlots(clinicId: number, vetUserId: number, date: string): Promise<AvailableSlots> {
         return httpClient
             .get<AvailableSlots>(
                 `/api/clinics/${clinicId}/vets/${vetUserId}/available-slots?date=${encodeURIComponent(date)}`,
             )
             .then((data) => availableSlotsSchema.parse(data));
+    },
+};
+
+export const ordersApi = {
+    getAll(clinicId?: number, status?: string): Promise<ClinicOrder[]> {
+        const params = new URLSearchParams();
+        if (clinicId != null) params.set('clinicId', String(clinicId));
+        if (status) params.set('status', status);
+        const qs = params.toString();
+        return httpClient
+            .get<ClinicOrder[]>(`/api/orders${qs ? '?' + qs : ''}`)
+            .then((data) => clinicOrdersSchema.parse(data));
+    },
+    create(payload: CreateOrderRequest): Promise<ClinicOrder> {
+        return httpClient.post<ClinicOrder>('/api/orders', payload).then((data) => clinicOrderSchema.parse(data));
+    },
+    updateStatus(id: number, status: string): Promise<ClinicOrder> {
+        return httpClient
+            .put<ClinicOrder>(`/api/orders/${id}/status`, { status })
+            .then((data) => clinicOrderSchema.parse(data));
+    },
+};
+
+export const warehouseApi = {
+    getMe(): Promise<WarehouseWorkerMe> {
+        return httpClient.get<WarehouseWorkerMe>('/api/warehouse-workers/me').then((data) => warehouseWorkerMeSchema.parse(data));
+    },
+    getStock(warehouseId?: number): Promise<WarehouseStockItem[]> {
+        const url = warehouseId != null
+            ? `/api/warehouse/stock/warehouse/${warehouseId}`
+            : '/api/warehouse/stock';
+        return httpClient.get<WarehouseStockItem[]>(url).then((data) => warehouseStockSchema.parse(data));
+    },
+    createStockItem(payload: WarehouseStockItemRequest): Promise<WarehouseStockItem> {
+        return httpClient
+            .post<WarehouseStockItem>('/api/warehouse/stock', payload)
+            .then((data) => warehouseStockItemSchema.parse(data));
+    },
+    updateStockItem(id: number, payload: WarehouseStockItemRequest): Promise<WarehouseStockItem> {
+        return httpClient
+            .put<WarehouseStockItem>(`/api/warehouse/stock/${id}`, payload)
+            .then((data) => warehouseStockItemSchema.parse(data));
+    },
+    deleteStockItem(id: number): Promise<void> {
+        return httpClient.delete<void>(`/api/warehouse/stock/${id}`);
     },
 };
 

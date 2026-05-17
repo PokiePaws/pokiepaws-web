@@ -175,3 +175,79 @@ export type UserAdminRequest = {
     phone?: string;
     specialization?: string;
 };
+
+export const clinicOrderSchema = z.object({
+    id: z.number(),
+    clinicId: z.number(),
+    clinicName: z.string().nullable().optional(),
+    name: z.string(),
+    amount: z.number(),
+    description: z.string().nullable().optional(),
+    category: z.string().nullable().optional(),
+    status: z.string(),
+    unit: z.string().nullable().optional(),
+    expiryDate: z.string().nullable().optional(),
+});
+
+export const clinicOrdersSchema = z.array(clinicOrderSchema);
+
+export const warehouseStockItemSchema = z.object({
+    id: z.number(),
+    warehouseId: z.number(),
+    name: z.string(),
+    assortmentDescription: z.string().nullable().optional(),
+    price: z.number().nullable().optional(),
+    unit: z.string().nullable().optional(),
+    category: z.string().nullable().optional(),
+    amount: z.number(),
+    expiryDate: z.string().nullable().optional(),
+    status: z.string().nullable().optional(),
+});
+
+export const warehouseStockSchema = z.array(warehouseStockItemSchema);
+
+export const warehouseWorkerMeSchema = z.object({
+    warehouseId: z.number(),
+    warehouseName: z.string(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
+    email: z.string(),
+});
+
+export const vetMeResponseSchema = z.object({
+    userId: z.number(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
+    phone: z.string().nullable().optional(),
+    npwz: z.string().nullable().optional(),
+    specialization: z.string().nullable().optional(),
+    clinicId: z.number().nullable().optional(),
+    clinicName: z.string().nullable().optional(),
+});
+
+export type ClinicOrder = z.infer<typeof clinicOrderSchema>;
+export type WarehouseStockItem = z.infer<typeof warehouseStockItemSchema>;
+export type WarehouseWorkerMe = z.infer<typeof warehouseWorkerMeSchema>;
+export type VetMeResponse = z.infer<typeof vetMeResponseSchema>;
+
+export type CreateOrderRequest = {
+    clinicId: number;
+    name: string;
+    amount: number;
+    description?: string;
+    category?: string;
+    unit?: string;
+    expiryDate?: string;
+};
+
+export type WarehouseStockItemRequest = {
+    warehouseId: number;
+    name: string;
+    assortmentDescription?: string;
+    price?: number;
+    unit?: string;
+    category?: string;
+    amount: number;
+    expiryDate?: string;
+    status?: string;
+};

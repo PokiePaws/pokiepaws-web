@@ -49,7 +49,7 @@ export async function POST(request: Request) {
         }
 
         const loginData = backendResponse.data as BackendLoginResponse;
-        const { token, email, role } = loginData;
+        const { accessToken, email, role } = loginData;
         const userRole = mapApiRole(role);
         const response = NextResponse.json({
             user: {
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
             },
         });
 
-        response.cookies.set(AUTH_ACCESS_TOKEN_COOKIE, token, authCookieOptions);
+        response.cookies.set(AUTH_ACCESS_TOKEN_COOKIE, accessToken, authCookieOptions);
         response.cookies.set(AUTH_USER_EMAIL_COOKIE, email, authCookieOptions);
         response.cookies.set(AUTH_USER_ROLE_COOKIE, userRole, authCookieOptions);
         response.cookies.delete(AUTH_MFA_PENDING_EMAIL_COOKIE);

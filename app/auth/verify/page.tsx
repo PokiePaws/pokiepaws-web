@@ -1,19 +1,16 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useAuthStore } from '../../../store/use-auth-store';
 import { getRedirectPath } from '../../../lib/features/auth/auth-types';
 
 function VerifyMfaContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
-    const router = useRouter();
-    const setUser = useAuthStore((state) => state.setUser);
     const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
     const [errorMessage, setErrorMessage] = useState('');
 
@@ -41,9 +38,8 @@ function VerifyMfaContent() {
             })
             .then((data) => {
                 if (!active || !data) return;
-                setUser(data.user);
                 setStatus('success');
-                setTimeout(() => router.push(getRedirectPath(data.user.role)), 1500);
+                setTimeout(() => { window.location.href = getRedirectPath(data.user.role); }, 1500);
             })
             .catch((err: unknown) => {
                 if (!active) return;
@@ -54,7 +50,7 @@ function VerifyMfaContent() {
         return () => {
             active = false;
         };
-    }, [token, router, setUser]);
+    }, [token]);
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

@@ -1,15 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminApi, animalsApi, vetsApi, visitsApi } from './api';
+import { adminApi, animalsApi, ordersApi, vetsApi, visitsApi, warehouseApi } from './api';
 import type {
     AnimalRequest,
     ClinicRequest,
+    CreateOrderRequest,
     CreatePrescriptionRequest,
     CreateVisitRequest,
     UpdateVisitMedicalDataRequest,
     UserAdminRequest,
+    WarehouseStockItemRequest,
 } from './api-schemas';
 
 export const apiQueryKeys = {
+    warehouseMe: ['warehouse', 'me'] as const,
+    warehouseStock: (warehouseId?: number) => ['warehouse', 'stock', warehouseId ?? 'all'] as const,
+    warehouseOrders: (clinicId?: number, status?: string) => ['warehouse', 'orders', clinicId ?? 'all', status ?? 'all'] as const,
+    vetMe: ['vets', 'me'] as const,
     animals: ['animals'] as const,
     ownerUpcomingVisits: ['visits', 'owner', 'upcoming'] as const,
     ownerRangeVisits: (from: string, to: string) => ['visits', 'owner', 'range', from, to] as const,
@@ -214,5 +220,78 @@ export function useAdminLogStats() {
     return useQuery({
         queryKey: apiQueryKeys.adminLogStats,
         queryFn: adminApi.getLogStats,
+    });
+}
+
+export function useVetMe() {
+    return useQuery({
+        queryKey: apiQueryKeys.vetMe,
+        queryFn: vetsApi.getMe,
+        retry: false,
+    });
+}
+
+export function useWarehouseMe() {
+    return useQuery({
+        queryKey: apiQueryKeys.warehouseMe,
+        queryFn: warehouseApi.getMe,
+        retry: false,
+    });
+}
+
+export function useWarehouseStock(warehouseId?: number) {
+    return useQuery({
+        queryKey: apiQueryKeys.warehouseStock(warehouseId),
+        queryFn: () => warehouseApi.getStock(warehouseId),
+        enabled: warehouseId != null,
+    });
+}
+
+export function useCreateStockItem() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (payload: WarehouseStockItemRequest) => warehouseApi.createStockItem(payload),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouse', 'stock'] }),
+    });
+}
+
+export function useUpdateStockItem() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: number; payload: WarehouseStockItemRequest }) =>
+            warehouseApi.updateStockItem(id, payload),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouse', 'stock'] }),
+    });
+}
+
+export function useDeleteStockItem() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => warehouseApi.deleteStockItem(id),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouse', 'stock'] }),
+    });
+}
+
+export function useWarehouseOrders(clinicId?: number, status?: string) {
+    return useQuery({
+        queryKey: apiQueryKeys.warehouseOrders(clinicId, status),
+        queryFn: () => ordersApi.getAll(clinicId, status),
+        retry: false,
+    });
+}
+
+export function useCreateOrder() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (payload: CreateOrderRequest) => ordersApi.create(payload),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouse', 'orders'] }),
+    });
+}
+
+export function useUpdateOrderStatus() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, status }: { id: number; status: string }) => ordersApi.updateStatus(id, status),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouse', 'orders'] }),
     });
 }

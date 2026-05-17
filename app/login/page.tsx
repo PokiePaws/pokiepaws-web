@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, ChevronRight, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useAuthStore } from '../../store/use-auth-store';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
 import { authApi } from '../../lib/features/auth/auth-api';
@@ -18,7 +17,6 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
-    const setUser = useAuthStore((state) => state.setUser);
     const { language } = useLanguageStore();
 
     const t = translations[language];
@@ -34,8 +32,7 @@ export default function LoginPage() {
                 router.push(`/auth/2fa/pending?email=${encodeURIComponent(session.email)}`);
                 return;
             }
-            setUser(session.user);
-            router.push(getRedirectPath(session.user.role));
+            window.location.href = getRedirectPath(session.user.role);
         } catch (error) {
             setError(error instanceof Error ? error.message : t.login.error);
         } finally {

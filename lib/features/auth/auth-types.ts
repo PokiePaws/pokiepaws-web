@@ -9,7 +9,7 @@ export interface User {
 }
 
 export interface BackendLoginResponse {
-    token: string;
+    accessToken: string;
     email: string;
     role: ApiRole;
 }
