@@ -15,7 +15,7 @@ import {
     useVetMe,
     useCreateOrder,
 } from 'lib/features/api-hooks';
-import type { WarehouseStockItem, ClinicOrder } from 'lib/features/api-schemas';
+import type { WarehouseStockItem } from 'lib/features/api-schemas';
 
 const INPUT = 'w-full p-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-[#68b9dc] outline-none text-sm transition-all focus:bg-white';
 

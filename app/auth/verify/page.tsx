@@ -11,15 +11,11 @@ import { getRedirectPath } from '../../../lib/features/auth/auth-types';
 function VerifyMfaContent() {
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
-    const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [status, setStatus] = useState<'verifying' | 'success' | 'error'>(token ? 'verifying' : 'error');
+    const [errorMessage, setErrorMessage] = useState(token ? '' : 'Brak tokenu weryfikacyjnego.');
 
     useEffect(() => {
-        if (!token) {
-            setStatus('error');
-            setErrorMessage('Brak tokenu weryfikacyjnego.');
-            return;
-        }
+        if (!token) return;
 
         let active = true;
 

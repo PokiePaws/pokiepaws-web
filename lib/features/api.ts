@@ -8,11 +8,13 @@ import {
     availableSlotsSchema,
     clinicOrderSchema,
     clinicOrdersSchema,
+    labOrderSchema,
+    labOrdersSchema,
     prescriptionSchema,
+    productsSchema,
     userAdminSchema,
     usersAdminSchema,
     vetMeResponseSchema,
-    vetSchema,
     vetsSchema,
     visitSchema,
     visitsSchema,
@@ -25,10 +27,13 @@ import {
     type AvailableSlots,
     type ClinicOrder,
     type ClinicRequest,
+    type CreateLabOrderRequest,
     type CreateOrderRequest,
     type CreatePrescriptionRequest,
     type CreateVisitRequest,
+    type LabOrder,
     type Prescription,
+    type Product,
     type UpdateVisitMedicalDataRequest,
     type UserAdmin,
     type UserAdminRequest,
@@ -153,6 +158,66 @@ export const warehouseApi = {
     },
     deleteStockItem(id: number): Promise<void> {
         return httpClient.delete<void>(`/api/warehouse/stock/${id}`);
+    },
+};
+
+export const vetVisitsApi = {
+    createForVet(payload: { animalId: number; startsAt: string; description?: string }): Promise<Visit> {
+        return httpClient.post<Visit>('/api/vets/me/visits', payload).then((data) => visitSchema.parse(data));
+    },
+    registerPatient(payload: {
+        ownerEmail: string;
+        ownerFirstName: string;
+        ownerLastName: string;
+        ownerPhone?: string;
+        animalName: string;
+        animalSpecies: string;
+        animalBreed?: string;
+        animalGender: string;
+        animalColor?: string;
+        animalMicrochipNumber?: string;
+        animalWeight?: number;
+        animalBirthDate?: string;
+        animalNotes?: string;
+    }): Promise<Animal> {
+        return httpClient.post<Animal>('/api/vets/me/patients', payload).then((data) => animalSchema.parse(data));
+    },
+};
+
+export const clinicAnimalsApi = {
+    getByClinic(clinicId: number): Promise<Animal[]> {
+        return httpClient
+            .get<Animal[]>(`/api/animals/clinic/${clinicId}`)
+            .then((data) => animalsSchema.parse(data));
+    },
+};
+
+export const productsApi = {
+    getAll(): Promise<Product[]> {
+        return httpClient.get<Product[]>('/api/products').then((data) => productsSchema.parse(data));
+    },
+};
+
+export const labOrdersApi = {
+    getByClinic(clinicId: number): Promise<LabOrder[]> {
+        return httpClient
+            .get<LabOrder[]>(`/api/clinics/${clinicId}/lab-orders`)
+            .then((data) => labOrdersSchema.parse(data));
+    },
+    getByAnimal(animalId: number): Promise<LabOrder[]> {
+        return httpClient
+            .get<LabOrder[]>(`/api/animals/${animalId}/lab-orders`)
+            .then((data) => labOrdersSchema.parse(data));
+    },
+    create(animalId: number, payload: Omit<CreateLabOrderRequest, 'animalId'>): Promise<LabOrder> {
+        return httpClient
+            .post<LabOrder>(`/api/animals/${animalId}/lab-orders`, payload)
+            .then((data) => labOrderSchema.parse(data));
+    },
+    updateStatus(id: number, status: string): Promise<LabOrder> {
+        return httpClient
+            .patch<LabOrder>(`/api/lab-orders/${id}/status`, { status })
+            .then((data) => labOrderSchema.parse(data));
     },
 };
 

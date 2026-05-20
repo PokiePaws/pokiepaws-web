@@ -1,4 +1,4 @@
-import { Building2, Users2, ShieldCheck, MapPin, Star, ChevronRight } from 'lucide-react';
+import { Building2, Users2, ShieldCheck, MapPin, Star } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 interface ContentItem {

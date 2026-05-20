@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminApi, animalsApi, ordersApi, vetsApi, visitsApi, warehouseApi } from './api';
+import { adminApi, animalsApi, clinicAnimalsApi, labOrdersApi, ordersApi, productsApi, vetsApi, vetVisitsApi, visitsApi, warehouseApi } from './api';
 import type {
     AnimalRequest,
     ClinicRequest,
@@ -30,6 +30,10 @@ export const apiQueryKeys = {
     adminLogs: ['admin', 'logs'] as const,
     adminLogStats: ['admin', 'logs', 'stats'] as const,
     prescription: (visitId?: number) => ['visits', visitId ?? 'none', 'prescription'] as const,
+    labOrders: (clinicId?: number) => ['labOrders', clinicId ?? 'all'] as const,
+    labOrdersByAnimal: (animalId?: number) => ['labOrders', 'animal', animalId ?? 'all'] as const,
+    clinicAnimals: (clinicId?: number) => ['clinicAnimals', clinicId ?? 'none'] as const,
+    products: ['products'] as const,
 };
 
 export function useAnimals() {
@@ -293,5 +297,71 @@ export function useUpdateOrderStatus() {
     return useMutation({
         mutationFn: ({ id, status }: { id: number; status: string }) => ordersApi.updateStatus(id, status),
         onSuccess: () => qc.invalidateQueries({ queryKey: ['warehouse', 'orders'] }),
+    });
+}
+
+export function useLabOrders(clinicId?: number) {
+    return useQuery({
+        queryKey: apiQueryKeys.labOrders(clinicId),
+        queryFn: () => labOrdersApi.getByClinic(clinicId!),
+        enabled: clinicId != null,
+    });
+}
+
+export function useLabOrdersByAnimal(animalId?: number) {
+    return useQuery({
+        queryKey: apiQueryKeys.labOrdersByAnimal(animalId),
+        queryFn: () => labOrdersApi.getByAnimal(animalId!),
+        enabled: animalId != null,
+    });
+}
+
+export function useCreateLabOrder() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ animalId, ...payload }: { animalId: number; testType: string; priority: string; clinicalReason?: string; visitId?: number }) =>
+            labOrdersApi.create(animalId, payload as Parameters<typeof labOrdersApi.create>[1]),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['labOrders'] }),
+    });
+}
+
+export function useClinicAnimals(clinicId?: number) {
+    return useQuery({
+        queryKey: apiQueryKeys.clinicAnimals(clinicId),
+        queryFn: () => clinicAnimalsApi.getByClinic(clinicId!),
+        enabled: clinicId != null,
+    });
+}
+
+export function useCreateVetVisit() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (payload: { animalId: number; startsAt: string; description?: string }) =>
+            vetVisitsApi.createForVet(payload),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['visits'] }),
+    });
+}
+
+export function useRegisterPatient() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (payload: Parameters<typeof vetVisitsApi.registerPatient>[0]) =>
+            vetVisitsApi.registerPatient(payload),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['clinicAnimals'] }),
+    });
+}
+
+export function useProducts() {
+    return useQuery({
+        queryKey: apiQueryKeys.products,
+        queryFn: productsApi.getAll,
+    });
+}
+
+export function useUpdateLabOrderStatus() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, status }: { id: number; status: string }) => labOrdersApi.updateStatus(id, status),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['labOrders'] }),
     });
 }

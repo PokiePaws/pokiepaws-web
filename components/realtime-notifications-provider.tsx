@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAuthStore } from '../store/use-auth-store';
+import { useNotificationStore } from '../store/use-notification-store';
 import { notificationsApi } from '../lib/features/notifications/notifications-api';
 import { getApiBaseUrl } from '../lib/config/env';
 
@@ -9,6 +10,7 @@ const RECONNECT_DELAY_MS = 5000;
 
 export default function RealtimeNotificationsProvider() {
     const user = useAuthStore((state) => state.user);
+    const addNotification = useNotificationStore((state) => state.addNotification);
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -55,7 +57,7 @@ export default function RealtimeNotificationsProvider() {
                         const payload = JSON.parse(body);
                         const message = payload.message ?? payload.content ?? body;
                         if (typeof message === 'string') {
-                            // Browser Notification API (requires permission)
+                            addNotification({ message, type: 'info' });
                             if (Notification.permission === 'granted') {
                                 new Notification('PokiePaws', { body: message });
                             }
@@ -92,7 +94,7 @@ export default function RealtimeNotificationsProvider() {
                 wsRef.current = null;
             }
         };
-    }, [user]);
+    }, [user, addNotification]);
 
     return null;
 }

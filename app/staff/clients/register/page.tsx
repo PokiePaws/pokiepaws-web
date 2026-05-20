@@ -1,46 +1,84 @@
 'use client';
 
 import { useState } from 'react';
-import { useLanguageStore } from '../../../../store/use-language-store';
-import { translations } from '../../../../lib/translations';
-import { User, Mail, Phone, MapPin, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { User, Mail, Phone, PawPrint, CheckCircle2, ArrowLeft, Ruler, Calendar } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import { cn } from 'lib/utils';
+import { useNotificationStore } from 'store/use-notification-store';
+import { useRegisterPatient } from 'lib/features/api-hooks';
+
+const SPECIES_OPTIONS = ['Pies', 'Kot', 'Królik', 'Chomik', 'Świnka morska', 'Ptak', 'Gad', 'Inne'];
+const GENDER_OPTIONS = [
+    { value: 'MALE', label: 'Samiec' },
+    { value: 'FEMALE', label: 'Samica' },
+    { value: 'HERMAPHRODITE', label: 'Hermafrodyta' },
+] as const;
+
+const INPUT = 'w-full px-4 py-3.5 bg-stone-50 border border-stone-200 rounded-2xl text-sm text-stone-900 focus:ring-2 focus:ring-emerald-500 focus:bg-white outline-none transition-all';
+const LABEL = 'block text-xs font-bold text-stone-500 uppercase tracking-widest mb-2';
 
 export default function ClientRegistrationPage() {
-    const { language } = useLanguageStore();
-    const t = translations[language];
+    const addNotification = useNotificationStore((s) => s.addNotification);
+    const registerPatient = useRegisterPatient();
+    const [done, setDone] = useState<{ ownerName: string; animalName: string } | null>(null);
 
-    const [isSubmitted, setIsSubmitted] = useState(false);
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        street: '',
-        city: '',
-        zipCode: '',
-        petsName:'',
-        gender:'',
-        breed:'',
-        petsAge:'',
-        petsChip:'',
-        petsAccomodation:'',
+    const [form, setForm] = useState({
+        // owner
+        ownerFirstName: '',
+        ownerLastName: '',
+        ownerEmail: '',
+        ownerPhone: '',
+        // animal
+        animalName: '',
+        animalSpecies: '',
+        animalBreed: '',
+        animalGender: 'MALE' as 'MALE' | 'FEMALE' | 'HERMAPHRODITE',
+        animalColor: '',
+        animalMicrochipNumber: '',
+        animalBirthDate: '',
+        animalWeight: '',
+        animalNotes: '',
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+        setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, we would save this to Firestore
-        console.log('Registering client:', formData);
-        setIsSubmitted(true);
+        try {
+            await registerPatient.mutateAsync({
+                ownerEmail: form.ownerEmail,
+                ownerFirstName: form.ownerFirstName,
+                ownerLastName: form.ownerLastName,
+                ownerPhone: form.ownerPhone || undefined,
+                animalName: form.animalName,
+                animalSpecies: form.animalSpecies,
+                animalBreed: form.animalBreed || undefined,
+                animalGender: form.animalGender,
+                animalColor: form.animalColor || undefined,
+                animalMicrochipNumber: form.animalMicrochipNumber || undefined,
+                animalWeight: form.animalWeight ? Number(form.animalWeight) : undefined,
+                animalBirthDate: form.animalBirthDate || undefined,
+                animalNotes: form.animalNotes || undefined,
+            });
+            setDone({ ownerName: `${form.ownerFirstName} ${form.ownerLastName}`, animalName: form.animalName });
+        } catch (err: unknown) {
+            const msg = (err as { message?: string })?.message ?? 'Błąd rejestracji';
+            addNotification({ message: msg, type: 'error' });
+        }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+    const reset = () => {
+        setDone(null);
+        setForm({
+            ownerFirstName: '', ownerLastName: '', ownerEmail: '', ownerPhone: '',
+            animalName: '', animalSpecies: '', animalBreed: '', animalGender: 'MALE',
+            animalColor: '', animalMicrochipNumber: '', animalBirthDate: '', animalWeight: '', animalNotes: '',
+        });
     };
 
-    if (isSubmitted) {
+    if (done) {
         return (
             <div className="max-w-2xl mx-auto py-12">
                 <motion.div
@@ -51,39 +89,25 @@ export default function ClientRegistrationPage() {
                     <div className="bg-emerald-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8">
                         <CheckCircle2 className="h-10 w-10 text-emerald-600" />
                     </div>
-                    <h2 className="text-3xl font-display font-bold text-stone-900 mb-4">{t.clientRegistration.success}</h2>
-                    <p className="text-stone-500 mb-10">
-                        {formData.firstName} {formData.lastName} has been added to the system.
+                    <h2 className="text-3xl font-display font-bold text-stone-900 mb-3">Zarejestrowano!</h2>
+                    <p className="text-stone-500 mb-2">
+                        <span className="font-semibold text-stone-700">{done.animalName}</span> został(a) dodany/a do systemu.
+                    </p>
+                    <p className="text-stone-400 text-sm mb-10">
+                        Właściciel: {done.ownerName}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             href="/staff/patients"
                             className="bg-emerald-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
                         >
-                            Go to Patients
+                            Lista pacjentów
                         </Link>
                         <button
-                            onClick={() => {
-                                setIsSubmitted(false);
-                                setFormData({
-                                    firstName: '',
-                                    lastName: '',
-                                    email: '',
-                                    phone: '',
-                                    street: '',
-                                    city: '',
-                                    zipCode: '',
-                                    petsName:'',
-                                    gender:'',
-                                    breed:'',
-                                    petsAge:'',
-                                    petsChip:'',
-                                    petsAccomodation:'',
-                                });
-                            }}
+                            onClick={reset}
                             className="bg-stone-100 text-stone-600 px-8 py-4 rounded-2xl font-bold hover:bg-stone-200 transition-all"
                         >
-                            Register Another
+                            Zarejestruj kolejnego
                         </button>
                     </div>
                 </motion.div>
@@ -98,203 +122,145 @@ export default function ClientRegistrationPage() {
                 className="inline-flex items-center gap-2 text-stone-500 hover:text-emerald-600 font-medium transition-colors"
             >
                 <ArrowLeft className="h-4 w-4" />
-                Back to Patients
+                Powrót do listy pacjentów
             </Link>
 
             <header>
-                <h1 className="text-3xl font-display font-bold text-stone-900">{t.clientRegistration.title}</h1>
-                <p className="text-stone-500">{t.clientRegistration.subtitle}</p>
+                <h1 className="text-3xl font-display font-bold text-stone-900">Rejestracja nowego pacjenta</h1>
+                <p className="text-stone-500 mt-1">Dane właściciela i zwierzęcia zostaną zapisane w systemie</p>
             </header>
 
-            <form onSubmit={handleSubmit} className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-stone-100 shadow-sm space-y-8">
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.firstName}</label>
-                        <div className="relative">
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
-                            <input
-                                required
-                                type="text"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                placeholder="John"
-                                className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* OWNER SECTION */}
+                <div className="bg-white p-8 rounded-[2rem] border border-stone-100 shadow-sm space-y-5">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="h-8 w-8 rounded-xl bg-blue-50 flex items-center justify-center">
+                            <User className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <h2 className="font-bold text-stone-900">Dane właściciela</h2>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={LABEL}>Imię *</label>
+                            <input required value={form.ownerFirstName} onChange={set('ownerFirstName')} placeholder="Jan" className={INPUT} />
+                        </div>
+                        <div>
+                            <label className={LABEL}>Nazwisko *</label>
+                            <input required value={form.ownerLastName} onChange={set('ownerLastName')} placeholder="Kowalski" className={INPUT} />
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.lastName}</label>
-                        <div className="relative">
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
-                            <input
-                                required
-                                type="text"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                placeholder="Doe"
-                                className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={cn(LABEL, 'flex items-center gap-1.5')}><Mail className="h-3 w-3" /> Email *</label>
+                            <input required type="email" value={form.ownerEmail} onChange={set('ownerEmail')} placeholder="jan@example.com" className={INPUT} />
+                        </div>
+                        <div>
+                            <label className={cn(LABEL, 'flex items-center gap-1.5')}><Phone className="h-3 w-3" /> Telefon</label>
+                            <input type="tel" value={form.ownerPhone} onChange={set('ownerPhone')} placeholder="+48 123 456 789" className={INPUT} />
                         </div>
                     </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.email}</label>
-                        <div className="relative">
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
-                            <input
-                                required
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                placeholder="john@example.com"
-                                className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
+                {/* ANIMAL SECTION */}
+                <div className="bg-white p-8 rounded-[2rem] border border-stone-100 shadow-sm space-y-5">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="h-8 w-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+                            <PawPrint className="h-4 w-4 text-emerald-600" />
+                        </div>
+                        <h2 className="font-bold text-stone-900">Dane zwierzęcia</h2>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={LABEL}>Imię *</label>
+                            <input required value={form.animalName} onChange={set('animalName')} placeholder="Burek" className={INPUT} />
+                        </div>
+                        <div>
+                            <label className={LABEL}>Gatunek *</label>
+                            <select required value={form.animalSpecies} onChange={set('animalSpecies')} className={INPUT}>
+                                <option value="">— Wybierz —</option>
+                                {SPECIES_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                            </select>
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.phone}</label>
-                        <div className="relative">
-                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
-                            <input
-                                required
-                                type="tel"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                placeholder="+1 (555) 000-0000"
-                                className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={LABEL}>Rasa</label>
+                            <input value={form.animalBreed} onChange={set('animalBreed')} placeholder="np. Labrador" className={INPUT} />
                         </div>
+                        <div>
+                            <label className={LABEL}>Płeć *</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {GENDER_OPTIONS.map(({ value, label }) => (
+                                    <button
+                                        key={value}
+                                        type="button"
+                                        onClick={() => setForm((f) => ({ ...f, animalGender: value }))}
+                                        className={cn(
+                                            'py-3 rounded-xl border-2 text-xs font-bold transition-all',
+                                            form.animalGender === value
+                                                ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                                : 'border-stone-200 text-stone-500 hover:border-stone-300',
+                                        )}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-4">
+                        <div>
+                            <label className={cn(LABEL, 'flex items-center gap-1.5')}><Ruler className="h-3 w-3" /> Masa (kg)</label>
+                            <input type="number" step="0.1" min="0" value={form.animalWeight} onChange={set('animalWeight')} placeholder="5.2" className={INPUT} />
+                        </div>
+                        <div>
+                            <label className={cn(LABEL, 'flex items-center gap-1.5')}><Calendar className="h-3 w-3" /> Data urodzenia</label>
+                            <input type="date" value={form.animalBirthDate} onChange={set('animalBirthDate')} className={INPUT} />
+                        </div>
+                        <div>
+                            <label className={LABEL}>Kolor / umaszczenie</label>
+                            <input value={form.animalColor} onChange={set('animalColor')} placeholder="np. czarny" className={INPUT} />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className={LABEL}>Nr mikroczipu</label>
+                        <input value={form.animalMicrochipNumber} onChange={set('animalMicrochipNumber')} placeholder="985XXXXXXXXXXXXXXX" className={INPUT} />
+                    </div>
+
+                    <div>
+                        <label className={LABEL}>Uwagi / notatki</label>
+                        <textarea
+                            rows={3}
+                            value={form.animalNotes}
+                            onChange={set('animalNotes')}
+                            placeholder="Alergie, choroby przewlekłe, specjalne wymagania..."
+                            className={cn(INPUT, 'resize-none')}
+                        />
                     </div>
                 </div>
 
-                <div className="space-y-6 pt-4 border-t border-stone-50">
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.street}</label>
-                        <div className="relative">
-                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-400" />
-                            <input
-                                required
-                                type="text"
-                                name="street"
-                                value={formData.street}
-                                onChange={handleChange}
-                                placeholder="123 Pet Lane"
-                                className="w-full pl-12 pr-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.city}</label>
-                            <input
-                                required
-                                type="text"
-                                name="city"
-                                value={formData.city}
-                                onChange={handleChange}
-                                placeholder="New York"
-                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.zipCode}</label>
-                            <input
-                                required
-                                type="text"
-                                name="zipCode"
-                                value={formData.zipCode}
-                                onChange={handleChange}
-                                placeholder="10001"
-                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.petsName}</label>
-                            <input
-                                required
-                                type="text"
-                                name="petsName"
-                                value={formData.petsName}
-                                onChange={handleChange}
-                                placeholder="Eevee"
-                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.gender}</label>
-                            <input
-                                required
-                                type="text"
-                                name="gender"
-                                value={formData.gender}
-                                onChange={handleChange}
-                                placeholder="Gender"
-                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.breed}</label>
-                            <input
-                                required
-                                type="text"
-                                name="breed"
-                                value={formData.breed}
-                                onChange={handleChange}
-                                placeholder="Breed"
-                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.petsAge}</label>
-                            <input
-                                required
-                                type="text"
-                                name="petsAge"
-                                value={formData.petsAge}
-                                onChange={handleChange}
-                                placeholder="Age"
-                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.petsChip}</label>
-                            <input
-                                required
-                                type="text"
-                                name="petsChip"
-                                value={formData.petsChip}
-                                onChange={handleChange}
-                                placeholder="Chip number"
-                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-stone-700 ml-1">{t.clientRegistration.petsAccomodation}</label>
-                            <input
-                                required
-                                type="text"
-                                name="petsAccomodation"
-                                value={formData.petsAccomodation}
-                                onChange={handleChange}
-                                placeholder="Accomodation"
-                                className="w-full px-4 py-4 bg-stone-50 border border-stone-100 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
-                            />
-                        </div>
-                    </div>
+                {/* SUBMIT */}
+                <div className="flex gap-4">
+                    <Link
+                        href="/staff/patients"
+                        className="flex-1 py-4 border border-stone-200 text-stone-600 rounded-2xl font-bold text-center hover:bg-stone-50 transition-all"
+                    >
+                        Anuluj
+                    </Link>
+                    <button
+                        type="submit"
+                        disabled={registerPatient.isPending}
+                        className="flex-1 bg-emerald-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 disabled:opacity-60"
+                    >
+                        {registerPatient.isPending ? 'Rejestrowanie…' : 'Zarejestruj pacjenta'}
+                    </button>
                 </div>
-
-                <button
-                    type="submit"
-                    className="w-full bg-emerald-600 text-white py-5 rounded-2xl font-bold text-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
-                >
-                    {t.clientRegistration.submit}
-                </button>
             </form>
         </div>
     );

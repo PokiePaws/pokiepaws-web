@@ -225,6 +225,50 @@ export const vetMeResponseSchema = z.object({
     clinicName: z.string().nullable().optional(),
 });
 
+export const labOrderPrioritySchema = z.enum(['NORMAL', 'HIGH', 'URGENT']);
+export const labOrderStatusSchema = z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
+
+export const labOrderSchema = z.object({
+    id: z.number(),
+    animalId: z.number(),
+    animalName: z.string(),
+    animalSpecies: z.string().nullable().optional(),
+    visitId: z.number().nullable().optional(),
+    vetUserId: z.number(),
+    vetFirstName: z.string().nullable().optional(),
+    vetLastName: z.string().nullable().optional(),
+    clinicId: z.number(),
+    testType: z.string(),
+    clinicalReason: z.string().nullable().optional(),
+    priority: labOrderPrioritySchema,
+    status: labOrderStatusSchema,
+    orderedAt: z.string(),
+    completedAt: z.string().nullable().optional(),
+});
+
+export const labOrdersSchema = z.array(labOrderSchema);
+
+export const productSchema = z.object({
+    id: z.number(),
+    name: z.string(),
+    unit: z.string().nullable().optional(),
+});
+
+export const productsSchema = z.array(productSchema);
+
+export type LabOrder = z.infer<typeof labOrderSchema>;
+export type LabOrderPriority = z.infer<typeof labOrderPrioritySchema>;
+export type LabOrderStatus = z.infer<typeof labOrderStatusSchema>;
+export type Product = z.infer<typeof productSchema>;
+
+export type CreateLabOrderRequest = {
+    animalId: number;
+    testType: string;
+    priority: 'NORMAL' | 'HIGH' | 'URGENT';
+    clinicalReason?: string;
+    visitId?: number;
+};
+
 export type ClinicOrder = z.infer<typeof clinicOrderSchema>;
 export type WarehouseStockItem = z.infer<typeof warehouseStockItemSchema>;
 export type WarehouseWorkerMe = z.infer<typeof warehouseWorkerMeSchema>;
