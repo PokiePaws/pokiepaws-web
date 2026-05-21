@@ -18,13 +18,20 @@ class AxiosHttpClient implements HttpClient {
     private readonly client: AxiosInstance;
 
     constructor(options: HttpClientOptions = {}) {
-        const baseURL = options.baseUrl ?? (typeof window === 'undefined' ? getApiBaseUrl() : '/api/backend');
-
         this.client = axios.create({
-            baseURL: baseURL.replace(/\/$/, ''),
             headers: {
                 Accept: 'application/json',
             },
+        });
+
+        // Lazy baseURL resolution — avoids calling getApiBaseUrl() at module init
+        // which would crash during Next.js SSG when NEXT_PUBLIC_API_URL is not yet available.
+        this.client.interceptors.request.use((config) => {
+            if (!config.baseURL) {
+                const baseURL = options.baseUrl ?? (typeof window === 'undefined' ? getApiBaseUrl() : '/api/backend');
+                config.baseURL = baseURL.replace(/\/$/, '');
+            }
+            return config;
         });
     }
 

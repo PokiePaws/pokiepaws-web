@@ -20,6 +20,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /app/pokiepaws
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
+            echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" > .env
             docker compose down -v
             docker compose up -d --build --remove-orphans
