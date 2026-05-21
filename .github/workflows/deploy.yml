@@ -20,6 +20,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /app/pokiepaws
-            git pull origin main
+            git fetch origin main
+            git checkout main
+            git reset --hard origin/main
+            git clean -fd
             docker compose down -v
             docker compose up -d --build --remove-orphans
