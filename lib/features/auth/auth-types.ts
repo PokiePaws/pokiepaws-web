@@ -10,6 +10,7 @@ export interface User {
 
 export interface BackendLoginResponse {
     accessToken: string;
+    refreshToken: string;
     email: string;
     role: ApiRole;
 }

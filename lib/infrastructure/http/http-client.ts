@@ -1,4 +1,4 @@
-import axios, { AxiosError, type AxiosInstance } from 'axios';
+import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import { getApiBaseUrl } from '../../config/env';
 import { ApiError } from './api-error';
 
@@ -16,6 +16,8 @@ interface HttpClientOptions {
 
 class AxiosHttpClient implements HttpClient {
     private readonly client: AxiosInstance;
+    private isRefreshing = false;
+    private refreshQueue: Array<(token: null) => void> = [];
 
     constructor(options: HttpClientOptions = {}) {
         this.client = axios.create({
@@ -33,6 +35,68 @@ class AxiosHttpClient implements HttpClient {
             }
             return config;
         });
+
+        // 401 interceptor: try token refresh once, then retry the original request.
+        // Only runs in the browser (the proxy runs server-side and doesn't need this).
+        this.client.interceptors.response.use(
+            (response) => response,
+            async (error: AxiosError) => {
+                const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+                if (
+                    error.response?.status !== 401 ||
+                    originalRequest._retry ||
+                    typeof window === 'undefined'
+                ) {
+                    throw this.toApiError(error);
+                }
+
+                // Mark to avoid infinite retry loops
+                originalRequest._retry = true;
+
+                if (this.isRefreshing) {
+                    // Another request is already refreshing — wait for it to finish
+                    await new Promise<null>((resolve) => this.refreshQueue.push(resolve));
+                    return this.client(originalRequest);
+                }
+
+                this.isRefreshing = true;
+
+                try {
+                    const refreshResponse = await fetch('/api/auth/refresh', {
+                        method: 'POST',
+                        cache: 'no-store',
+                    });
+
+                    if (!refreshResponse.ok) {
+                        this.flushQueue();
+                        this.redirectToLogin();
+                        throw this.toApiError(error);
+                    }
+
+                    // New access token is now in the cookie — just retry
+                    this.flushQueue();
+                    return this.client(originalRequest);
+                } catch {
+                    this.flushQueue();
+                    this.redirectToLogin();
+                    throw this.toApiError(error);
+                } finally {
+                    this.isRefreshing = false;
+                }
+            },
+        );
+    }
+
+    private flushQueue() {
+        this.refreshQueue.forEach((resolve) => resolve(null));
+        this.refreshQueue = [];
+    }
+
+    private redirectToLogin() {
+        if (typeof window !== 'undefined') {
+            window.location.href = '/login?reason=session_expired';
+        }
     }
 
     get<T>(endpoint: string) {
@@ -60,6 +124,7 @@ class AxiosHttpClient implements HttpClient {
             const response = await execute();
             return response.data;
         } catch (error) {
+            if (error instanceof ApiError) throw error;
             throw this.toApiError(error);
         }
     }

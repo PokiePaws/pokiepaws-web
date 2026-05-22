@@ -1,22 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { Mail, Lock, ChevronRight, AlertCircle } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Mail, Lock, ChevronRight, AlertCircle, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
 import { authApi } from '../../lib/features/auth/auth-api';
 import { getRedirectPath, isMfaPendingSession } from '../../lib/features/auth/auth-types';
 
-export default function LoginPage() {
+function LoginForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const sessionExpired = searchParams.get('reason') === 'session_expired';
     const { language } = useLanguageStore();
 
     const t = translations[language];
@@ -71,6 +73,12 @@ export default function LoginPage() {
                     className="bg-white py-8 px-4 shadow-xl shadow-slate-200/50 sm:rounded-3xl sm:px-10 border border-slate-100"
                 >
                     <form className="space-y-6" onSubmit={handleLogin}>
+                        {sessionExpired && !error && (
+                            <div className="bg-amber-50 border border-amber-100 text-amber-700 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
+                                <Clock className="h-5 w-5 flex-shrink-0" />
+                                <p>{language === 'pl' ? 'Sesja wygasła. Zaloguj się ponownie.' : 'Your session expired. Please sign in again.'}</p>
+                            </div>
+                        )}
                         {error && (
                             <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
                                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -155,5 +163,13 @@ export default function LoginPage() {
                 </motion.div>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense>
+            <LoginForm />
+        </Suspense>
     );
 }

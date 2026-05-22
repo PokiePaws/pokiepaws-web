@@ -4,6 +4,7 @@ import { getServerApiBaseUrl } from '../../../../lib/config/env';
 import {
     AUTH_ACCESS_TOKEN_COOKIE,
     AUTH_MFA_PENDING_EMAIL_COOKIE,
+    AUTH_REFRESH_TOKEN_COOKIE,
     AUTH_USER_EMAIL_COOKIE,
     AUTH_USER_ROLE_COOKIE,
     authCookieOptions,
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
         }
 
         const loginData = backendResponse.data as BackendLoginResponse;
-        const { accessToken, email, role } = loginData;
+        const { accessToken, refreshToken, email, role } = loginData;
         const userRole = mapApiRole(role);
         const response = NextResponse.json({
             user: {
@@ -61,6 +62,10 @@ export async function POST(request: Request) {
         });
 
         response.cookies.set(AUTH_ACCESS_TOKEN_COOKIE, accessToken, authCookieOptions);
+        response.cookies.set(AUTH_REFRESH_TOKEN_COOKIE, refreshToken, {
+            ...authCookieOptions,
+            maxAge: 7 * 24 * 60 * 60, // 7 days
+        });
         response.cookies.set(AUTH_USER_EMAIL_COOKIE, email, authCookieOptions);
         response.cookies.set(AUTH_USER_ROLE_COOKIE, userRole, authCookieOptions);
         response.cookies.delete(AUTH_MFA_PENDING_EMAIL_COOKIE);

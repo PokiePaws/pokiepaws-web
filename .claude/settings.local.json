@@ -18,7 +18,9 @@
       "Bash(node -e ' *)",
       "WebFetch(domain:docs.pokiepaws.pl)",
       "WebFetch(domain:api.pokiepaws.pl)",
-      "WebFetch(domain:pokiepaws.pl)"
+      "WebFetch(domain:pokiepaws.pl)",
+      "Bash(xargs cat)",
+      "Bash(npx tsc *)"
     ]
   }
 }
