@@ -33,7 +33,7 @@ import {
 import { pl, enUS } from 'date-fns/locale';
 import { cn } from '../../../lib/utils';
 import {
-    useCancelVisit,
+    useCancelVetVisit,
     useClinicAnimals,
     useConfirmVetVisit,
     useCreatePrescription,
@@ -94,7 +94,7 @@ export default function SchedulePage() {
     const { data: apiVisits = [] } = useVetVisitsRange(rangeFrom, rangeTo);
     const createVisit = useCreateVetVisit();
     const confirmVisit = useConfirmVetVisit();
-    const cancelVisit = useCancelVisit();
+    const cancelVisit = useCancelVetVisit();
     const updateMedicalData = useUpdateVisitMedicalData();
     const createPrescription = useCreatePrescription();
     const { data: prescription } = usePrescription(medicalVisit?.id);

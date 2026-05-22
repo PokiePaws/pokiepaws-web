@@ -90,6 +90,14 @@ export function useCancelVisit() {
     });
 }
 
+export function useCancelVetVisit() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => visitsApi.cancelVet(id),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visits'] }),
+    });
+}
+
 export function useConfirmVetVisit() {
     const queryClient = useQueryClient();
     return useMutation({

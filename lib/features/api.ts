@@ -77,6 +77,9 @@ export const visitsApi = {
     cancel(id: number): Promise<Visit> {
         return httpClient.patch<Visit>(`/api/visits/${id}/cancel`).then((data) => visitSchema.parse(data));
     },
+    cancelVet(id: number): Promise<Visit> {
+        return httpClient.patch<Visit>(`/api/vets/me/visits/${id}/cancel`).then((data) => visitSchema.parse(data));
+    },
     confirmVetVisit(id: number): Promise<Visit> {
         return httpClient.post<Visit>(`/api/vets/me/visits/${id}/confirm`).then((data) => visitSchema.parse(data));
     },

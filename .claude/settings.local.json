@@ -15,7 +15,10 @@
       "Bash(npm install *)",
       "Bash(node generate_docx2.js)",
       "Bash(node -e \"const {Document,Packer,Paragraph,TextRun,TableOfContents}=require\\('docx'\\);const doc=new Document\\({sections:[{children:[new TableOfContents\\('Test',{hyperlink:true,headingStyleRange:'1-2'}\\)]}]}\\);Packer.toBuffer\\(doc\\).then\\(b=>{require\\('fs'\\).writeFileSync\\('test.docx',b\\);console.log\\('OK'\\)}\\).catch\\(e=>console.error\\(e.message\\)\\)\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "WebFetch(domain:docs.pokiepaws.pl)",
+      "WebFetch(domain:api.pokiepaws.pl)",
+      "WebFetch(domain:pokiepaws.pl)"
     ]
   }
 }
