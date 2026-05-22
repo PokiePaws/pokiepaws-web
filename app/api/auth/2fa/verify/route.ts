@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getServerApiBaseUrl } from '../../../../../lib/config/env';
 import {
     AUTH_ACCESS_TOKEN_COOKIE,
+    AUTH_MFA_COMPLETED_COOKIE,
     AUTH_MFA_PENDING_EMAIL_COOKIE,
     AUTH_USER_EMAIL_COOKIE,
     AUTH_USER_ROLE_COOKIE,
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
         response.cookies.set(AUTH_ACCESS_TOKEN_COOKIE, accessToken, authCookieOptions);
         response.cookies.set(AUTH_USER_EMAIL_COOKIE, email, authCookieOptions);
         response.cookies.set(AUTH_USER_ROLE_COOKIE, userRole, authCookieOptions);
+        response.cookies.set(AUTH_MFA_COMPLETED_COOKIE, '1', authCookieOptions);
         response.cookies.delete(AUTH_MFA_PENDING_EMAIL_COOKIE);
 
         return response;

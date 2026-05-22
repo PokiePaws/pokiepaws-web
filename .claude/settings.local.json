@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where pandoc *)",
+      "Bash(pandoc --version)",
+      "Bash(python -c \"import docx; print\\('python-docx OK'\\)\")",
+      "Bash(pip install *)",
+      "Bash(python -c \"import docx; print\\('OK'\\)\")",
+      "Bash(python docs/generate_docx.py)",
+      "Bash(cp \"C:\\\\Users\\\\Natalia\\\\WebstormProjects\\\\pokiepaws-web\\\\docs\\\\dokumentacja_web.docx\" \"C:\\\\Users\\\\Natalia\\\\Desktop\\\\dokumentacja_web.docx\")",
+      "Bash(cp \"C:\\\\Users\\\\Natalia\\\\WebstormProjects\\\\pokiepaws-web\\\\docs\\\\dokumentacja_web.tex\" \"C:\\\\Users\\\\Natalia\\\\Desktop\\\\dokumentacja_web.tex\")"
+    ]
+  }
+}
