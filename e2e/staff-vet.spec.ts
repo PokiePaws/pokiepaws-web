@@ -14,7 +14,26 @@ const MOCK_ANIMALS = [
 ];
 
 const MOCK_PRODUCTS = [
-    { id: 1, name: 'Amoksycylina', unit: 'op', category: 'Antybiotyk' },
+    { id: 1, name: 'Amoksycylina 500mg', unit: 'tabletka' },
+    { id: 2, name: 'Amoksycylina 250mg', unit: 'tabletka' },
+    { id: 3, name: 'Enrofloksacyna 50mg', unit: 'tabletka' },
+    { id: 4, name: 'Metronidazol 250mg', unit: 'tabletka' },
+    { id: 5, name: 'Doksycyklina 100mg', unit: 'kapsułka' },
+    { id: 6, name: 'Karprofen 50mg', unit: 'tabletka' },
+    { id: 7, name: 'Meloksykam 1mg', unit: 'tabletka' },
+    { id: 8, name: 'Mavacoxib 6mg', unit: 'tabletka' },
+    { id: 9, name: 'Tramadol 50mg', unit: 'tabletka' },
+    { id: 10, name: 'Fenbendazol 150mg', unit: 'tabletka' },
+    { id: 11, name: 'Afoksolaner 28,3mg', unit: 'tabletka' },
+    { id: 12, name: 'Prednizolon 5mg', unit: 'tabletka' },
+    { id: 13, name: 'Oclacitinib 3,6mg', unit: 'tabletka' },
+    { id: 14, name: 'Omeprazol 10mg', unit: 'kapsułka' },
+    { id: 15, name: 'Maropitant 16mg', unit: 'tabletka' },
+    { id: 16, name: 'Pimobendan 1,25mg', unit: 'tabletka' },
+    { id: 17, name: 'Furosemid 40mg', unit: 'tabletka' },
+    { id: 18, name: 'Fenobarbital 30mg', unit: 'tabletka' },
+    { id: 19, name: 'Gabapentyna 100mg', unit: 'kapsułka' },
+    { id: 20, name: 'Caniviton Plus', unit: 'tabletka' },
 ];
 
 async function setupVetMocks(page: import('@playwright/test').Page) {

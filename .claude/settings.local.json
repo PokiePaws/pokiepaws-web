@@ -8,7 +8,14 @@
       "Bash(python -c \"import docx; print\\('OK'\\)\")",
       "Bash(python docs/generate_docx.py)",
       "Bash(cp \"C:\\\\Users\\\\Natalia\\\\WebstormProjects\\\\pokiepaws-web\\\\docs\\\\dokumentacja_web.docx\" \"C:\\\\Users\\\\Natalia\\\\Desktop\\\\dokumentacja_web.docx\")",
-      "Bash(cp \"C:\\\\Users\\\\Natalia\\\\WebstormProjects\\\\pokiepaws-web\\\\docs\\\\dokumentacja_web.tex\" \"C:\\\\Users\\\\Natalia\\\\Desktop\\\\dokumentacja_web.tex\")"
+      "Bash(cp \"C:\\\\Users\\\\Natalia\\\\WebstormProjects\\\\pokiepaws-web\\\\docs\\\\dokumentacja_web.tex\" \"C:\\\\Users\\\\Natalia\\\\Desktop\\\\dokumentacja_web.tex\")",
+      "Bash(git push *)",
+      "Bash(cp \"C:\\\\Users\\\\Natalia\\\\WebstormProjects\\\\pokiepaws-web\\\\docs\\\\dokumentacja_web.tex\" \"C:\\\\Users\\\\Natalia\\\\Desktop\\\\dokumentacja_web.tex\" && echo \"OK\")",
+      "Bash(npm list *)",
+      "Bash(npm install *)",
+      "Bash(node generate_docx2.js)",
+      "Bash(node -e \"const {Document,Packer,Paragraph,TextRun,TableOfContents}=require\\('docx'\\);const doc=new Document\\({sections:[{children:[new TableOfContents\\('Test',{hyperlink:true,headingStyleRange:'1-2'}\\)]}]}\\);Packer.toBuffer\\(doc\\).then\\(b=>{require\\('fs'\\).writeFileSync\\('test.docx',b\\);console.log\\('OK'\\)}\\).catch\\(e=>console.error\\(e.message\\)\\)\")",
+      "Bash(node -e ' *)"
     ]
   }
 }
