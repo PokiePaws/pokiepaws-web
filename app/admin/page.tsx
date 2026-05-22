@@ -10,6 +10,7 @@ import {
     useAdminLogStats,
     useAdminLogs,
     useAdminUsers,
+    useAdminWarehouses,
     useCreateAdminClinic,
     useCreateAdminUser,
     useDeleteAdminClinic,
@@ -71,6 +72,7 @@ export default function AdminPanelPage() {
     const [editingUserId, setEditingUserId] = useState<number | null>(null);
     const { data: clinics = [] } = useAdminClinics();
     const { data: users = [] } = useAdminUsers();
+    const { data: warehouses = [] } = useAdminWarehouses();
     const { data: logs = [] } = useAdminLogs();
     const { data: logStats = {} } = useAdminLogStats();
     const { data: orders = [], isError: ordersError } = useWarehouseOrders();
@@ -102,6 +104,7 @@ export default function AdminPanelPage() {
         password: '',
         role: 'VET',
         clinicId: '',
+        warehouseId: '',
         npwz: '',
         phone: '',
         specialization: '',
@@ -135,6 +138,7 @@ export default function AdminPanelPage() {
             password: '',
             role: 'VET',
             clinicId: '',
+            warehouseId: '',
             npwz: '',
             phone: '',
             specialization: '',
@@ -169,16 +173,22 @@ export default function AdminPanelPage() {
         const payload = {
             ...userForm,
             clinicId: userForm.clinicId ? Number(userForm.clinicId) : undefined,
+            warehouseId: userForm.warehouseId ? Number(userForm.warehouseId) : undefined,
         };
 
-        if (editingUserId) {
-            await updateUser.mutateAsync({ id: editingUserId, payload });
-        } else {
-            await createUser.mutateAsync(payload);
+        try {
+            if (editingUserId) {
+                await updateUser.mutateAsync({ id: editingUserId, payload });
+            } else {
+                await createUser.mutateAsync(payload);
+            }
+            setShowUserForm(false);
+            resetUserForm();
+            addNotification({ message: editingUserId ? 'Uzytkownik zaktualizowany' : 'Pracownik dodany', type: 'success' });
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Nie udalo sie zapisac pracownika';
+            addNotification({ message, type: 'error' });
         }
-        setShowUserForm(false);
-        resetUserForm();
-        addNotification({ message: editingUserId ? 'Uzytkownik zaktualizowany' : 'Pracownik dodany', type: 'success' });
     };
 
     const openClinicForm = () => {
@@ -219,6 +229,7 @@ export default function AdminPanelPage() {
             password: '',
             role: user.role,
             clinicId: user.clinicId ? String(user.clinicId) : '',
+            warehouseId: user.warehouseId ? String(user.warehouseId) : '',
             npwz: user.npwz || '',
             phone: user.phone || '',
             specialization: user.specialization || '',
@@ -521,37 +532,117 @@ export default function AdminPanelPage() {
 
                 {showUserForm && (
                     <AdminModal onClose={() => { setShowUserForm(false); resetUserForm(); }}>
-                        <div className="p-10">
-                            <h2 className="text-3xl font-bold mb-2">{editingUserId ? 'Edytuj Uzytkownika' : 'Dodaj Pracownika'}</h2>
-                            <form onSubmit={handleUserSubmit} className="space-y-4 mt-8">
+                        <div className="p-10 max-h-[90vh] overflow-y-auto">
+                            <h2 className="text-3xl font-bold mb-1">{editingUserId ? 'Edytuj Uzytkownika' : 'Dodaj Pracownika'}</h2>
+                            <p className="text-stone-400 text-sm mb-8">Pola oznaczone <span className="text-red-500">*</span> sa wymagane dla danej roli</p>
+                            <form onSubmit={handleUserSubmit} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <input required placeholder="Imie" className={INPUT_CLS} value={userForm.firstName} onChange={e => setUserForm({ ...userForm, firstName: e.target.value })} />
-                                    <input required placeholder="Nazwisko" className={INPUT_CLS} value={userForm.lastName} onChange={e => setUserForm({ ...userForm, lastName: e.target.value })} />
+                                    <input required placeholder="Imie *" className={INPUT_CLS} value={userForm.firstName} onChange={e => setUserForm({ ...userForm, firstName: e.target.value })} />
+                                    <input required placeholder="Nazwisko *" className={INPUT_CLS} value={userForm.lastName} onChange={e => setUserForm({ ...userForm, lastName: e.target.value })} />
                                 </div>
-                                <input required type="email" placeholder="Email sluzbowy" className={INPUT_CLS} value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} />
-                                <input type="password" placeholder="Haslo startowe" className={INPUT_CLS} value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} />
-                                <div className="grid grid-cols-2 gap-4">
-                                    <select className={INPUT_CLS} value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })}>
-                                        <option value="VET">Lekarz</option>
-                                        <option value="ADMIN">Admin</option>
-                                        <option value="WAREHOUSE">Magazyn</option>
+                                <input required type="email" placeholder="Email sluzbowy *" className={INPUT_CLS} value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} />
+                                <input
+                                    type="password"
+                                    placeholder={editingUserId ? 'Nowe haslo (zostaw puste aby nie zmieniac)' : 'Haslo startowe *'}
+                                    required={!editingUserId}
+                                    className={INPUT_CLS}
+                                    value={userForm.password}
+                                    onChange={e => setUserForm({ ...userForm, password: e.target.value })}
+                                />
+
+                                {/* Rola */}
+                                <div>
+                                    <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1 mb-1 block">Rola *</label>
+                                    <select
+                                        className={INPUT_CLS}
+                                        value={userForm.role}
+                                        onChange={e => setUserForm({ ...userForm, role: e.target.value, clinicId: '', warehouseId: '', npwz: '' })}
+                                    >
+                                        <option value="VET">Lekarz weterynarii (VET)</option>
+                                        <option value="WAREHOUSE">Pracownik magazynu (WAREHOUSE)</option>
+                                        <option value="ADMIN">Administrator (ADMIN)</option>
                                     </select>
-                                    <select className={INPUT_CLS} value={userForm.clinicId} onChange={e => setUserForm({ ...userForm, clinicId: e.target.value })}>
-                                        <option value="">Wybierz klinike</option>
-                                        {clinics.map(clinic => <option key={clinic.id} value={clinic.id}>{clinic.clinicName}</option>)}
-                                    </select>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <input placeholder="NPWZ" className={INPUT_CLS} value={userForm.npwz} onChange={e => setUserForm({ ...userForm, npwz: e.target.value })} />
-                                    <input placeholder="Telefon" className={INPUT_CLS} value={userForm.phone} onChange={e => setUserForm({ ...userForm, phone: e.target.value })} />
-                                </div>
-                                <input placeholder="Specjalizacja" className={INPUT_CLS} value={userForm.specialization} onChange={e => setUserForm({ ...userForm, specialization: e.target.value })} />
+
+                                {/* Pola specyficzne dla VET */}
+                                {userForm.role === 'VET' && (
+                                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 space-y-4">
+                                        <p className="text-xs font-bold text-emerald-700 uppercase tracking-widest">Dane lekarza</p>
+                                        <select
+                                            required
+                                            className={INPUT_CLS}
+                                            value={userForm.clinicId}
+                                            onChange={e => setUserForm({ ...userForm, clinicId: e.target.value })}
+                                        >
+                                            <option value="">Przypisz do kliniki *</option>
+                                            {clinics.map(clinic => <option key={clinic.id} value={clinic.id}>{clinic.clinicName}</option>)}
+                                        </select>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <input
+                                                required
+                                                placeholder="NPWZ (7 cyfr) *"
+                                                className={INPUT_CLS}
+                                                value={userForm.npwz}
+                                                onChange={e => setUserForm({ ...userForm, npwz: e.target.value })}
+                                            />
+                                            <input
+                                                placeholder="Telefon"
+                                                className={INPUT_CLS}
+                                                value={userForm.phone}
+                                                onChange={e => setUserForm({ ...userForm, phone: e.target.value })}
+                                            />
+                                        </div>
+                                        <input
+                                            placeholder="Specjalizacja"
+                                            className={INPUT_CLS}
+                                            value={userForm.specialization}
+                                            onChange={e => setUserForm({ ...userForm, specialization: e.target.value })}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Pola specyficzne dla WAREHOUSE */}
+                                {userForm.role === 'WAREHOUSE' && (
+                                    <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 space-y-4">
+                                        <p className="text-xs font-bold text-blue-700 uppercase tracking-widest">Dane pracownika magazynu</p>
+                                        <select
+                                            required
+                                            className={INPUT_CLS}
+                                            value={userForm.warehouseId}
+                                            onChange={e => setUserForm({ ...userForm, warehouseId: e.target.value })}
+                                        >
+                                            <option value="">Przypisz do magazynu *</option>
+                                            {warehouses.map(w => <option key={w.id} value={w.id}>{w.warehouseName}{w.city ? ` — ${w.city}` : ''}</option>)}
+                                        </select>
+                                        <input
+                                            placeholder="Telefon"
+                                            className={INPUT_CLS}
+                                            value={userForm.phone}
+                                            onChange={e => setUserForm({ ...userForm, phone: e.target.value })}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Telefon dla ADMIN (brak dedykowanego pola powyzej) */}
+                                {userForm.role === 'ADMIN' && (
+                                    <input
+                                        placeholder="Telefon"
+                                        className={INPUT_CLS}
+                                        value={userForm.phone}
+                                        onChange={e => setUserForm({ ...userForm, phone: e.target.value })}
+                                    />
+                                )}
+
                                 <label className="flex items-center gap-3 text-sm font-bold text-stone-600">
                                     <input type="checkbox" checked={userForm.active} onChange={e => setUserForm({ ...userForm, active: e.target.checked })} />
                                     Uzytkownik aktywny
                                 </label>
-                                <button disabled={createUser.isPending || updateUser.isPending} type="submit" className="w-full py-5 bg-emerald-500 text-white rounded-3xl font-bold shadow-xl shadow-emerald-100 hover:bg-emerald-600 transition-all">
-                                    {editingUserId ? 'Zapisz zmiany' : 'Zatwierdz Pracownika'}
+                                <button
+                                    disabled={createUser.isPending || updateUser.isPending}
+                                    type="submit"
+                                    className="w-full py-5 bg-emerald-500 text-white rounded-3xl font-bold shadow-xl shadow-emerald-100 hover:bg-emerald-600 transition-all disabled:opacity-60"
+                                >
+                                    {(createUser.isPending || updateUser.isPending) ? 'Zapisywanie...' : editingUserId ? 'Zapisz zmiany' : 'Dodaj Pracownika'}
                                 </button>
                             </form>
                         </div>

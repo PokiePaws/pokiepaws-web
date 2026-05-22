@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '../../components/navbar';
 import { useLanguageStore } from '../../store/use-language-store';
 import { translations } from '../../lib/translations';
-import { Mail, Phone, MapPin, Send, CheckCircle2, User, Building2 } from 'lucide-react';
+import { Mail, Phone, MapPin, User, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useClinics } from '../../lib/features/clinics/use-clinics';
 
@@ -14,18 +13,6 @@ export default function ContactPage() {
     const { language } = useLanguageStore();
     const t = translations[language];
     const { data: clinics = [] } = useClinics();
-    const [submitted, setSubmitted] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [selectedClinicId, setSelectedClinicId] = useState('');
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            setSubmitted(true);
-        }, 1500);
-    };
 
     return (
         <div className="min-h-screen bg-stone-50">

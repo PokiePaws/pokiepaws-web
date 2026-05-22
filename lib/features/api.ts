@@ -3,6 +3,7 @@ import { httpClient } from '../infrastructure/http/http-client';
 import { clinicSchema, clinicsSchema } from './clinics/clinic-schema';
 import {
     activityLogsSchema,
+    adminWarehousesSchema,
     animalSchema,
     animalsSchema,
     availableSlotsSchema,
@@ -22,6 +23,7 @@ import {
     warehouseStockSchema,
     warehouseWorkerMeSchema,
     type ActivityLog,
+    type AdminWarehouse,
     type Animal,
     type AnimalRequest,
     type AvailableSlots,
@@ -248,6 +250,11 @@ export const adminApi = {
     },
     deleteClinic(id: number): Promise<void> {
         return httpClient.delete<void>(`/api/clinics/${id}`);
+    },
+    getWarehouses(): Promise<AdminWarehouse[]> {
+        return httpClient
+            .get<AdminWarehouse[]>('/api/admin/warehouses')
+            .then((data) => adminWarehousesSchema.parse(data));
     },
     getLogs(limit = 20): Promise<ActivityLog[]> {
         return httpClient

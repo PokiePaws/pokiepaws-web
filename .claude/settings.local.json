@@ -20,7 +20,13 @@
       "WebFetch(domain:api.pokiepaws.pl)",
       "WebFetch(domain:pokiepaws.pl)",
       "Bash(xargs cat)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(xargs grep -l \"admin/users\\\\|AdminController\\\\|AdminService\")",
+      "Bash(xargs grep -l \"warehouseRepository\\\\|WarehouseRepository\")",
+      "Bash(xargs grep -l \"GET.*warehouse\\\\|@RequestMapping.*warehouse\")",
+      "Bash(.\\\\mvnw.cmd spotless:apply -q)",
+      "Bash(grep -v \"^$\")"
     ]
   }
 }

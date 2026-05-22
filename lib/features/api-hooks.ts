@@ -12,6 +12,7 @@ import type {
 } from './api-schemas';
 
 export const apiQueryKeys = {
+    adminWarehouses: ['admin', 'warehouses'] as const,
     warehouseMe: ['warehouse', 'me'] as const,
     warehouseStock: (warehouseId?: number) => ['warehouse', 'stock', warehouseId ?? 'all'] as const,
     warehouseOrders: (clinicId?: number, status?: string) => ['warehouse', 'orders', clinicId ?? 'all', status ?? 'all'] as const,
@@ -218,6 +219,13 @@ export function useDeleteAdminClinic() {
     return useMutation({
         mutationFn: (id: number) => adminApi.deleteClinic(id),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.adminClinics }),
+    });
+}
+
+export function useAdminWarehouses() {
+    return useQuery({
+        queryKey: apiQueryKeys.adminWarehouses,
+        queryFn: adminApi.getWarehouses,
     });
 }
 
