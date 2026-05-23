@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Package, PackagePlus, ClipboardList, Pencil, Trash2, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Package, PackagePlus, ClipboardList, Pencil, Trash2, CheckCircle, XCircle, Clock, History } from 'lucide-react';
 import { useNotificationStore } from 'store/use-notification-store';
 import { cn } from 'lib/utils';
 import {
@@ -291,9 +291,11 @@ function WarehouseView({ warehouseId }: { warehouseId: number }) {
 function VetView({ clinicId }: { clinicId: number }) {
     const addNotification = useNotificationStore((s) => s.addNotification);
     const createOrder = useCreateOrder();
+    const { data: orderHistory = [], isLoading: loadingHistory } = useWarehouseOrders(clinicId);
     const emptyForm = { name: '', amount: '1', unit: '', category: '', description: '', expiryDate: '' };
     const [form, setForm] = useState(emptyForm);
     const [submitted, setSubmitted] = useState<string[]>([]);
+    const [tab, setTab] = useState<'order' | 'history'>('order');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -316,48 +318,101 @@ function VetView({ clinicId }: { clinicId: number }) {
     };
 
     return (
-        <div className="grid gap-6 lg:grid-cols-2">
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-stone-900 mb-5 flex items-center gap-2">
-                    <PackagePlus className="h-5 w-5 text-[#68b9dc]" /> Zamów produkt
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input required placeholder="Nazwa produktu *" className={INPUT} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                    <div className="grid grid-cols-2 gap-4">
-                        <input required type="number" min="1" placeholder="Ilość *" className={INPUT} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
-                        <input placeholder="Jednostka (szt, op…)" className={INPUT} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
-                    </div>
-                    <input placeholder="Kategoria" className={INPUT} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-                    <textarea placeholder="Uwagi / opis" rows={3} className={INPUT + ' resize-none'} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                    <div>
-                        <label className="text-xs text-stone-500 mb-1 block">Data ważności (opcjonalnie)</label>
-                        <input type="date" className={INPUT} value={form.expiryDate} onChange={(e) => setForm({ ...form, expiryDate: e.target.value })} />
-                    </div>
-                    <button type="submit" disabled={createOrder.isPending} className="w-full py-3 bg-[#68b9dc] text-white rounded-xl font-semibold hover:bg-blue-500 transition-all disabled:opacity-50">
-                        {createOrder.isPending ? 'Wysyłanie…' : 'Złóż zamówienie'}
-                    </button>
-                </form>
+        <div className="space-y-6">
+            <div className="flex gap-2 bg-stone-100 p-1 rounded-2xl w-fit">
+                <button
+                    onClick={() => setTab('order')}
+                    className={cn('flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all', tab === 'order' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700')}
+                >
+                    <PackagePlus className="h-4 w-4" /> Złóż zamówienie
+                </button>
+                <button
+                    onClick={() => setTab('history')}
+                    className={cn('flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all', tab === 'history' ? 'bg-white shadow-sm text-stone-900' : 'text-stone-500 hover:text-stone-700')}
+                >
+                    <History className="h-4 w-4" /> Historia zamówień
+                    {orderHistory.length > 0 && (
+                        <span className="ml-1 text-xs font-bold bg-[#68b9dc]/20 text-[#68b9dc] px-1.5 py-0.5 rounded-md">{orderHistory.length}</span>
+                    )}
+                </button>
             </div>
 
-            <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-stone-900 mb-5 flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-stone-400" /> Złożone w tej sesji
-                </h2>
-                {submitted.length === 0 ? (
-                    <p className="text-stone-400 text-sm">Jeszcze nie złożono żadnego zamówienia.</p>
-                ) : (
-                    <ul className="space-y-2">
-                        {submitted.map((label, i) => (
-                            <li key={i} className="flex items-center gap-3 py-2 border-b border-stone-50 last:border-0">
-                                <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
-                                <span className="text-sm text-stone-700">{label}</span>
-                                <StatusBadge status="PENDING" />
-                            </li>
-                        ))}
-                    </ul>
-                )}
-                <p className="text-xs text-stone-400 mt-4">Zamówienia trafiają do magazynu centralnego. Status możesz śledzić u magazyniera.</p>
-            </div>
+            {tab === 'order' && (
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                        <h2 className="text-lg font-bold text-stone-900 mb-5 flex items-center gap-2">
+                            <PackagePlus className="h-5 w-5 text-[#68b9dc]" /> Zamów produkt
+                        </h2>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <input required placeholder="Nazwa produktu *" className={INPUT} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                            <div className="grid grid-cols-2 gap-4">
+                                <input required type="number" min="1" placeholder="Ilość *" className={INPUT} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+                                <input placeholder="Jednostka (szt, op…)" className={INPUT} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />
+                            </div>
+                            <input placeholder="Kategoria" className={INPUT} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+                            <textarea placeholder="Uwagi / opis" rows={3} className={INPUT + ' resize-none'} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                            <div>
+                                <label className="text-xs text-stone-500 mb-1 block">Data ważności (opcjonalnie)</label>
+                                <input type="date" className={INPUT} value={form.expiryDate} onChange={(e) => setForm({ ...form, expiryDate: e.target.value })} />
+                            </div>
+                            <button type="submit" disabled={createOrder.isPending} className="w-full py-3 bg-[#68b9dc] text-white rounded-xl font-semibold hover:bg-blue-500 transition-all disabled:opacity-50">
+                                {createOrder.isPending ? 'Wysyłanie…' : 'Złóż zamówienie'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                        <h2 className="text-lg font-bold text-stone-900 mb-5 flex items-center gap-2">
+                            <Clock className="h-5 w-5 text-stone-400" /> Złożone w tej sesji
+                        </h2>
+                        {submitted.length === 0 ? (
+                            <p className="text-stone-400 text-sm">Jeszcze nie złożono żadnego zamówienia.</p>
+                        ) : (
+                            <ul className="space-y-2">
+                                {submitted.map((label, i) => (
+                                    <li key={i} className="flex items-center gap-3 py-2 border-b border-stone-50 last:border-0">
+                                        <CheckCircle className="h-4 w-4 text-emerald-500 shrink-0" />
+                                        <span className="text-sm text-stone-700">{label}</span>
+                                        <StatusBadge status="PENDING" />
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        <p className="text-xs text-stone-400 mt-4">Zamówienia trafiają do magazynu centralnego.</p>
+                    </div>
+                </div>
+            )}
+
+            {tab === 'history' && (
+                <div className="space-y-3">
+                    {loadingHistory ? (
+                        <div className="py-16 text-center text-stone-400">Ładowanie…</div>
+                    ) : orderHistory.length === 0 ? (
+                        <div className="py-16 text-center bg-white rounded-2xl border border-slate-100">
+                            <History className="h-10 w-10 text-stone-300 mx-auto mb-3" />
+                            <p className="text-stone-400 text-sm">Brak zamówień dla tej kliniki.</p>
+                        </div>
+                    ) : (
+                        orderHistory.map((order) => (
+                            <div key={order.id} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <p className="font-semibold text-stone-900">{order.name}</p>
+                                            <StatusBadge status={order.status} />
+                                        </div>
+                                        <p className="text-sm text-stone-500">
+                                            Ilość: <span className="font-medium text-stone-700">{order.amount}{order.unit ? ` ${order.unit}` : ''}</span>
+                                            {order.category && <> · Kategoria: <span className="font-medium text-stone-700">{order.category}</span></>}
+                                        </p>
+                                        {order.description && <p className="text-xs text-stone-400 mt-1">{order.description}</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
         </div>
     );
 }

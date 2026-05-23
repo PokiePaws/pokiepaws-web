@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Activity, Building2, LogOut, Package, Pencil, ShieldCheck, Trash2, Users } from 'lucide-react';
+import { Activity, Building2, LogOut, Package, Pencil, ScrollText, ShieldCheck, Trash2, Users } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { pl } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNotificationStore } from 'store/use-notification-store';
 import { cn } from 'lib/utils';
@@ -21,6 +23,31 @@ import {
     useWarehouseOrders,
 } from 'lib/features/api-hooks';
 import { authApi } from 'lib/features/auth/auth-api';
+
+const LOG_TYPE_LABELS: Record<string, string> = {
+    LOGIN: 'Logowanie',
+    DATA: 'Dane',
+    SUPPLY: 'Zaopatrzenie',
+    LAB: 'Laboratorium',
+    PRESCRIPTION: 'Recepta',
+};
+
+const LOG_TYPE_COLORS: Record<string, string> = {
+    LOGIN: 'bg-blue-50 text-blue-700 border-blue-200',
+    DATA: 'bg-purple-50 text-purple-700 border-purple-200',
+    SUPPLY: 'bg-amber-50 text-amber-700 border-amber-200',
+    LAB: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+    PRESCRIPTION: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+};
+
+const LOG_STAT_LABELS: Record<string, string> = {
+    today: 'Dzisiaj',
+    LOGIN: 'Logowania',
+    DATA: 'Dane',
+    SUPPLY: 'Zaopatrzenie',
+    LAB: 'Laboratorium',
+    PRESCRIPTION: 'Recepty',
+};
 
 const ORDER_STATUS_LABELS: Record<string, string> = {
     PENDING: 'Oczekuje',
@@ -66,6 +93,7 @@ export default function AdminPanelPage() {
     const addNotification = useNotificationStore(state => state.addNotification);
     const [activeTab, setActiveTab] = useState('users');
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [logTypeFilter, setLogTypeFilter] = useState('');
     const [showClinicForm, setShowClinicForm] = useState(false);
     const [showUserForm, setShowUserForm] = useState(false);
     const [editingClinicId, setEditingClinicId] = useState<number | null>(null);
@@ -74,6 +102,7 @@ export default function AdminPanelPage() {
     const { data: users = [] } = useAdminUsers();
     const { data: warehouses = [] } = useAdminWarehouses();
     const { data: logs = [] } = useAdminLogs();
+    const { data: filteredLogs = [] } = useAdminLogs(logTypeFilter || undefined, 100);
     const { data: logStats = {} } = useAdminLogStats();
     const { data: orders = [], isError: ordersError } = useWarehouseOrders();
     const updateOrderStatus = useUpdateOrderStatus();
@@ -297,6 +326,7 @@ export default function AdminPanelPage() {
                             { id: 'clinics', icon: Building2, label: 'Kliniki' },
                             { id: 'users', icon: Users, label: 'Personel' },
                             { id: 'orders', icon: Package, label: 'Zamowienia' },
+                            { id: 'logs', icon: ScrollText, label: 'Logi systemu' },
                         ].map(item => (
                             <button
                                 key={item.id}
@@ -323,7 +353,7 @@ export default function AdminPanelPage() {
                 <header className="flex justify-between items-center mb-12">
                     <div>
                         <h1 className="text-4xl font-bold text-stone-900">
-                            {activeTab === 'users' ? 'Personel' : activeTab === 'clinics' ? 'Kliniki' : activeTab === 'orders' ? 'Zamowienia' : 'Panel'}
+                            {activeTab === 'users' ? 'Personel' : activeTab === 'clinics' ? 'Kliniki' : activeTab === 'orders' ? 'Zamowienia' : activeTab === 'logs' ? 'Logi systemu' : 'Panel'}
                         </h1>
                         <p className="text-stone-500 uppercase text-[10px] font-bold tracking-widest mt-1">
                             Produkcyjne dane z PokiePaws API
@@ -350,8 +380,8 @@ export default function AdminPanelPage() {
                             <div className="grid grid-cols-4 gap-3">
                                 {Object.entries(logStats).map(([type, count]) => (
                                     <div key={type} className="rounded-2xl bg-stone-50 p-4">
-                                        <p className="text-[10px] font-bold uppercase text-stone-400">{type}</p>
-                                        <p className="text-2xl font-bold text-stone-900">{count}</p>
+                                        <p className="text-[10px] font-bold uppercase text-stone-400">{LOG_STAT_LABELS[type] ?? type}</p>
+                                        <p className="text-2xl font-bold text-stone-900">{count as number}</p>
                                     </div>
                                 ))}
                             </div>
@@ -496,6 +526,84 @@ export default function AdminPanelPage() {
                         )}
                     </section>
                 )}
+                {activeTab === 'logs' && (
+                    <section className="space-y-6">
+                        {/* stats */}
+                        <div className="grid grid-cols-3 lg:grid-cols-6 gap-4">
+                            {Object.entries(logStats).map(([type, count]) => (
+                                <div key={type} className="bg-white p-5 rounded-[2rem] border border-stone-100 shadow-sm">
+                                    <p className="text-[10px] font-bold uppercase text-stone-400 tracking-widest mb-1">{LOG_STAT_LABELS[type] ?? type}</p>
+                                    <p className="text-3xl font-bold text-stone-900">{count as number}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* type filter */}
+                        <div className="flex gap-2 flex-wrap">
+                            {[
+                                { value: '', label: 'Wszystkie' },
+                                { value: 'LOGIN', label: 'Logowania' },
+                                { value: 'DATA', label: 'Dane' },
+                                { value: 'SUPPLY', label: 'Zaopatrzenie' },
+                                { value: 'LAB', label: 'Laboratorium' },
+                                { value: 'PRESCRIPTION', label: 'Recepty' },
+                            ].map(({ value, label }) => (
+                                <button
+                                    key={value || 'all'}
+                                    onClick={() => setLogTypeFilter(value)}
+                                    className={cn(
+                                        'px-4 py-2 rounded-xl text-sm font-semibold border transition-all',
+                                        logTypeFilter === value
+                                            ? 'bg-[#1e293b] text-white border-[#1e293b]'
+                                            : 'bg-white text-stone-600 border-stone-200 hover:border-stone-400',
+                                    )}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* log list */}
+                        <div className="bg-white rounded-[2.5rem] border border-stone-100 shadow-sm overflow-hidden">
+                            {filteredLogs.length === 0 ? (
+                                <div className="py-16 text-center text-stone-400 text-sm">Brak logów</div>
+                            ) : (
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-stone-50 text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                                    <tr>
+                                        <th className="px-6 py-4">Czas</th>
+                                        <th className="px-6 py-4">Typ</th>
+                                        <th className="px-6 py-4">Uzytkownik</th>
+                                        <th className="px-6 py-4">Szczegoly</th>
+                                        <th className="px-6 py-4">Klinika</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-stone-50">
+                                    {filteredLogs.map(log => (
+                                        <tr key={log.id} className="hover:bg-stone-50 transition-colors">
+                                            <td className="px-6 py-4 text-stone-400 whitespace-nowrap text-xs">
+                                                {log.time ? format(parseISO(log.time), 'd MMM yyyy, HH:mm', { locale: pl }) : '—'}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={cn(
+                                                    'px-2.5 py-1 rounded-lg text-xs font-bold border',
+                                                    LOG_TYPE_COLORS[log.type ?? ''] ?? 'bg-stone-100 text-stone-600 border-stone-200',
+                                                )}>
+                                                    {LOG_TYPE_LABELS[log.type ?? ''] ?? log.type ?? '—'}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 font-medium text-stone-700 text-xs">{log.userEmail ?? '—'}</td>
+                                            <td className="px-6 py-4 text-stone-500 max-w-xs truncate">{log.detail ?? '—'}</td>
+                                            <td className="px-6 py-4 text-stone-400 text-xs">{log.clinic ?? '—'}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </section>
+                )}
+
             </main>
 
             <AnimatePresence>

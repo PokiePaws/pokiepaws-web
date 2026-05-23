@@ -229,10 +229,10 @@ export function useAdminWarehouses() {
     });
 }
 
-export function useAdminLogs() {
+export function useAdminLogs(type?: string, limit = 100) {
     return useQuery({
-        queryKey: apiQueryKeys.adminLogs,
-        queryFn: () => adminApi.getLogs(20),
+        queryKey: [...apiQueryKeys.adminLogs, type ?? 'all', limit],
+        queryFn: () => adminApi.getLogs(type, limit),
     });
 }
 

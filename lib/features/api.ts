@@ -256,9 +256,11 @@ export const adminApi = {
             .get<AdminWarehouse[]>('/api/admin/warehouses')
             .then((data) => adminWarehousesSchema.parse(data));
     },
-    getLogs(limit = 20): Promise<ActivityLog[]> {
+    getLogs(type?: string, limit = 100): Promise<ActivityLog[]> {
+        const params = new URLSearchParams({ limit: String(limit) });
+        if (type) params.set('type', type);
         return httpClient
-            .get<ActivityLog[]>(`/api/admin/logs?limit=${limit}`)
+            .get<ActivityLog[]>(`/api/admin/logs?${params.toString()}`)
             .then((data) => activityLogsSchema.parse(data));
     },
     getLogStats(): Promise<Record<string, number>> {
