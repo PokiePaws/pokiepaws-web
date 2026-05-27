@@ -249,7 +249,15 @@ export const vetMeResponseSchema = z.object({
 });
 
 export const labOrderPrioritySchema = z.enum(['NORMAL', 'HIGH', 'URGENT']);
-export const labOrderStatusSchema = z.enum(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
+export const labOrderStatusSchema = z.enum(['PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
+
+export const labOrderStatusHistorySchema = z.object({
+    id: z.number(),
+    previousStatus: labOrderStatusSchema.nullable().optional(),
+    newStatus: labOrderStatusSchema,
+    changedByEmail: z.string().nullable().optional(),
+    changedAt: z.string(),
+});
 
 export const labOrderSchema = z.object({
     id: z.number(),
@@ -265,8 +273,10 @@ export const labOrderSchema = z.object({
     clinicalReason: z.string().nullable().optional(),
     priority: labOrderPrioritySchema,
     status: labOrderStatusSchema,
+    warehouseOrderId: z.number().nullable().optional(),
     orderedAt: z.string(),
     completedAt: z.string().nullable().optional(),
+    statusHistory: z.array(labOrderStatusHistorySchema).optional().default([]),
 });
 
 export const labOrdersSchema = z.array(labOrderSchema);
@@ -283,6 +293,7 @@ export type AdminWarehouse = z.infer<typeof adminWarehouseSchema>;
 export type LabOrder = z.infer<typeof labOrderSchema>;
 export type LabOrderPriority = z.infer<typeof labOrderPrioritySchema>;
 export type LabOrderStatus = z.infer<typeof labOrderStatusSchema>;
+export type LabOrderStatusHistory = z.infer<typeof labOrderStatusHistorySchema>;
 export type Product = z.infer<typeof productSchema>;
 
 export type CreateLabOrderRequest = {

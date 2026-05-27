@@ -423,7 +423,6 @@ export default function SuppliesPage() {
     const {
         data: warehouseMe,
         isLoading: loadingWarehouse,
-        isError: notWarehouse,
         error: warehouseError,
     } = useWarehouseMe();
     const {

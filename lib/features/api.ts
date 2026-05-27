@@ -222,22 +222,27 @@ export const productsApi = {
 export const labOrdersApi = {
     getByClinic(clinicId: number): Promise<LabOrder[]> {
         return httpClient
-            .get<LabOrder[]>(`/api/clinics/${clinicId}/lab-orders`)
+            .get<LabOrder[]>(API_ENDPOINTS.labOrders.byClinic(clinicId))
             .then((data) => labOrdersSchema.parse(data));
     },
     getByAnimal(animalId: number): Promise<LabOrder[]> {
         return httpClient
-            .get<LabOrder[]>(`/api/animals/${animalId}/lab-orders`)
+            .get<LabOrder[]>(API_ENDPOINTS.labOrders.byAnimal(animalId))
             .then((data) => labOrdersSchema.parse(data));
+    },
+    getById(id: number): Promise<LabOrder> {
+        return httpClient
+            .get<LabOrder>(API_ENDPOINTS.labOrders.byId(id))
+            .then((data) => labOrderSchema.parse(data));
     },
     create(animalId: number, payload: Omit<CreateLabOrderRequest, 'animalId'>): Promise<LabOrder> {
         return httpClient
-            .post<LabOrder>(`/api/animals/${animalId}/lab-orders`, payload)
+            .post<LabOrder>(API_ENDPOINTS.labOrders.create(animalId), payload)
             .then((data) => labOrderSchema.parse(data));
     },
     updateStatus(id: number, status: string): Promise<LabOrder> {
         return httpClient
-            .patch<LabOrder>(`/api/lab-orders/${id}/status`, { status })
+            .patch<LabOrder>(API_ENDPOINTS.labOrders.updateStatus(id), { status })
             .then((data) => labOrderSchema.parse(data));
     },
 };

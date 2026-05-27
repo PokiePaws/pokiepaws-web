@@ -76,4 +76,11 @@ export const API_ENDPOINTS = {
         logs: '/api/admin/logs',
         logStats: '/api/admin/logs/stats',
     },
+    labOrders: {
+        byClinic: (clinicId: number) => `/api/clinics/${clinicId}/lab-orders`,
+        byAnimal: (animalId: number) => `/api/animals/${animalId}/lab-orders`,
+        create: (animalId: number) => `/api/animals/${animalId}/lab-orders`,
+        byId: (id: number) => `/api/lab-orders/${id}`,
+        updateStatus: (id: number) => `/api/lab-orders/${id}/status`,
+    },
 } as const;

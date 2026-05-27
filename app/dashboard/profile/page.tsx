@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { User, Phone, Lock, MapPin, AlertCircle, CheckCircle2, Loader2, Trash2 } from 'lucide-react';
+import { User, Phone, Lock, MapPin, AlertCircle, Loader2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import {
     useDeleteOwnerAccount,
@@ -40,6 +40,7 @@ export default function ProfilePage() {
 
     useEffect(() => {
         if (profile) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPhoneNumber(profile.phoneNumber ?? '');
             setAddress({
                 street: profile.street ?? '',

@@ -382,7 +382,7 @@ export default function PrescriptionsPage() {
     const from = format(subMonths(new Date(), 6), 'yyyy-MM-dd');
     const to = format(addMonths(new Date(), 6), 'yyyy-MM-dd');
 
-    const { data: vetMe } = useVetMe();
+    useVetMe();
     const { data: visits = [], isLoading } = useVetVisitsRange(from, to);
     const { data: animals = [] } = useClinicAnimals();
     const { data: products = [] } = useProducts();

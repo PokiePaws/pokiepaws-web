@@ -16,6 +16,8 @@ import {
     Stethoscope,
     CalendarDays,
     FileText,
+    ShieldCheck,
+    Package,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, parseISO } from 'date-fns';
@@ -41,6 +43,12 @@ const STATUS_CONFIG = {
         classes: 'bg-amber-50 text-amber-700 border-amber-200',
         icon: Clock,
         rowBorder: 'border-l-amber-400',
+    },
+    CONFIRMED: {
+        label: { pl: 'Potwierdzone', en: 'Confirmed' },
+        classes: 'bg-violet-50 text-violet-700 border-violet-200',
+        icon: ShieldCheck,
+        rowBorder: 'border-l-violet-400',
     },
     IN_PROGRESS: {
         label: { pl: 'W trakcie', en: 'In Progress' },
@@ -179,10 +187,48 @@ function LabOrderRow({ order, onStatusChange, isPending }: {
                                 </div>
                             )}
 
+                            {/* warehouse order link */}
+                            {order.warehouseOrderId && (
+                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                    <Package className="h-3.5 w-3.5 text-slate-400" />
+                                    <span>Zamówienie magazynowe: <span className="font-semibold text-slate-700">#{order.warehouseOrderId}</span></span>
+                                </div>
+                            )}
+
+                            {/* status history */}
+                            {order.statusHistory && order.statusHistory.length > 0 && (
+                                <div className="space-y-1.5">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Historia statusów</p>
+                                    <div className="space-y-1">
+                                        {order.statusHistory.map((h) => (
+                                            <div key={h.id} className="flex items-center gap-2 text-xs text-slate-600">
+                                                <span className="text-slate-400">{format(h.changedAt.endsWith('Z') ? new Date(h.changedAt) : new Date(h.changedAt + 'Z'), 'd MMM HH:mm', { locale: pl })}</span>
+                                                <span className="text-slate-300">→</span>
+                                                {h.previousStatus
+                                                    ? <><span className="font-medium">{STATUS_CONFIG[h.previousStatus as keyof typeof STATUS_CONFIG]?.label.pl ?? h.previousStatus}</span><span className="text-slate-300 mx-1">→</span></>
+                                                    : null}
+                                                <span className="font-semibold text-slate-800">{STATUS_CONFIG[h.newStatus as keyof typeof STATUS_CONFIG]?.label.pl ?? h.newStatus}</span>
+                                                {h.changedByEmail && <span className="text-slate-400 ml-auto">{h.changedByEmail}</span>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* status actions */}
                             {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
                                 <div className="flex flex-wrap gap-2">
                                     {order.status === 'PENDING' && (
+                                        <ActionButton
+                                            onClick={() => onStatusChange(order.id, 'CONFIRMED')}
+                                            disabled={isPending}
+                                            variant="violet"
+                                            icon={ShieldCheck}
+                                        >
+                                            Potwierdź zlecenie
+                                        </ActionButton>
+                                    )}
+                                    {order.status === 'CONFIRMED' && (
                                         <ActionButton
                                             onClick={() => onStatusChange(order.id, 'IN_PROGRESS')}
                                             disabled={isPending}
@@ -236,13 +282,14 @@ function ActionButton({ children, onClick, disabled, variant, icon: Icon }: {
     children: React.ReactNode;
     onClick: () => void;
     disabled: boolean;
-    variant: 'blue' | 'green' | 'red';
+    variant: 'blue' | 'green' | 'red' | 'violet';
     icon: React.FC<{ className?: string }>;
 }) {
     const variants = {
         blue: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200',
         green: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-200',
         red: 'bg-red-50 text-red-600 hover:bg-red-100 border-red-200',
+        violet: 'bg-violet-50 text-violet-700 hover:bg-violet-100 border-violet-200',
     };
     return (
         <button
@@ -261,7 +308,7 @@ function ActionButton({ children, onClick, disabled, variant, icon: Icon }: {
 
 // ─── NEW ORDER MODAL ──────────────────────────────────────────────────────────
 
-function NewOrderModal({ clinicId, onClose }: { clinicId: number; onClose: () => void }) {
+function NewOrderModal({ onClose }: { onClose: () => void }) {
     const { data: animals = [] } = useClinicAnimals();
     const createLabOrder = useCreateLabOrder();
     const addNotification = useNotificationStore((s) => s.addNotification);
@@ -436,7 +483,7 @@ function NewOrderModal({ clinicId, onClose }: { clinicId: number; onClose: () =>
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 
-type FilterStatus = 'ALL' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+type FilterStatus = 'ALL' | 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export default function LabOrdersPage() {
     const { language } = useLanguageStore();
@@ -459,6 +506,7 @@ export default function LabOrdersPage() {
 
     const counts = {
         PENDING: orders.filter((o) => o.status === 'PENDING').length,
+        CONFIRMED: orders.filter((o) => o.status === 'CONFIRMED').length,
         IN_PROGRESS: orders.filter((o) => o.status === 'IN_PROGRESS').length,
         COMPLETED: orders.filter((o) => o.status === 'COMPLETED').length,
     };
@@ -492,8 +540,9 @@ export default function LabOrdersPage() {
             </div>
 
             {/* summary cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <SummaryCard label="Oczekujące" count={counts.PENDING} color="amber" icon={Clock} />
+                <SummaryCard label="Potwierdzone" count={counts.CONFIRMED} color="violet" icon={ShieldCheck} />
                 <SummaryCard label="W trakcie" count={counts.IN_PROGRESS} color="blue" icon={Activity} />
                 <SummaryCard label="Zakończone" count={counts.COMPLETED} color="emerald" icon={CheckCircle2} />
             </div>
@@ -501,7 +550,7 @@ export default function LabOrdersPage() {
             {/* filters */}
             <div className="flex flex-wrap gap-2 items-center">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mr-1">Status:</span>
-                {(['ALL', 'PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] as FilterStatus[]).map((s) => (
+                {(['ALL', 'PENDING', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] as FilterStatus[]).map((s) => (
                     <button
                         key={s}
                         onClick={() => setFilterStatus(s)}
@@ -565,7 +614,7 @@ export default function LabOrdersPage() {
             {/* modal */}
             <AnimatePresence>
                 {showModal && vetMe?.clinicId && (
-                    <NewOrderModal clinicId={vetMe.clinicId} onClose={() => setShowModal(false)} />
+                    <NewOrderModal onClose={() => setShowModal(false)} />
                 )}
             </AnimatePresence>
         </div>
@@ -575,18 +624,20 @@ export default function LabOrdersPage() {
 function SummaryCard({ label, count, color, icon: Icon }: {
     label: string;
     count: number;
-    color: 'amber' | 'blue' | 'emerald';
+    color: 'amber' | 'blue' | 'emerald' | 'violet';
     icon: React.FC<{ className?: string }>;
 }) {
     const colors = {
         amber: 'bg-amber-50 text-amber-600 border-amber-100',
         blue: 'bg-blue-50 text-blue-600 border-blue-100',
         emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+        violet: 'bg-violet-50 text-violet-600 border-violet-100',
     };
     const iconColors = {
         amber: 'text-amber-500',
         blue: 'text-blue-500',
         emerald: 'text-emerald-500',
+        violet: 'text-violet-500',
     };
     return (
         <div className={cn('rounded-2xl border p-4 flex items-center gap-4', colors[color])}>
