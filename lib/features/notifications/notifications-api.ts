@@ -4,14 +4,6 @@ export interface NotificationSubscription {
     topic: string;
 }
 
-/**
- * ARCHITECTURE_WARNING: Notification subscription endpoints are not documented.
- * - GET /api/admin/notifications/subscriptions
- * - GET /api/vets/me/notifications/subscriptions
- * These are live endpoints used by RealtimeNotificationsProvider to subscribe
- * to WebSocket topics over STOMP. No documented alternatives exist.
- * Backend-specific endpoints — requires backend support.
- */
 const notificationsApi = {
     async getSubscriptions(role: UserRole): Promise<NotificationSubscription[]> {
         const path = role === 'Admin' ? 'admin' : 'vets/me';
