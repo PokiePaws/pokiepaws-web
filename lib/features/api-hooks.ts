@@ -1,5 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminApi, animalsApi, labOrdersApi, ordersApi, ownerApi, productsApi, vetsApi, vetVisitsApi, visitsApi, warehouseApi } from './api';
+import {
+    adminApi,
+    animalsApi,
+    labOrdersApi,
+    ordersApi,
+    ownerApi,
+    productsApi,
+    vetPatientsApi,
+    vetsApi,
+    vetVisitsApi,
+    visitsApi,
+    warehouseApi,
+} from './api';
 import type {
     AnimalRequest,
     ClinicRequest,
@@ -19,6 +31,7 @@ export const apiQueryKeys = {
     warehouseStock: (warehouseId?: number) => ['warehouse', 'stock', warehouseId ?? 'all'] as const,
     warehouseOrders: (clinicId?: number, status?: string) => ['warehouse', 'orders', clinicId ?? 'all', status ?? 'all'] as const,
     vetMe: ['vets', 'me'] as const,
+    vetPatients: ['vets', 'me', 'patients'] as const,
     animals: ['animals'] as const,
     ownerProfile: ['owner', 'profile'] as const,
     ownerUpcomingVisits: ['visits', 'owner', 'upcoming'] as const,
@@ -38,6 +51,8 @@ export const apiQueryKeys = {
     labOrdersByAnimal: (animalId?: number) => ['labOrders', 'animal', animalId ?? 'all'] as const,
     products: ['products'] as const,
 };
+
+// ─── ANIMALS (owner) ─────────────────────────────────────────────────────────
 
 export function useAnimals() {
     return useQuery({
@@ -69,6 +84,21 @@ export function useDeleteAnimal() {
         onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.animals }),
     });
 }
+
+// ─── VET PATIENTS (clinic animals) ───────────────────────────────────────────
+
+/**
+ * Returns all patients registered at the vet's clinic.
+ * Uses GET /api/vets/me/patients — the correct endpoint for staff views.
+ */
+export function useClinicAnimals() {
+    return useQuery({
+        queryKey: apiQueryKeys.vetPatients,
+        queryFn: vetPatientsApi.getAll,
+    });
+}
+
+// ─── VISITS ──────────────────────────────────────────────────────────────────
 
 export function useOwnerUpcomingVisits() {
     return useQuery({
@@ -105,6 +135,15 @@ export function useCancelVisit() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: number) => visitsApi.cancel(id),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visits'] }),
+    });
+}
+
+/** Vet-specific cancel — uses PATCH /api/vets/me/visits/{id}/cancel */
+export function useCancelVetVisit() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => visitsApi.cancelVetVisit(id),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visits'] }),
     });
 }
@@ -147,6 +186,8 @@ export function useCreatePrescription() {
     });
 }
 
+// ─── VETS ─────────────────────────────────────────────────────────────────────
+
 export function useVets() {
     return useQuery({
         queryKey: apiQueryKeys.vets,
@@ -169,6 +210,16 @@ export function useAvailableSlots(clinicId?: number, vetUserId?: number, date?: 
         enabled: typeof clinicId === 'number' && typeof vetUserId === 'number' && !!date,
     });
 }
+
+export function useVetMe() {
+    return useQuery({
+        queryKey: apiQueryKeys.vetMe,
+        queryFn: vetsApi.getMe,
+        retry: false,
+    });
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────────────────────
 
 export function useAdminUsers() {
     return useQuery({
@@ -246,13 +297,7 @@ export function useAdminLogStats() {
     });
 }
 
-export function useVetMe() {
-    return useQuery({
-        queryKey: apiQueryKeys.vetMe,
-        queryFn: vetsApi.getMe,
-        retry: false,
-    });
-}
+// ─── WAREHOUSE ────────────────────────────────────────────────────────────────
 
 export function useWarehouseMe() {
     return useQuery({
@@ -319,6 +364,8 @@ export function useUpdateOrderStatus() {
     });
 }
 
+// ─── LAB ORDERS ───────────────────────────────────────────────────────────────
+
 export function useLabOrders(clinicId?: number) {
     return useQuery({
         queryKey: apiQueryKeys.labOrders(clinicId),
@@ -344,21 +391,30 @@ export function useCreateLabOrder() {
     });
 }
 
-export function useClinicAnimals() {
-    return useQuery({
-        queryKey: apiQueryKeys.animals,
-        queryFn: animalsApi.getMine,
+export function useUpdateLabOrderStatus() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, status }: { id: number; status: string }) => labOrdersApi.updateStatus(id, status),
+        onSuccess: () => qc.invalidateQueries({ queryKey: ['labOrders'] }),
     });
 }
+
+// ─── VET PATIENTS / REGISTER ──────────────────────────────────────────────────
 
 export function useRegisterPatient() {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: (payload: Parameters<typeof vetVisitsApi.registerPatient>[0]) =>
             vetVisitsApi.registerPatient(payload),
-        onSuccess: () => qc.invalidateQueries({ queryKey: apiQueryKeys.animals }),
+        onSuccess: () => {
+            // Invalidate both owner animals and vet patients caches
+            qc.invalidateQueries({ queryKey: apiQueryKeys.animals });
+            qc.invalidateQueries({ queryKey: apiQueryKeys.vetPatients });
+        },
     });
 }
+
+// ─── PRODUCTS ─────────────────────────────────────────────────────────────────
 
 export function useProducts() {
     return useQuery({
@@ -367,13 +423,7 @@ export function useProducts() {
     });
 }
 
-export function useUpdateLabOrderStatus() {
-    const qc = useQueryClient();
-    return useMutation({
-        mutationFn: ({ id, status }: { id: number; status: string }) => labOrdersApi.updateStatus(id, status),
-        onSuccess: () => qc.invalidateQueries({ queryKey: ['labOrders'] }),
-    });
-}
+// ─── OWNER PROFILE ────────────────────────────────────────────────────────────
 
 export function useOwnerProfile() {
     return useQuery({

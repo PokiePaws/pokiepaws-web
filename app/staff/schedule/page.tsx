@@ -32,8 +32,9 @@ import {
 } from 'date-fns';
 import { pl, enUS } from 'date-fns/locale';
 import { cn } from '../../../lib/utils';
+import { useNotificationStore } from '../../../store/use-notification-store';
 import {
-    useCancelVisit,
+    useCancelVetVisit,
     useClinicAnimals,
     useConfirmVetVisit,
     useCreatePrescription,
@@ -61,6 +62,7 @@ export default function SchedulePage() {
     const { language } = useLanguageStore();
     const t = translations[language];
     const locale = language === 'pl' ? pl : enUS;
+    const addNotification = useNotificationStore((s) => s.addNotification);
 
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -94,7 +96,7 @@ export default function SchedulePage() {
     const { data: apiVisits = [] } = useVetVisitsRange(rangeFrom, rangeTo);
     const createVisit = useCreateVisit();
     const confirmVisit = useConfirmVetVisit();
-    const cancelVisit = useCancelVisit();
+    const cancelVisit = useCancelVetVisit();
     const updateMedicalData = useUpdateVisitMedicalData();
     const createPrescription = useCreatePrescription();
     const { data: prescription } = usePrescription(medicalVisit?.id);
@@ -124,14 +126,21 @@ export default function SchedulePage() {
         return appointments.filter(app => isSameDay(parseISO(app.date), selectedDate));
     }, [appointments, selectedDate]);
 
-    const handleStatusChange = (id: string, newStatus: 'confirmed' | 'cancelled') => {
+    const handleStatusChange = async (id: string, newStatus: 'confirmed' | 'cancelled') => {
         const visitId = Number(id);
-        if (newStatus === 'confirmed') {
-            confirmVisit.mutate(visitId);
-        } else {
-            cancelVisit.mutate(visitId);
-        }
         setOpenMenuId(null);
+        try {
+            if (newStatus === 'confirmed') {
+                await confirmVisit.mutateAsync(visitId);
+                addNotification({ message: language === 'pl' ? 'Wizyta potwierdzona' : 'Visit confirmed', type: 'success' });
+            } else {
+                await cancelVisit.mutateAsync(visitId);
+                addNotification({ message: language === 'pl' ? 'Wizyta anulowana' : 'Visit cancelled', type: 'success' });
+            }
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Błąd operacji';
+            addNotification({ message: msg, type: 'error' });
+        }
     };
 
     const openReschedule = (app: Appointment) => {
@@ -145,15 +154,21 @@ export default function SchedulePage() {
         if (!rescheduleModal || !vetMe?.clinicId || !vetMe?.userId) return;
         const clinicId = vetMe.clinicId;
         const vetUserId = vetMe.userId;
-        await cancelVisit.mutateAsync(Number(rescheduleModal.id));
-        await createVisit.mutateAsync({
-            animalId: rescheduleModal.visit.animalId,
-            clinicId,
-            vetUserId,
-            startsAt: `${rescheduleData.date}T${rescheduleData.time}:00`,
-            description: rescheduleModal.visit.description || undefined,
-        });
-        setRescheduleModal(null);
+        try {
+            await cancelVisit.mutateAsync(Number(rescheduleModal.id));
+            await createVisit.mutateAsync({
+                animalId: rescheduleModal.visit.animalId,
+                clinicId,
+                vetUserId,
+                startsAt: `${rescheduleData.date}T${rescheduleData.time}:00`,
+                description: rescheduleModal.visit.description || undefined,
+            });
+            addNotification({ message: language === 'pl' ? 'Wizyta przebookowana' : 'Visit rescheduled', type: 'success' });
+            setRescheduleModal(null);
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Błąd przebookowania';
+            addNotification({ message: msg, type: 'error' });
+        }
     };
 
     const openMedicalData = (app: Appointment) => {
@@ -170,26 +185,31 @@ export default function SchedulePage() {
     const handleMedicalSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!medicalVisit) return;
-
-        await updateMedicalData.mutateAsync({
-            id: medicalVisit.id,
-            payload: medicalForm,
-        });
-        if (prescriptionForm.productId) {
-            await createPrescription.mutateAsync({
-                visitId: medicalVisit.id,
-                payload: {
-                    recommendationDate: format(new Date(), 'yyyy-MM-dd'),
-                    items: [{
-                        productId: Number(prescriptionForm.productId),
-                        quantityPackages: Number(prescriptionForm.quantityPackages) || 1,
-                        dosage: prescriptionForm.dosage || undefined,
-                        treatmentTime: prescriptionForm.treatmentTime || undefined,
-                    }],
-                },
+        try {
+            await updateMedicalData.mutateAsync({
+                id: medicalVisit.id,
+                payload: medicalForm,
             });
+            if (prescriptionForm.productId) {
+                await createPrescription.mutateAsync({
+                    visitId: medicalVisit.id,
+                    payload: {
+                        recommendationDate: format(new Date(), 'yyyy-MM-dd'),
+                        items: [{
+                            productId: Number(prescriptionForm.productId),
+                            quantityPackages: Number(prescriptionForm.quantityPackages) || 1,
+                            dosage: prescriptionForm.dosage || undefined,
+                            treatmentTime: prescriptionForm.treatmentTime || undefined,
+                        }],
+                    },
+                });
+            }
+            addNotification({ message: language === 'pl' ? 'Kartoteka zapisana' : 'Medical record saved', type: 'success' });
+            setMedicalVisit(null);
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Błąd zapisu kartoteki';
+            addNotification({ message: msg, type: 'error' });
         }
-        setMedicalVisit(null);
     };
 
     return (

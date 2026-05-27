@@ -420,17 +420,36 @@ function VetView({ clinicId }: { clinicId: number }) {
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 
 export default function SuppliesPage() {
-    const { data: warehouseMe, isLoading: loadingWarehouse, isError: notWarehouse } = useWarehouseMe();
-    const { data: vetMe, isLoading: loadingVet } = useVetMe();
+    const {
+        data: warehouseMe,
+        isLoading: loadingWarehouse,
+        isError: notWarehouse,
+        error: warehouseError,
+    } = useWarehouseMe();
+    const {
+        data: vetMe,
+        isLoading: loadingVet,
+        isError: vetError,
+        error: vetErrorObj,
+    } = useVetMe();
 
-    const isLoading = loadingWarehouse || (notWarehouse && loadingVet);
+    const isLoading = loadingWarehouse || loadingVet;
+
+    if (!isLoading && warehouseError) {
+        console.log('[supplies] warehouse error (expected for VETs):', warehouseError);
+    }
+    if (!isLoading && vetError) {
+        console.error('[supplies] vetMe error:', vetErrorObj);
+    }
 
     const title = warehouseMe ? 'Zarządzanie magazynem' : 'Zaopatrzenie gabinetu';
     const subtitle = warehouseMe
         ? `Magazyn: ${warehouseMe.warehouseName}`
         : vetMe?.clinicName
         ? `Gabinet: ${vetMe.clinicName}`
-        : 'Sklep centralny';
+        : 'Zaopatrzenie';
+
+    const vetErrorMessage = vetErrorObj instanceof Error ? vetErrorObj.message : null;
 
     return (
         <div className="space-y-8">
@@ -447,19 +466,29 @@ export default function SuppliesPage() {
                 <WarehouseView warehouseId={warehouseMe.warehouseId} />
             )}
 
-            {!isLoading && notWarehouse && vetMe?.clinicId != null && (
+            {!isLoading && !warehouseMe && vetMe?.clinicId != null && (
                 <VetView clinicId={vetMe.clinicId} />
             )}
 
-            {!isLoading && notWarehouse && vetMe && vetMe.clinicId == null && (
+            {!isLoading && !warehouseMe && vetMe && vetMe.clinicId == null && (
                 <div className="py-16 text-center text-stone-400 text-sm">
                     Twoje konto lekarza nie ma przypisanej kliniki. Skontaktuj się z administratorem.
                 </div>
             )}
 
-            {!isLoading && notWarehouse && !vetMe && (
-                <div className="py-16 text-center text-stone-400 text-sm">
-                    Nie można załadować danych. Sprawdź połączenie z API.
+            {!isLoading && !warehouseMe && !vetMe && (
+                <div className="py-16 text-center space-y-3">
+                    <p className="text-red-500 font-semibold text-sm">
+                        Błąd ładowania danych
+                    </p>
+                    {vetErrorMessage && (
+                        <p className="text-stone-500 text-xs font-mono bg-stone-100 rounded-xl px-4 py-2 max-w-xl mx-auto break-all">
+                            {vetErrorMessage}
+                        </p>
+                    )}
+                    <p className="text-stone-400 text-xs">
+                        Sprawdź konsolę serwera (terminal) po więcej szczegółów.
+                    </p>
                 </div>
             )}
         </div>

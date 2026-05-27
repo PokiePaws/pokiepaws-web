@@ -29,7 +29,9 @@ export const API_ENDPOINTS = {
         me: '/api/vets/me',
         meVisits: '/api/vets/me/visits',
         meVisitsUpcoming: '/api/vets/me/visits/upcoming',
+        mePatients: '/api/vets/me/patients',
         meVisitConfirm: (id: number) => `/api/vets/me/visits/${id}/confirm`,
+        meVisitCancel: (id: number) => `/api/vets/me/visits/${id}/cancel`,
         meVisitMedicalData: (id: number) => `/api/vets/me/visits/${id}/medical-data`,
     },
     animals: {

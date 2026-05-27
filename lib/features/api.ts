@@ -18,6 +18,7 @@ import {
     usersAdminSchema,
     vetListsSchema,
     vetMeResponseSchema,
+    vetPatientsSchema,
     vetsSchema,
     visitSchema,
     visitsSchema,
@@ -47,6 +48,7 @@ import {
     type Vet,
     type VetList,
     type VetMeResponse,
+    type VetPatient,
     type Visit,
     type WarehouseStockItem,
     type WarehouseStockItemRequest,
@@ -65,6 +67,15 @@ export const animalsApi = {
     },
     delete(id: number): Promise<void> {
         return httpClient.delete<void>(API_ENDPOINTS.animals.byId(id));
+    },
+};
+
+export const vetPatientsApi = {
+    /** GET /api/vets/me/patients — all animals registered at the vet's clinic */
+    getAll(): Promise<VetPatient[]> {
+        return httpClient
+            .get<VetPatient[]>(API_ENDPOINTS.vets.mePatients)
+            .then((data) => vetPatientsSchema.parse(data));
     },
 };
 
@@ -88,8 +99,15 @@ export const visitsApi = {
     create(payload: CreateVisitRequest): Promise<Visit> {
         return httpClient.post<Visit>(API_ENDPOINTS.visits.create, payload).then((data) => visitSchema.parse(data));
     },
+    /** Generic cancel — for admins / owners. Vets must use cancelVetVisit(). */
     cancel(id: number): Promise<Visit> {
         return httpClient.patch<Visit>(API_ENDPOINTS.visits.cancel(id)).then((data) => visitSchema.parse(data));
+    },
+    /** Vet-specific cancel — PATCH /api/vets/me/visits/{id}/cancel */
+    cancelVetVisit(id: number): Promise<Visit> {
+        return httpClient
+            .patch<Visit>(API_ENDPOINTS.vets.meVisitCancel(id))
+            .then((data) => visitSchema.parse(data));
     },
     confirmVetVisit(id: number): Promise<Visit> {
         return httpClient.post<Visit>(API_ENDPOINTS.vets.meVisitConfirm(id)).then((data) => visitSchema.parse(data));
