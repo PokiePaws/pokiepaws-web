@@ -262,7 +262,7 @@ function ActionButton({ children, onClick, disabled, variant, icon: Icon }: {
 // ─── NEW ORDER MODAL ──────────────────────────────────────────────────────────
 
 function NewOrderModal({ clinicId, onClose }: { clinicId: number; onClose: () => void }) {
-    const { data: animals = [] } = useClinicAnimals(clinicId);
+    const { data: animals = [] } = useClinicAnimals();
     const createLabOrder = useCreateLabOrder();
     const addNotification = useNotificationStore((s) => s.addNotification);
 

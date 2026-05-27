@@ -54,8 +54,6 @@ export const userAdminSchema = z.object({
     role: z.string(),
     clinicId: z.number().nullable().optional(),
     clinicName: z.string().nullable().optional(),
-    warehouseId: z.number().nullable().optional(),
-    warehouseName: z.string().nullable().optional(),
     active: z.boolean().nullable().optional(),
     emailVerified: z.boolean().nullable().optional(),
     npwz: z.string().nullable().optional(),
@@ -172,7 +170,6 @@ export type UserAdminRequest = {
     password?: string;
     role: string;
     clinicId?: number;
-    warehouseId?: number;
     active?: boolean;
     npwz?: string;
     phone?: string;
@@ -309,4 +306,60 @@ export type WarehouseStockItemRequest = {
     amount: number;
     expiryDate?: string;
     status?: string;
+};
+
+export const vetListSchema = z.object({
+    userId: z.number(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
+    npwz: z.string().nullable().optional(),
+    specialization: z.string().nullable().optional(),
+});
+
+export const vetListsSchema = z.array(vetListSchema);
+
+export type VetList = z.infer<typeof vetListSchema>;
+
+export const ownerProfileSchema = z.object({
+    ownerId: z.number().optional(),
+    userId: z.number().optional(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
+    email: z.string(),
+    phoneNumber: z.string().nullable().optional(),
+    street: z.string().nullable().optional(),
+    houseNumber: z.string().nullable().optional(),
+    apartmentNumber: z.string().nullable().optional(),
+    postalCode: z.string().nullable().optional(),
+    city: z.string().nullable().optional(),
+    country: z.string().nullable().optional(),
+});
+
+export type OwnerProfile = z.infer<typeof ownerProfileSchema>;
+
+export type UpdateOwnerPhoneRequest = { phoneNumber: string };
+
+export type UpdateOwnerPasswordRequest = { currentPassword: string; newPassword: string };
+
+export type UpdateOwnerAddressRequest = {
+    street: string;
+    houseNumber: string;
+    apartmentNumber?: string;
+    postalCode: string;
+    city: string;
+    country: string;
+};
+
+export type RegisterRequest = {
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    street: string;
+    houseNumber: string;
+    apartmentNumber?: string;
+    postalCode: string;
+    city: string;
+    country: string;
+    email: string;
+    password: string;
 };

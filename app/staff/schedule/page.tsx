@@ -33,11 +33,11 @@ import {
 import { pl, enUS } from 'date-fns/locale';
 import { cn } from '../../../lib/utils';
 import {
-    useCancelVetVisit,
+    useCancelVisit,
     useClinicAnimals,
     useConfirmVetVisit,
     useCreatePrescription,
-    useCreateVetVisit,
+    useCreateVisit,
     useProducts,
     usePrescription,
     useUpdateVisitMedicalData,
@@ -89,12 +89,12 @@ export default function SchedulePage() {
     const rangeFrom = format(startDate, 'yyyy-MM-dd');
     const rangeTo = format(endDate, 'yyyy-MM-dd');
     const { data: vetMe } = useVetMe();
-    const { data: clinicAnimals = [] } = useClinicAnimals(vetMe?.clinicId ?? undefined);
+    const { data: clinicAnimals = [] } = useClinicAnimals();
     const { data: products = [] } = useProducts();
     const { data: apiVisits = [] } = useVetVisitsRange(rangeFrom, rangeTo);
-    const createVisit = useCreateVetVisit();
+    const createVisit = useCreateVisit();
     const confirmVisit = useConfirmVetVisit();
-    const cancelVisit = useCancelVetVisit();
+    const cancelVisit = useCancelVisit();
     const updateMedicalData = useUpdateVisitMedicalData();
     const createPrescription = useCreatePrescription();
     const { data: prescription } = usePrescription(medicalVisit?.id);
@@ -142,10 +142,14 @@ export default function SchedulePage() {
 
     const handleReschedule = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!rescheduleModal) return;
+        if (!rescheduleModal || !vetMe?.clinicId || !vetMe?.userId) return;
+        const clinicId = vetMe.clinicId;
+        const vetUserId = vetMe.userId;
         await cancelVisit.mutateAsync(Number(rescheduleModal.id));
         await createVisit.mutateAsync({
             animalId: rescheduleModal.visit.animalId,
+            clinicId,
+            vetUserId,
             startsAt: `${rescheduleData.date}T${rescheduleData.time}:00`,
             description: rescheduleModal.visit.description || undefined,
         });

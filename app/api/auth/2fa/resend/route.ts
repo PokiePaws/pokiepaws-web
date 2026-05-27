@@ -2,6 +2,12 @@ import axios from 'axios';
 import { NextResponse } from 'next/server';
 import { getServerApiBaseUrl } from '../../../../../lib/config/env';
 
+/**
+ * ARCHITECTURE_WARNING: POST /api/auth/2fa/resend is not documented in the official API.
+ * The documented 2FA endpoint is POST /api/auth/2fa/verify (used to complete MFA login).
+ * This endpoint is live and used by app/auth/2fa/pending/page.tsx to let users
+ * request a new MFA email. Backend-specific endpoint — requires backend support.
+ */
 export async function POST(request: Request) {
     const { email } = await request.json();
 

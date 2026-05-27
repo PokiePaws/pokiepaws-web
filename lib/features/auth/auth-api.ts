@@ -1,11 +1,15 @@
 import axios, { AxiosError } from 'axios';
 import type { AuthSession, LoginResult } from './auth-types';
+import type { RegisterRequest } from '../api-schemas';
 
 export interface AuthApi {
     login(email: string, password: string): Promise<LoginResult>;
     logout(): Promise<void>;
     getSession(): Promise<AuthSession | null>;
     resendMfa(email: string): Promise<void>;
+    register(payload: RegisterRequest): Promise<void>;
+    forgotPassword(email: string): Promise<void>;
+    resetPassword(token: string, newPassword: string): Promise<void>;
 }
 
 function createAuthApi(): AuthApi {
@@ -27,6 +31,27 @@ function createAuthApi(): AuthApi {
         },
         async resendMfa(email) {
             await axios.post('/api/auth/2fa/resend', { email });
+        },
+        async register(payload) {
+            try {
+                await axios.post('/api/auth/register', payload);
+            } catch (error) {
+                throw toAuthError(error);
+            }
+        },
+        async forgotPassword(email) {
+            try {
+                await axios.post('/api/auth/forgot-password', { email });
+            } catch (error) {
+                throw toAuthError(error);
+            }
+        },
+        async resetPassword(token, newPassword) {
+            try {
+                await axios.post('/api/auth/reset-password', { token, newPassword });
+            } catch (error) {
+                throw toAuthError(error);
+            }
         },
     };
 }
