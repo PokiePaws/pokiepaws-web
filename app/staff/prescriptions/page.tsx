@@ -384,7 +384,7 @@ export default function PrescriptionsPage() {
 
     const { data: vetMe } = useVetMe();
     const { data: visits = [], isLoading } = useVetVisitsRange(from, to);
-    const { data: animals = [] } = useClinicAnimals(vetMe?.clinicId ?? undefined);
+    const { data: animals = [] } = useClinicAnimals();
     const { data: products = [] } = useProducts();
 
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);

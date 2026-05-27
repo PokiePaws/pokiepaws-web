@@ -12,7 +12,6 @@ import {
     useAdminLogStats,
     useAdminLogs,
     useAdminUsers,
-    useAdminWarehouses,
     useCreateAdminClinic,
     useCreateAdminUser,
     useDeleteAdminClinic,
@@ -100,7 +99,6 @@ export default function AdminPanelPage() {
     const [editingUserId, setEditingUserId] = useState<number | null>(null);
     const { data: clinics = [] } = useAdminClinics();
     const { data: users = [] } = useAdminUsers();
-    const { data: warehouses = [] } = useAdminWarehouses();
     const { data: logs = [] } = useAdminLogs();
     const { data: filteredLogs = [] } = useAdminLogs(logTypeFilter || undefined, 100);
     const { data: logStats = {} } = useAdminLogStats();
@@ -133,7 +131,6 @@ export default function AdminPanelPage() {
         password: '',
         role: 'VET',
         clinicId: '',
-        warehouseId: '',
         npwz: '',
         phone: '',
         specialization: '',
@@ -167,7 +164,6 @@ export default function AdminPanelPage() {
             password: '',
             role: 'VET',
             clinicId: '',
-            warehouseId: '',
             npwz: '',
             phone: '',
             specialization: '',
@@ -202,7 +198,6 @@ export default function AdminPanelPage() {
         const payload = {
             ...userForm,
             clinicId: userForm.clinicId ? Number(userForm.clinicId) : undefined,
-            warehouseId: userForm.warehouseId ? Number(userForm.warehouseId) : undefined,
         };
 
         try {
@@ -258,7 +253,6 @@ export default function AdminPanelPage() {
             password: '',
             role: user.role,
             clinicId: user.clinicId ? String(user.clinicId) : '',
-            warehouseId: user.warehouseId ? String(user.warehouseId) : '',
             npwz: user.npwz || '',
             phone: user.phone || '',
             specialization: user.specialization || '',
@@ -664,7 +658,7 @@ export default function AdminPanelPage() {
                                     <select
                                         className={INPUT_CLS}
                                         value={userForm.role}
-                                        onChange={e => setUserForm({ ...userForm, role: e.target.value, clinicId: '', warehouseId: '', npwz: '' })}
+                                        onChange={e => setUserForm({ ...userForm, role: e.target.value, clinicId: '', npwz: '' })}
                                     >
                                         <option value="VET">Lekarz weterynarii (VET)</option>
                                         <option value="WAREHOUSE">Pracownik magazynu (WAREHOUSE)</option>
@@ -713,15 +707,6 @@ export default function AdminPanelPage() {
                                 {userForm.role === 'WAREHOUSE' && (
                                     <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-4 space-y-4">
                                         <p className="text-xs font-bold text-blue-700 uppercase tracking-widest">Dane pracownika magazynu</p>
-                                        <select
-                                            required
-                                            className={INPUT_CLS}
-                                            value={userForm.warehouseId}
-                                            onChange={e => setUserForm({ ...userForm, warehouseId: e.target.value })}
-                                        >
-                                            <option value="">Przypisz do magazynu *</option>
-                                            {warehouses.map(w => <option key={w.id} value={w.id}>{w.warehouseName}{w.city ? ` — ${w.city}` : ''}</option>)}
-                                        </select>
                                         <input
                                             placeholder="Telefon"
                                             className={INPUT_CLS}

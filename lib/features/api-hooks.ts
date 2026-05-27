@@ -1,23 +1,26 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminApi, animalsApi, clinicAnimalsApi, labOrdersApi, ordersApi, productsApi, vetsApi, vetVisitsApi, visitsApi, warehouseApi } from './api';
+import { adminApi, animalsApi, labOrdersApi, ordersApi, ownerApi, productsApi, vetsApi, vetVisitsApi, visitsApi, warehouseApi } from './api';
 import type {
     AnimalRequest,
     ClinicRequest,
     CreateOrderRequest,
     CreatePrescriptionRequest,
     CreateVisitRequest,
+    UpdateOwnerAddressRequest,
+    UpdateOwnerPasswordRequest,
+    UpdateOwnerPhoneRequest,
     UpdateVisitMedicalDataRequest,
     UserAdminRequest,
     WarehouseStockItemRequest,
 } from './api-schemas';
 
 export const apiQueryKeys = {
-    adminWarehouses: ['admin', 'warehouses'] as const,
     warehouseMe: ['warehouse', 'me'] as const,
     warehouseStock: (warehouseId?: number) => ['warehouse', 'stock', warehouseId ?? 'all'] as const,
     warehouseOrders: (clinicId?: number, status?: string) => ['warehouse', 'orders', clinicId ?? 'all', status ?? 'all'] as const,
     vetMe: ['vets', 'me'] as const,
     animals: ['animals'] as const,
+    ownerProfile: ['owner', 'profile'] as const,
     ownerUpcomingVisits: ['visits', 'owner', 'upcoming'] as const,
     ownerRangeVisits: (from: string, to: string) => ['visits', 'owner', 'range', from, to] as const,
     vetUpcomingVisits: ['visits', 'vet', 'upcoming'] as const,
@@ -33,7 +36,6 @@ export const apiQueryKeys = {
     prescription: (visitId?: number) => ['visits', visitId ?? 'none', 'prescription'] as const,
     labOrders: (clinicId?: number) => ['labOrders', clinicId ?? 'all'] as const,
     labOrdersByAnimal: (animalId?: number) => ['labOrders', 'animal', animalId ?? 'all'] as const,
-    clinicAnimals: (clinicId?: number) => ['clinicAnimals', clinicId ?? 'none'] as const,
     products: ['products'] as const,
 };
 
@@ -48,6 +50,22 @@ export function useCreateAnimal() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (payload: AnimalRequest) => animalsApi.create(payload),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.animals }),
+    });
+}
+
+export function useUpdateAnimal() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: number; payload: AnimalRequest }) => animalsApi.update(id, payload),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.animals }),
+    });
+}
+
+export function useDeleteAnimal() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (id: number) => animalsApi.delete(id),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: apiQueryKeys.animals }),
     });
 }
@@ -87,14 +105,6 @@ export function useCancelVisit() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: number) => visitsApi.cancel(id),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visits'] }),
-    });
-}
-
-export function useCancelVetVisit() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (id: number) => visitsApi.cancelVet(id),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visits'] }),
     });
 }
@@ -222,13 +232,6 @@ export function useDeleteAdminClinic() {
     });
 }
 
-export function useAdminWarehouses() {
-    return useQuery({
-        queryKey: apiQueryKeys.adminWarehouses,
-        queryFn: adminApi.getWarehouses,
-    });
-}
-
 export function useAdminLogs(type?: string, limit = 100) {
     return useQuery({
         queryKey: [...apiQueryKeys.adminLogs, type ?? 'all', limit],
@@ -341,20 +344,10 @@ export function useCreateLabOrder() {
     });
 }
 
-export function useClinicAnimals(clinicId?: number) {
+export function useClinicAnimals() {
     return useQuery({
-        queryKey: apiQueryKeys.clinicAnimals(clinicId),
-        queryFn: () => clinicAnimalsApi.getByClinic(clinicId!),
-        enabled: clinicId != null,
-    });
-}
-
-export function useCreateVetVisit() {
-    const qc = useQueryClient();
-    return useMutation({
-        mutationFn: (payload: { animalId: number; startsAt: string; description?: string }) =>
-            vetVisitsApi.createForVet(payload),
-        onSuccess: () => qc.invalidateQueries({ queryKey: ['visits'] }),
+        queryKey: apiQueryKeys.animals,
+        queryFn: animalsApi.getMine,
     });
 }
 
@@ -363,7 +356,7 @@ export function useRegisterPatient() {
     return useMutation({
         mutationFn: (payload: Parameters<typeof vetVisitsApi.registerPatient>[0]) =>
             vetVisitsApi.registerPatient(payload),
-        onSuccess: () => qc.invalidateQueries({ queryKey: ['clinicAnimals'] }),
+        onSuccess: () => qc.invalidateQueries({ queryKey: apiQueryKeys.animals }),
     });
 }
 
@@ -379,5 +372,41 @@ export function useUpdateLabOrderStatus() {
     return useMutation({
         mutationFn: ({ id, status }: { id: number; status: string }) => labOrdersApi.updateStatus(id, status),
         onSuccess: () => qc.invalidateQueries({ queryKey: ['labOrders'] }),
+    });
+}
+
+export function useOwnerProfile() {
+    return useQuery({
+        queryKey: apiQueryKeys.ownerProfile,
+        queryFn: ownerApi.getProfile,
+        retry: false,
+    });
+}
+
+export function useUpdateOwnerPhone() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (payload: UpdateOwnerPhoneRequest) => ownerApi.updatePhone(payload),
+        onSuccess: () => qc.invalidateQueries({ queryKey: apiQueryKeys.ownerProfile }),
+    });
+}
+
+export function useUpdateOwnerPassword() {
+    return useMutation({
+        mutationFn: (payload: UpdateOwnerPasswordRequest) => ownerApi.updatePassword(payload),
+    });
+}
+
+export function useUpdateOwnerAddress() {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (payload: UpdateOwnerAddressRequest) => ownerApi.updateAddress(payload),
+        onSuccess: () => qc.invalidateQueries({ queryKey: apiQueryKeys.ownerProfile }),
+    });
+}
+
+export function useDeleteOwnerAccount() {
+    return useMutation({
+        mutationFn: () => ownerApi.deleteAccount(),
     });
 }

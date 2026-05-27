@@ -421,7 +421,7 @@ export default function PatientsPage() {
     const t = translations[language];
 
     const { data: vetMe } = useVetMe();
-    const { data: animals = [] } = useClinicAnimals(vetMe?.clinicId ?? undefined);
+    const { data: animals = [] } = useClinicAnimals();
 
     const from = format(new Date(new Date().setFullYear(new Date().getFullYear() - 3)), 'yyyy-MM-dd');
     const to = format(new Date(new Date().setFullYear(new Date().getFullYear() + 1)), 'yyyy-MM-dd');
