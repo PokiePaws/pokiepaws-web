@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Phone, Star, Clock, ChevronLeft, ShieldCheck, Users, Heart, Loader2 } from 'lucide-react';
+import { MapPin, Phone, Star, Clock, ChevronLeft, ShieldCheck, Users, Loader2 } from 'lucide-react';
 import Navbar from '../../../components/navbar';
 import { useClinic } from '../../../lib/features/clinics/use-clinics';
 import { useLanguageStore } from '../../../store/use-language-store';
@@ -136,29 +136,7 @@ export default function ClinicDetailPage() {
                                         </div>
                                     )}
                                 </div>
-                                <div className="mt-10">
-                                    <Link
-                                        href="/register"
-                                        className="w-full bg-[#68b9dc] text-white py-4 rounded-2xl font-bold text-center block hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
-                                    >
-                                        {t.scheduleBtn}
-                                    </Link>
-                                </div>
                             </div>
-
-                            {clinic.phone && (
-                                <div className="bg-[#d34f57] p-8 rounded-[2.5rem] text-white relative overflow-hidden">
-                                    <div className="relative z-10">
-                                        <Heart className="h-8 w-8 mb-4" />
-                                        <h4 className="text-xl font-bold mb-2">{t.emergency}</h4>
-                                        <p className="text-red-100 text-sm mb-6">{t.emergencyDesc}</p>
-                                        <a href={`tel:${clinic.phone}`} className="bg-white text-[#d34f57] px-6 py-3 rounded-xl font-bold text-sm inline-block">
-                                            {t.callNow}
-                                        </a>
-                                    </div>
-                                    <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#c04047] rounded-full blur-3xl opacity-50" />
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>

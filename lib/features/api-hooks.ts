@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     adminApi,
@@ -6,7 +7,6 @@ import {
     ordersApi,
     ownerApi,
     productsApi,
-    vetPatientsApi,
     vetsApi,
     vetVisitsApi,
     visitsApi,
@@ -88,13 +88,40 @@ export function useDeleteAnimal() {
 // ─── VET PATIENTS (clinic animals) ───────────────────────────────────────────
 
 /**
- * Returns all patients registered at the vet's clinic.
- * Uses GET /api/vets/me/patients — the correct endpoint for staff views.
+ * Derives the vet's patient list from their visit history.
+ * GET /api/vets/me/patients does NOT exist in the API — we fetch a wide date range
+ * of visits, extract unique animalIds, then load each animal individually.
  */
 export function useClinicAnimals() {
+    const wideFrom = useMemo(() => {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() - 3);
+        return d.toISOString().slice(0, 10);
+    }, []);
+    const wideTo = useMemo(() => {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() + 1);
+        return d.toISOString().slice(0, 10);
+    }, []);
+
+    const { data: visits = [] } = useQuery({
+        queryKey: ['vets', 'me', 'visits', 'wide', wideFrom, wideTo],
+        queryFn: () => visitsApi.getVetRange(wideFrom, wideTo),
+        staleTime: 5 * 60 * 1000,
+        retry: false,
+    });
+
+    const animalIds = useMemo(
+        () => [...new Set(visits.map((v) => v.animalId))].sort((a, b) => a - b),
+        [visits],
+    );
+
     return useQuery({
-        queryKey: apiQueryKeys.vetPatients,
-        queryFn: vetPatientsApi.getAll,
+        queryKey: [...apiQueryKeys.vetPatients, ...animalIds],
+        queryFn: () => animalsApi.getManyByIds(animalIds),
+        enabled: animalIds.length > 0,
+        staleTime: 5 * 60 * 1000,
+        retry: false,
     });
 }
 
@@ -104,6 +131,14 @@ export function useOwnerUpcomingVisits() {
     return useQuery({
         queryKey: apiQueryKeys.ownerUpcomingVisits,
         queryFn: visitsApi.getOwnerUpcoming,
+    });
+}
+
+export function useVetUpcomingVisits() {
+    return useQuery({
+        queryKey: apiQueryKeys.vetUpcomingVisits,
+        queryFn: visitsApi.getVetUpcoming,
+        retry: false,
     });
 }
 
@@ -135,15 +170,6 @@ export function useCancelVisit() {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: number) => visitsApi.cancel(id),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visits'] }),
-    });
-}
-
-/** Vet-specific cancel — uses PATCH /api/vets/me/visits/{id}/cancel */
-export function useCancelVetVisit() {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (id: number) => visitsApi.cancelVetVisit(id),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['visits'] }),
     });
 }
@@ -371,6 +397,7 @@ export function useLabOrders(clinicId?: number) {
         queryKey: apiQueryKeys.labOrders(clinicId),
         queryFn: () => labOrdersApi.getByClinic(clinicId!),
         enabled: clinicId != null,
+        retry: false,
     });
 }
 
@@ -379,6 +406,7 @@ export function useLabOrdersByAnimal(animalId?: number) {
         queryKey: apiQueryKeys.labOrdersByAnimal(animalId),
         queryFn: () => labOrdersApi.getByAnimal(animalId!),
         enabled: animalId != null,
+        retry: false,
     });
 }
 

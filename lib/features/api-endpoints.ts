@@ -29,9 +29,7 @@ export const API_ENDPOINTS = {
         me: '/api/vets/me',
         meVisits: '/api/vets/me/visits',
         meVisitsUpcoming: '/api/vets/me/visits/upcoming',
-        mePatients: '/api/vets/me/patients',
         meVisitConfirm: (id: number) => `/api/vets/me/visits/${id}/confirm`,
-        meVisitCancel: (id: number) => `/api/vets/me/visits/${id}/cancel`,
         meVisitMedicalData: (id: number) => `/api/vets/me/visits/${id}/medical-data`,
     },
     animals: {
@@ -75,12 +73,5 @@ export const API_ENDPOINTS = {
         userById: (id: number) => `/api/admin/users/${id}`,
         logs: '/api/admin/logs',
         logStats: '/api/admin/logs/stats',
-    },
-    labOrders: {
-        byClinic: (clinicId: number) => `/api/clinics/${clinicId}/lab-orders`,
-        byAnimal: (animalId: number) => `/api/animals/${animalId}/lab-orders`,
-        create: (animalId: number) => `/api/animals/${animalId}/lab-orders`,
-        byId: (id: number) => `/api/lab-orders/${id}`,
-        updateStatus: (id: number) => `/api/lab-orders/${id}/status`,
     },
 } as const;

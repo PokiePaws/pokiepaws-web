@@ -13,6 +13,7 @@ import {
     useDeleteStockItem,
     useUpdateOrderStatus,
     useVetMe,
+    useVetUpcomingVisits,
     useCreateOrder,
 } from 'lib/features/api-hooks';
 import type { WarehouseStockItem } from 'lib/features/api-schemas';
@@ -428,24 +429,29 @@ export default function SuppliesPage() {
     const {
         data: vetMe,
         isLoading: loadingVet,
-        isError: vetError,
         error: vetErrorObj,
     } = useVetMe();
+    // Fallback: GET /api/vets/me can return 500; extract clinicId from upcoming visits instead
+    const { data: upcomingVisits = [], isLoading: loadingUpcoming } = useVetUpcomingVisits();
 
-    const isLoading = loadingWarehouse || loadingVet;
+    const isLoading = loadingWarehouse || loadingVet || loadingUpcoming;
 
     if (!isLoading && warehouseError) {
         console.log('[supplies] warehouse error (expected for VETs):', warehouseError);
     }
-    if (!isLoading && vetError) {
-        console.error('[supplies] vetMe error:', vetErrorObj);
-    }
+
+    // Effective clinic ID: from vetMe profile, or from first upcoming visit as fallback
+    const effectiveClinicId: number | null =
+        vetMe?.clinicId ?? upcomingVisits[0]?.clinicId ?? null;
+
+    const effectiveClinicName: string | null =
+        vetMe?.clinicName ?? (effectiveClinicId ? `Klinika #${effectiveClinicId}` : null);
 
     const title = warehouseMe ? 'Zarządzanie magazynem' : 'Zaopatrzenie gabinetu';
     const subtitle = warehouseMe
         ? `Magazyn: ${warehouseMe.warehouseName}`
-        : vetMe?.clinicName
-        ? `Gabinet: ${vetMe.clinicName}`
+        : effectiveClinicName
+        ? `Gabinet: ${effectiveClinicName}`
         : 'Zaopatrzenie';
 
     const vetErrorMessage = vetErrorObj instanceof Error ? vetErrorObj.message : null;
@@ -465,29 +471,29 @@ export default function SuppliesPage() {
                 <WarehouseView warehouseId={warehouseMe.warehouseId} />
             )}
 
-            {!isLoading && !warehouseMe && vetMe?.clinicId != null && (
-                <VetView clinicId={vetMe.clinicId} />
+            {!isLoading && !warehouseMe && effectiveClinicId != null && (
+                <VetView clinicId={effectiveClinicId} />
             )}
 
-            {!isLoading && !warehouseMe && vetMe && vetMe.clinicId == null && (
-                <div className="py-16 text-center text-stone-400 text-sm">
-                    Twoje konto lekarza nie ma przypisanej kliniki. Skontaktuj się z administratorem.
-                </div>
-            )}
-
-            {!isLoading && !warehouseMe && !vetMe && (
+            {!isLoading && !warehouseMe && effectiveClinicId == null && (
                 <div className="py-16 text-center space-y-3">
-                    <p className="text-red-500 font-semibold text-sm">
-                        Błąd ładowania danych
-                    </p>
-                    {vetErrorMessage && (
-                        <p className="text-stone-500 text-xs font-mono bg-stone-100 rounded-xl px-4 py-2 max-w-xl mx-auto break-all">
-                            {vetErrorMessage}
+                    {vetErrorMessage ? (
+                        <>
+                            <p className="text-red-500 font-semibold text-sm">
+                                Błąd ładowania danych kliniki
+                            </p>
+                            <p className="text-stone-500 text-xs font-mono bg-stone-100 rounded-xl px-4 py-2 max-w-xl mx-auto break-all">
+                                {vetErrorMessage}
+                            </p>
+                            <p className="text-stone-400 text-xs">
+                                Sprawdź konsolę serwera (terminal) po więcej szczegółów.
+                            </p>
+                        </>
+                    ) : (
+                        <p className="text-stone-400 text-sm">
+                            Twoje konto lekarza nie ma przypisanej kliniki. Skontaktuj się z administratorem.
                         </p>
                     )}
-                    <p className="text-stone-400 text-xs">
-                        Sprawdź konsolę serwera (terminal) po więcej szczegółów.
-                    </p>
                 </div>
             )}
         </div>

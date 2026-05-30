@@ -9,8 +9,6 @@ import {
     availableSlotsSchema,
     clinicOrderSchema,
     clinicOrdersSchema,
-    labOrderSchema,
-    labOrdersSchema,
     ownerProfileSchema,
     prescriptionSchema,
     productsSchema,
@@ -18,7 +16,6 @@ import {
     usersAdminSchema,
     vetListsSchema,
     vetMeResponseSchema,
-    vetPatientsSchema,
     vetsSchema,
     visitSchema,
     visitsSchema,
@@ -48,7 +45,6 @@ import {
     type Vet,
     type VetList,
     type VetMeResponse,
-    type VetPatient,
     type Visit,
     type WarehouseStockItem,
     type WarehouseStockItemRequest,
@@ -59,6 +55,14 @@ export const animalsApi = {
     getMine(): Promise<Animal[]> {
         return httpClient.get<Animal[]>(API_ENDPOINTS.animals.list).then((data) => animalsSchema.parse(data));
     },
+    getById(id: number): Promise<Animal> {
+        return httpClient.get<Animal>(API_ENDPOINTS.animals.byId(id)).then((data) => animalSchema.parse(data));
+    },
+    /** Fetch multiple animals by id in parallel. */
+    getManyByIds(ids: number[]): Promise<Animal[]> {
+        if (ids.length === 0) return Promise.resolve([]);
+        return Promise.all(ids.map((id) => animalsApi.getById(id)));
+    },
     create(payload: AnimalRequest): Promise<Animal> {
         return httpClient.post<Animal>(API_ENDPOINTS.animals.create, payload).then((data) => animalSchema.parse(data));
     },
@@ -67,15 +71,6 @@ export const animalsApi = {
     },
     delete(id: number): Promise<void> {
         return httpClient.delete<void>(API_ENDPOINTS.animals.byId(id));
-    },
-};
-
-export const vetPatientsApi = {
-    /** GET /api/vets/me/patients — all animals registered at the vet's clinic */
-    getAll(): Promise<VetPatient[]> {
-        return httpClient
-            .get<VetPatient[]>(API_ENDPOINTS.vets.mePatients)
-            .then((data) => vetPatientsSchema.parse(data));
     },
 };
 
@@ -99,15 +94,8 @@ export const visitsApi = {
     create(payload: CreateVisitRequest): Promise<Visit> {
         return httpClient.post<Visit>(API_ENDPOINTS.visits.create, payload).then((data) => visitSchema.parse(data));
     },
-    /** Generic cancel — for admins / owners. Vets must use cancelVetVisit(). */
     cancel(id: number): Promise<Visit> {
         return httpClient.patch<Visit>(API_ENDPOINTS.visits.cancel(id)).then((data) => visitSchema.parse(data));
-    },
-    /** Vet-specific cancel — PATCH /api/vets/me/visits/{id}/cancel */
-    cancelVetVisit(id: number): Promise<Visit> {
-        return httpClient
-            .patch<Visit>(API_ENDPOINTS.vets.meVisitCancel(id))
-            .then((data) => visitSchema.parse(data));
     },
     confirmVetVisit(id: number): Promise<Visit> {
         return httpClient.post<Visit>(API_ENDPOINTS.vets.meVisitConfirm(id)).then((data) => visitSchema.parse(data));
@@ -219,31 +207,27 @@ export const productsApi = {
     },
 };
 
+/** Lab orders endpoints are NOT available in the current API. This stub preserves type safety. */
 export const labOrdersApi = {
-    getByClinic(clinicId: number): Promise<LabOrder[]> {
-        return httpClient
-            .get<LabOrder[]>(API_ENDPOINTS.labOrders.byClinic(clinicId))
-            .then((data) => labOrdersSchema.parse(data));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getByClinic(_clinicId: number): Promise<LabOrder[]> {
+        return Promise.reject(new Error('Lab orders API not available'));
     },
-    getByAnimal(animalId: number): Promise<LabOrder[]> {
-        return httpClient
-            .get<LabOrder[]>(API_ENDPOINTS.labOrders.byAnimal(animalId))
-            .then((data) => labOrdersSchema.parse(data));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getByAnimal(_animalId: number): Promise<LabOrder[]> {
+        return Promise.reject(new Error('Lab orders API not available'));
     },
-    getById(id: number): Promise<LabOrder> {
-        return httpClient
-            .get<LabOrder>(API_ENDPOINTS.labOrders.byId(id))
-            .then((data) => labOrderSchema.parse(data));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    getById(_id: number): Promise<LabOrder> {
+        return Promise.reject(new Error('Lab orders API not available'));
     },
-    create(animalId: number, payload: Omit<CreateLabOrderRequest, 'animalId'>): Promise<LabOrder> {
-        return httpClient
-            .post<LabOrder>(API_ENDPOINTS.labOrders.create(animalId), payload)
-            .then((data) => labOrderSchema.parse(data));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    create(_animalId: number, _payload: Omit<CreateLabOrderRequest, 'animalId'>): Promise<LabOrder> {
+        return Promise.reject(new Error('Lab orders API not available'));
     },
-    updateStatus(id: number, status: string): Promise<LabOrder> {
-        return httpClient
-            .patch<LabOrder>(API_ENDPOINTS.labOrders.updateStatus(id), { status })
-            .then((data) => labOrderSchema.parse(data));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    updateStatus(_id: number, _status: string): Promise<LabOrder> {
+        return Promise.reject(new Error('Lab orders API not available'));
     },
 };
 

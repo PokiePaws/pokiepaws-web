@@ -34,7 +34,7 @@ import { pl, enUS } from 'date-fns/locale';
 import { cn } from '../../../lib/utils';
 import { useNotificationStore } from '../../../store/use-notification-store';
 import {
-    useCancelVetVisit,
+    useCancelVisit,
     useClinicAnimals,
     useConfirmVetVisit,
     useCreatePrescription,
@@ -43,6 +43,7 @@ import {
     usePrescription,
     useUpdateVisitMedicalData,
     useVetMe,
+    useVetUpcomingVisits,
     useVetVisitsRange,
 } from '../../../lib/features/api-hooks';
 import type { Visit } from '../../../lib/features/api-schemas';
@@ -91,12 +92,13 @@ export default function SchedulePage() {
     const rangeFrom = format(startDate, 'yyyy-MM-dd');
     const rangeTo = format(endDate, 'yyyy-MM-dd');
     const { data: vetMe } = useVetMe();
+    const { data: upcomingVisits = [] } = useVetUpcomingVisits();
     const { data: clinicAnimals = [] } = useClinicAnimals();
     const { data: products = [] } = useProducts();
     const { data: apiVisits = [] } = useVetVisitsRange(rangeFrom, rangeTo);
     const createVisit = useCreateVisit();
     const confirmVisit = useConfirmVetVisit();
-    const cancelVisit = useCancelVetVisit();
+    const cancelVisit = useCancelVisit();
     const updateMedicalData = useUpdateVisitMedicalData();
     const createPrescription = useCreatePrescription();
     const { data: prescription } = usePrescription(medicalVisit?.id);
@@ -151,9 +153,14 @@ export default function SchedulePage() {
 
     const handleReschedule = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!rescheduleModal || !vetMe?.clinicId || !vetMe?.userId) return;
-        const clinicId = vetMe.clinicId;
-        const vetUserId = vetMe.userId;
+        if (!rescheduleModal) return;
+        // Fall back to the visit's own clinicId/vetUserId if GET /api/vets/me fails (500)
+        const clinicId = vetMe?.clinicId ?? rescheduleModal.visit.clinicId ?? upcomingVisits[0]?.clinicId;
+        const vetUserId = vetMe?.userId ?? rescheduleModal.visit.vetUserId;
+        if (!clinicId || !vetUserId) {
+            addNotification({ message: language === 'pl' ? 'Brak danych kliniki/weterynarza' : 'Missing clinic/vet data', type: 'error' });
+            return;
+        }
         try {
             await cancelVisit.mutateAsync(Number(rescheduleModal.id));
             await createVisit.mutateAsync({

@@ -491,7 +491,7 @@ export default function LabOrdersPage() {
     const addNotification = useNotificationStore((s) => s.addNotification);
 
     const { data: vetMe } = useVetMe();
-    const { data: orders = [], isLoading } = useLabOrders(vetMe?.clinicId ?? undefined);
+    const { data: orders = [], isLoading, isError } = useLabOrders(vetMe?.clinicId ?? undefined);
     const updateStatus = useUpdateLabOrderStatus();
 
     const [showModal, setShowModal] = useState(false);
@@ -528,7 +528,7 @@ export default function LabOrdersPage() {
                     <h1 className="text-3xl font-display font-bold text-slate-900">{t.labOrders.title}</h1>
                     <p className="text-slate-500 mt-1">{t.labOrders.subtitle}</p>
                 </div>
-                {vetMe?.clinicId && (
+                {vetMe?.clinicId && !isError && (
                     <button
                         onClick={() => setShowModal(true)}
                         className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
@@ -538,6 +538,22 @@ export default function LabOrdersPage() {
                     </button>
                 )}
             </div>
+
+            {/* API not available banner */}
+            {isError && (
+                <div className="flex items-start gap-4 bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                    <AlertCircle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                    <div>
+                        <p className="font-semibold text-amber-800 text-sm">
+                            Moduł zleceń laboratoryjnych jest tymczasowo niedostępny
+                        </p>
+                        <p className="text-amber-700 text-xs mt-1">
+                            Endpointy API dla zleceń laboratoryjnych nie są jeszcze zaimplementowane po stronie serwera.
+                            Funkcjonalność zostanie włączona automatycznie po udostępnieniu przez backend.
+                        </p>
+                    </div>
+                </div>
+            )}
 
             {/* summary cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -584,6 +600,12 @@ export default function LabOrdersPage() {
             {/* orders list */}
             {isLoading ? (
                 <div className="py-20 text-center text-slate-400">Ładowanie zleceń…</div>
+            ) : isError ? (
+                <EmptyState
+                    icon={FlaskConical}
+                    title="Brak danych"
+                    description="Zlecenia laboratoryjne będą widoczne tutaj po uruchomieniu API."
+                />
             ) : !vetMe?.clinicId ? (
                 <EmptyState
                     icon={AlertCircle}

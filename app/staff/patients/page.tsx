@@ -32,7 +32,7 @@ import {
     usePrescription,
     useLabOrdersByAnimal,
 } from '../../../lib/features/api-hooks';
-import type { VetPatient, Visit } from '../../../lib/features/api-schemas';
+import type { Animal, Visit } from '../../../lib/features/api-schemas';
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -181,7 +181,7 @@ function MedicalRecordPanel({
     visits,
     onClose,
 }: {
-    animal: VetPatient;
+    animal: Animal;
     visits: Visit[];
     onClose: () => void;
 }) {
@@ -241,26 +241,6 @@ function MedicalRecordPanel({
                     <MetricCell icon={Cpu} label="Chip" value={animal.microchipNumber ?? '—'} />
                     <MetricCell icon={Stethoscope} label="Wizyty" value={String(animalVisits.length)} />
                 </div>
-
-                {/* ── OWNER INFO (if returned by API) ── */}
-                {(animal.ownerFirstName || animal.ownerLastName || animal.ownerEmail || animal.ownerPhone) && (
-                    <div className="shrink-0 mx-6 mt-3 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Właściciel</p>
-                        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-700">
-                            {(animal.ownerFirstName || animal.ownerLastName) && (
-                                <span className="font-medium">
-                                    {[animal.ownerFirstName, animal.ownerLastName].filter(Boolean).join(' ')}
-                                </span>
-                            )}
-                            {animal.ownerEmail && (
-                                <span className="text-slate-500">{animal.ownerEmail}</span>
-                            )}
-                            {animal.ownerPhone && (
-                                <span className="text-slate-500">{animal.ownerPhone}</span>
-                            )}
-                        </div>
-                    </div>
-                )}
 
                 {animal.notes && (
                     <div className="shrink-0 mx-6 mt-3 px-4 py-3 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-800">
@@ -375,7 +355,7 @@ function EmptySection({ icon: Icon, text }: { icon: React.FC<{ className?: strin
 // ─── PATIENT CARD ────────────────────────────────────────────────────────────
 
 function PatientCard({ animal, lastVisit, onClick }: {
-    animal: VetPatient;
+    animal: Animal;
     lastVisit?: Visit;
     onClick: () => void;
 }) {
@@ -446,7 +426,7 @@ export default function PatientsPage() {
     const { data: visits = [] } = useVetVisitsRange(from, to);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedAnimal, setSelectedAnimal] = useState<VetPatient | null>(null);
+    const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
 
     // map animalId → most recent non-cancelled visit
     const lastVisitMap = useMemo(() => {

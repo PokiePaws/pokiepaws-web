@@ -16,18 +16,6 @@ export const animalSchema = z.object({
 
 export const animalsSchema = z.array(animalSchema);
 
-// VetPatient — extends Animal with optional owner fields returned by GET /api/vets/me/patients
-export const vetPatientSchema = animalSchema.extend({
-    ownerFirstName: z.string().nullable().optional(),
-    ownerLastName: z.string().nullable().optional(),
-    ownerEmail: z.string().nullable().optional(),
-    ownerPhone: z.string().nullable().optional(),
-});
-
-export const vetPatientsSchema = z.array(vetPatientSchema);
-
-export type VetPatient = z.infer<typeof vetPatientSchema>;
-
 export const visitSchema = z.object({
     id: z.number(),
     animalId: z.number(),
