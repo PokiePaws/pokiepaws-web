@@ -6,6 +6,7 @@ export interface User {
     name: string;
     email: string;
     role: UserRole;
+    apiRole?: ApiRole;
 }
 
 export interface BackendLoginResponse {

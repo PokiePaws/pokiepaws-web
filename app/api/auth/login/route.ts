@@ -5,6 +5,7 @@ import {
     AUTH_ACCESS_TOKEN_COOKIE,
     AUTH_MFA_PENDING_EMAIL_COOKIE,
     AUTH_REFRESH_TOKEN_COOKIE,
+    AUTH_USER_API_ROLE_COOKIE,
     AUTH_USER_EMAIL_COOKIE,
     AUTH_USER_ROLE_COOKIE,
     authCookieOptions,
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
                 name: email,
                 email,
                 role: userRole,
+                apiRole: role,
             },
         });
 
@@ -68,6 +70,7 @@ export async function POST(request: Request) {
         });
         response.cookies.set(AUTH_USER_EMAIL_COOKIE, email, authCookieOptions);
         response.cookies.set(AUTH_USER_ROLE_COOKIE, userRole, authCookieOptions);
+        response.cookies.set(AUTH_USER_API_ROLE_COOKIE, role, authCookieOptions);
         response.cookies.delete(AUTH_MFA_PENDING_EMAIL_COOKIE);
 
         return response;

@@ -32,7 +32,9 @@ export default function Sidebar() {
         { name: t.sidebar.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
         { name: t.sidebar.labOrders, href: '/staff/labOrders', icon: Microscope },
         { name: t.sidebar.supplies, href: '/staff/supplies', icon: Package },
-        { name: t.sidebar.management, href: '/staff/management', icon: Building2 },
+        ...(user.apiRole !== 'VET'
+            ? [{ name: t.sidebar.management, href: '/staff/management', icon: Building2 }]
+            : []),
     ];
 
     if (user.role === 'Admin' || user.role === 'SuperAdmin') {

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../../store/use-auth-store';
 import {
     adminApi,
     animalsApi,
@@ -326,9 +327,11 @@ export function useAdminLogStats() {
 // ─── WAREHOUSE ────────────────────────────────────────────────────────────────
 
 export function useWarehouseMe() {
+    const apiRole = useAuthStore((s) => s.user?.apiRole);
     return useQuery({
         queryKey: apiQueryKeys.warehouseMe,
         queryFn: warehouseApi.getMe,
+        enabled: apiRole === 'WAREHOUSE',
         retry: false,
     });
 }

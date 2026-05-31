@@ -6,6 +6,7 @@ import {
     AUTH_MFA_COMPLETED_COOKIE,
     AUTH_MFA_PENDING_EMAIL_COOKIE,
     AUTH_REFRESH_TOKEN_COOKIE,
+    AUTH_USER_API_ROLE_COOKIE,
     AUTH_USER_EMAIL_COOKIE,
     AUTH_USER_ROLE_COOKIE,
     authCookieOptions,
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
         const userRole = mapApiRole(role);
 
         const response = NextResponse.json({
-            user: { id: email, name: email, email, role: userRole },
+            user: { id: email, name: email, email, role: userRole, apiRole: role },
         });
 
         response.cookies.set(AUTH_ACCESS_TOKEN_COOKIE, accessToken, authCookieOptions);
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
         });
         response.cookies.set(AUTH_USER_EMAIL_COOKIE, email, authCookieOptions);
         response.cookies.set(AUTH_USER_ROLE_COOKIE, userRole, authCookieOptions);
+        response.cookies.set(AUTH_USER_API_ROLE_COOKIE, role, authCookieOptions);
         response.cookies.set(AUTH_MFA_COMPLETED_COOKIE, '1', authCookieOptions);
         response.cookies.delete(AUTH_MFA_PENDING_EMAIL_COOKIE);
 
