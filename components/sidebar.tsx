@@ -9,7 +9,6 @@ import {
     LayoutDashboard,
     Calendar,
     LogOut,
-    Users,
     ClipboardList,
     Microscope,
     Package,
@@ -30,7 +29,6 @@ export default function Sidebar() {
     const links = [
         { name: t.sidebar.overview, href: '/staff', icon: LayoutDashboard },
         { name: t.sidebar.schedule, href: '/staff/schedule', icon: Calendar },
-        { name: t.sidebar.patients, href: '/staff/patients', icon: Users },
         { name: t.sidebar.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
         { name: t.sidebar.labOrders, href: '/staff/labOrders', icon: Microscope },
         { name: t.sidebar.supplies, href: '/staff/supplies', icon: Package },

@@ -66,7 +66,7 @@ test.describe('Panel Admina', () => {
 
     test('tab Personel: przycisk "+ Nowy Pracownik" otwiera modal', async ({ page }) => {
         await page.getByRole('button', { name: /nowy pracownik/i }).click();
-        await expect(page.getByText(/dodaj pracownika/i)).toBeVisible();
+        await expect(page.getByRole('heading', { name: /dodaj pracownika/i })).toBeVisible();
     });
 
     test('modal dodawania pracownika zawiera pola Imię, Nazwisko, Email', async ({ page }) => {
@@ -177,7 +177,7 @@ test.describe('Panel Admina', () => {
         await page.getByRole('button', { name: /panel glowny/i }).click();
         await expect(page.getByText(/kliniki/i).first()).toBeVisible();
         await expect(page.getByText(/uzytkownicy/i)).toBeVisible();
-        await expect(page.getByText(/logi/i)).toBeVisible();
+        await expect(page.getByText(/logi/i).first()).toBeVisible();
     });
 
     // ── Tab: Zamówienia ───────────────────────────────────────────────────────
