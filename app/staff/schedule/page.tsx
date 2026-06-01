@@ -72,7 +72,13 @@ export default function SchedulePage() {
     const [rescheduleModal, setRescheduleModal] = useState<Appointment | null>(null);
     const [medicalVisit, setMedicalVisit] = useState<Visit | null>(null);
     const [rescheduleData, setRescheduleData] = useState({ date: '', time: '' });
-    const [medicalForm, setMedicalForm] = useState({ disease: '', diagnosis: '', recommendations: '' });
+    const [medicalForm, setMedicalForm] = useState({
+        disease: '',
+        diagnosis: '',
+        recommendations: '',
+        rabiesVaccinationPerformed: false,
+        rabiesVaccinationDate: '',
+    });
     const [prescriptionForm, setPrescriptionForm] = useState({
         productId: '',
         quantityPackages: '1',
@@ -184,6 +190,8 @@ export default function SchedulePage() {
             disease: app.visit.disease || '',
             diagnosis: app.visit.diagnosis || '',
             recommendations: app.visit.recommendations || '',
+            rabiesVaccinationPerformed: false,
+            rabiesVaccinationDate: format(parseISO(app.visit.startsAt), 'yyyy-MM-dd'),
         });
         setPrescriptionForm({ productId: '', quantityPackages: '1', dosage: '', treatmentTime: '' });
         setOpenMenuId(null);
@@ -195,7 +203,15 @@ export default function SchedulePage() {
         try {
             await updateMedicalData.mutateAsync({
                 id: medicalVisit.id,
-                payload: medicalForm,
+                payload: {
+                    disease: medicalForm.disease,
+                    diagnosis: medicalForm.diagnosis,
+                    recommendations: medicalForm.recommendations,
+                    rabiesVaccinationPerformed: medicalForm.rabiesVaccinationPerformed,
+                    rabiesVaccinationDate: medicalForm.rabiesVaccinationPerformed
+                        ? medicalForm.rabiesVaccinationDate
+                        : undefined,
+                },
             });
             if (prescriptionForm.productId) {
                 await createPrescription.mutateAsync({
@@ -519,6 +535,42 @@ export default function SchedulePage() {
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">Recommendations</label>
                                     <textarea value={medicalForm.recommendations} onChange={e => setMedicalForm({ ...medicalForm, recommendations: e.target.value })} rows={4} className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500 resize-none" />
+                                </div>
+
+                                <div className="rounded-3xl border border-emerald-100 bg-emerald-50/30 p-5 space-y-4">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={medicalForm.rabiesVaccinationPerformed}
+                                            onChange={e => setMedicalForm({ ...medicalForm, rabiesVaccinationPerformed: e.target.checked })}
+                                            className="mt-1 h-4 w-4 rounded border-stone-300 text-emerald-600 focus:ring-emerald-500"
+                                        />
+                                        <span>
+                                            <span className="block font-bold text-stone-900">
+                                                {language === 'pl' ? 'Wykonano szczepienie przeciwko wściekliźnie' : 'Rabies vaccination performed'}
+                                            </span>
+                                            <span className="text-xs text-stone-500">
+                                                {language === 'pl'
+                                                    ? 'Data zostanie zapisana w profilu zwierzęcia i posłuży do przypomnień push.'
+                                                    : 'The date will be saved on the pet profile and used for push reminders.'}
+                                            </span>
+                                        </span>
+                                    </label>
+
+                                    {medicalForm.rabiesVaccinationPerformed && (
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-widest ml-1">
+                                                {language === 'pl' ? 'Data szczepienia' : 'Vaccination date'}
+                                            </label>
+                                            <input
+                                                required
+                                                type="date"
+                                                value={medicalForm.rabiesVaccinationDate}
+                                                onChange={e => setMedicalForm({ ...medicalForm, rabiesVaccinationDate: e.target.value })}
+                                                className="w-full md:w-64 bg-white border border-emerald-100 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="rounded-3xl border border-stone-100 p-5 space-y-4">

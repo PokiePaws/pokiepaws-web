@@ -12,6 +12,8 @@ export const animalSchema = z.object({
     weight: z.number().nullable().optional(),
     birthDate: z.string().nullable().optional(),
     notes: z.string().nullable().optional(),
+    rabiesVaccinationDate: z.string().nullable().optional(),
+    rabiesVaccinationDueDate: z.string().nullable().optional(),
 });
 
 export const animalsSchema = z.array(animalSchema);
@@ -121,6 +123,7 @@ export type AnimalRequest = {
     weight?: number;
     birthDate?: string;
     notes?: string;
+    rabiesVaccinationDate?: string;
 };
 
 export type CreateVisitRequest = {
@@ -135,6 +138,8 @@ export type UpdateVisitMedicalDataRequest = {
     disease?: string;
     diagnosis?: string;
     recommendations?: string;
+    rabiesVaccinationPerformed?: boolean;
+    rabiesVaccinationDate?: string;
 };
 
 export type CreatePrescriptionRequest = {
