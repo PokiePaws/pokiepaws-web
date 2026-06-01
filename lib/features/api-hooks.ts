@@ -246,6 +246,47 @@ export function useVetMe() {
     });
 }
 
+/**
+ * Derives vet clinic context from available API endpoints.
+ * /api/vets/me does not exist — clinicId is extracted from visits instead.
+ * Priority: upcoming visits → range visits (last 12 months + next 12 months).
+ */
+export function useVetContext() {
+    const { data: vetMe } = useVetMe();
+    const { data: upcoming = [], isLoading: loadingUpcoming } = useVetUpcomingVisits();
+
+    const today = new Date();
+    const rangeFrom = new Date(today);
+    rangeFrom.setFullYear(rangeFrom.getFullYear() - 1);
+    const rangeTo = new Date(today);
+    rangeTo.setFullYear(rangeTo.getFullYear() + 1);
+    const fromStr = rangeFrom.toISOString().slice(0, 10);
+    const toStr = rangeTo.toISOString().slice(0, 10);
+
+    const { data: rangeVisits = [], isLoading: loadingRange } = useVetVisitsRange(fromStr, toStr);
+
+    const clinicId: number | null = useMemo(() => {
+        if (vetMe?.clinicId) return vetMe.clinicId;
+        if (upcoming[0]?.clinicId) return upcoming[0].clinicId;
+        if (rangeVisits[0]?.clinicId) return rangeVisits[0].clinicId;
+        return null;
+    }, [vetMe, upcoming, rangeVisits]);
+
+    const vetUserId: number | null = useMemo(() => {
+        if (vetMe?.userId) return vetMe.userId;
+        if (upcoming[0]?.vetUserId) return upcoming[0].vetUserId;
+        if (rangeVisits[0]?.vetUserId) return rangeVisits[0].vetUserId;
+        return null;
+    }, [vetMe, upcoming, rangeVisits]);
+
+    return {
+        clinicId,
+        vetUserId,
+        clinicName: vetMe?.clinicName ?? (clinicId ? `Klinika #${clinicId}` : null),
+        isLoading: loadingUpcoming || loadingRange,
+    };
+}
+
 // ─── ADMIN ────────────────────────────────────────────────────────────────────
 
 export function useAdminUsers() {

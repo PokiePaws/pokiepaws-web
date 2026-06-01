@@ -42,8 +42,7 @@ import {
     useProducts,
     usePrescription,
     useUpdateVisitMedicalData,
-    useVetMe,
-    useVetUpcomingVisits,
+    useVetContext,
     useVetVisitsRange,
 } from '../../../lib/features/api-hooks';
 import type { Visit } from '../../../lib/features/api-schemas';
@@ -97,8 +96,7 @@ export default function SchedulePage() {
     const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
     const rangeFrom = format(startDate, 'yyyy-MM-dd');
     const rangeTo = format(endDate, 'yyyy-MM-dd');
-    const { data: vetMe } = useVetMe();
-    const { data: upcomingVisits = [] } = useVetUpcomingVisits();
+    const { clinicId: vetClinicId, vetUserId: vetMeUserId } = useVetContext();
     const { data: clinicAnimals = [] } = useClinicAnimals();
     const { data: products = [] } = useProducts();
     const { data: apiVisits = [] } = useVetVisitsRange(rangeFrom, rangeTo);
@@ -160,9 +158,8 @@ export default function SchedulePage() {
     const handleReschedule = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!rescheduleModal) return;
-        // Fall back to the visit's own clinicId/vetUserId if GET /api/vets/me fails (500)
-        const clinicId = vetMe?.clinicId ?? rescheduleModal.visit.clinicId ?? upcomingVisits[0]?.clinicId;
-        const vetUserId = vetMe?.userId ?? rescheduleModal.visit.vetUserId;
+        const clinicId = vetClinicId ?? rescheduleModal.visit.clinicId;
+        const vetUserId = vetMeUserId ?? rescheduleModal.visit.vetUserId;
         if (!clinicId || !vetUserId) {
             addNotification({ message: language === 'pl' ? 'Brak danych kliniki/weterynarza' : 'Missing clinic/vet data', type: 'error' });
             return;

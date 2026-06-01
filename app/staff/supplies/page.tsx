@@ -7,15 +7,14 @@ import { cn } from 'lib/utils';
 import {
     useWarehouseMe,
     useWarehouseStock,
-    useWarehouseStockAll,
     useWarehouseOrders,
     useCreateStockItem,
     useUpdateStockItem,
     useDeleteStockItem,
     useUpdateOrderStatus,
-    useVetMe,
-    useVetUpcomingVisits,
+    useVetContext,
     useCreateOrder,
+    useProducts,
 } from 'lib/features/api-hooks';
 import type { WarehouseStockItem } from 'lib/features/api-schemas';
 
@@ -294,18 +293,17 @@ function VetView({ clinicId }: { clinicId: number }) {
     const addNotification = useNotificationStore((s) => s.addNotification);
     const createOrder = useCreateOrder();
     const { data: orderHistory = [], isLoading: loadingHistory } = useWarehouseOrders(clinicId);
-    const { data: stockItems = [] } = useWarehouseStockAll();
+    const { data: products = [] } = useProducts();
     const emptyForm = { name: '', amount: '1', unit: '', category: '', description: '', expiryDate: '' };
     const [form, setForm] = useState(emptyForm);
 
     const handleProductSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selected = stockItems.find((item) => item.name === e.target.value);
+        const selected = products.find((p) => p.name === e.target.value);
         if (selected) {
             setForm((prev) => ({
                 ...prev,
                 name: selected.name,
                 unit: selected.unit ?? prev.unit,
-                category: selected.category ?? prev.category,
             }));
         } else {
             setForm((prev) => ({ ...prev, name: e.target.value }));
@@ -370,8 +368,8 @@ function VetView({ clinicId }: { clinicId: number }) {
                                     onChange={handleProductSelect}
                                 >
                                     <option value="">Wybierz produkt…</option>
-                                    {stockItems.map((item) => (
-                                        <option key={item.id} value={item.name}>{item.name}</option>
+                                    {products.map((p) => (
+                                        <option key={p.id} value={p.name}>{p.name}</option>
                                     ))}
                                 </select>
                             </div>
@@ -456,25 +454,16 @@ export default function SuppliesPage() {
         error: warehouseError,
     } = useWarehouseMe();
     const {
-        data: vetMe,
+        clinicId: effectiveClinicId,
+        clinicName: effectiveClinicName,
         isLoading: loadingVet,
-        error: vetErrorObj,
-    } = useVetMe();
-    // Fallback: GET /api/vets/me can return 500; extract clinicId from upcoming visits instead
-    const { data: upcomingVisits = [], isLoading: loadingUpcoming } = useVetUpcomingVisits();
+    } = useVetContext();
 
-    const isLoading = loadingWarehouse || loadingVet || loadingUpcoming;
+    const isLoading = loadingWarehouse || loadingVet;
 
     if (!isLoading && warehouseError) {
         console.log('[supplies] warehouse error (expected for VETs):', warehouseError);
     }
-
-    // Effective clinic ID: from vetMe profile, or from first upcoming visit as fallback
-    const effectiveClinicId: number | null =
-        vetMe?.clinicId ?? upcomingVisits[0]?.clinicId ?? null;
-
-    const effectiveClinicName: string | null =
-        vetMe?.clinicName ?? (effectiveClinicId ? `Klinika #${effectiveClinicId}` : null);
 
     const title = warehouseMe ? 'Zarządzanie magazynem' : 'Zaopatrzenie gabinetu';
     const subtitle = warehouseMe
@@ -483,7 +472,7 @@ export default function SuppliesPage() {
         ? `Gabinet: ${effectiveClinicName}`
         : 'Zaopatrzenie';
 
-    const vetErrorMessage = vetErrorObj instanceof Error ? vetErrorObj.message : null;
+    const vetErrorMessage = null;
 
     return (
         <div className="space-y-8">

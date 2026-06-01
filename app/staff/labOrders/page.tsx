@@ -26,7 +26,7 @@ import { cn } from 'lib/utils';
 import { useNotificationStore } from 'store/use-notification-store';
 import { useLanguageStore } from 'store/use-language-store';
 import { translations } from 'lib/translations';
-import { useVetMe, useClinicAnimals, useLabOrders, useCreateLabOrder, useUpdateLabOrderStatus } from 'lib/features/api-hooks';
+import { useVetContext, useClinicAnimals, useLabOrders, useCreateLabOrder, useUpdateLabOrderStatus } from 'lib/features/api-hooks';
 import type { LabOrder } from 'lib/features/api-schemas';
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -490,8 +490,9 @@ export default function LabOrdersPage() {
     const t = translations[language];
     const addNotification = useNotificationStore((s) => s.addNotification);
 
-    const { data: vetMe } = useVetMe();
-    const { data: orders = [], isLoading, isError } = useLabOrders(vetMe?.clinicId ?? undefined);
+    const { clinicId, isLoading: loadingVet } = useVetContext();
+    const { data: orders = [], isLoading: loadingOrders, isError } = useLabOrders(clinicId ?? undefined);
+    const isLoading = loadingVet || loadingOrders;
     const updateStatus = useUpdateLabOrderStatus();
 
     const [showModal, setShowModal] = useState(false);
@@ -528,7 +529,7 @@ export default function LabOrdersPage() {
                     <h1 className="text-3xl font-display font-bold text-slate-900">{t.labOrders.title}</h1>
                     <p className="text-slate-500 mt-1">{t.labOrders.subtitle}</p>
                 </div>
-                {vetMe?.clinicId && !isError && (
+                {clinicId && !isError && (
                     <button
                         onClick={() => setShowModal(true)}
                         className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
@@ -606,7 +607,7 @@ export default function LabOrdersPage() {
                     title="Brak danych"
                     description="Zlecenia laboratoryjne będą widoczne tutaj po uruchomieniu API."
                 />
-            ) : !vetMe?.clinicId ? (
+            ) : !clinicId ? (
                 <EmptyState
                     icon={AlertCircle}
                     title="Brak przypisanej kliniki"
@@ -635,7 +636,7 @@ export default function LabOrdersPage() {
 
             {/* modal */}
             <AnimatePresence>
-                {showModal && vetMe?.clinicId && (
+                {showModal && clinicId && (
                     <NewOrderModal onClose={() => setShowModal(false)} />
                 )}
             </AnimatePresence>
