@@ -1,4 +1,4 @@
-import type { UserRole } from '../auth/auth-types';
+import type { ApiRole, UserRole } from '../auth/auth-types';
 
 export interface NotificationSubscription {
     topic: string;
@@ -13,8 +13,16 @@ export interface NotificationSubscription {
  * Backend-specific endpoints — requires backend support.
  */
 const notificationsApi = {
-    async getSubscriptions(role: UserRole): Promise<NotificationSubscription[]> {
-        const path = role === 'Admin' ? 'admin' : 'vets/me';
+    async getSubscriptions(role: UserRole, apiRole?: ApiRole): Promise<NotificationSubscription[]> {
+        let path: string;
+        if (role === 'Admin') {
+            path = 'admin';
+        } else if (apiRole === 'VET') {
+            path = 'vets/me';
+        } else {
+            // WAREHOUSE and other Staff roles have no subscriptions endpoint yet
+            return [];
+        }
         const res = await fetch(`/api/backend/api/${path}/notifications/subscriptions`, {
             cache: 'no-store',
         });

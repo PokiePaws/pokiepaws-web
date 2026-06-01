@@ -7,6 +7,7 @@ import { cn } from 'lib/utils';
 import {
     useWarehouseMe,
     useWarehouseStock,
+    useWarehouseStockAll,
     useWarehouseOrders,
     useCreateStockItem,
     useUpdateStockItem,
@@ -293,8 +294,23 @@ function VetView({ clinicId }: { clinicId: number }) {
     const addNotification = useNotificationStore((s) => s.addNotification);
     const createOrder = useCreateOrder();
     const { data: orderHistory = [], isLoading: loadingHistory } = useWarehouseOrders(clinicId);
+    const { data: stockItems = [] } = useWarehouseStockAll();
     const emptyForm = { name: '', amount: '1', unit: '', category: '', description: '', expiryDate: '' };
     const [form, setForm] = useState(emptyForm);
+
+    const handleProductSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selected = stockItems.find((item) => item.name === e.target.value);
+        if (selected) {
+            setForm((prev) => ({
+                ...prev,
+                name: selected.name,
+                unit: selected.unit ?? prev.unit,
+                category: selected.category ?? prev.category,
+            }));
+        } else {
+            setForm((prev) => ({ ...prev, name: e.target.value }));
+        }
+    };
     const [submitted, setSubmitted] = useState<string[]>([]);
     const [tab, setTab] = useState<'order' | 'history'>('order');
 
@@ -345,7 +361,20 @@ function VetView({ clinicId }: { clinicId: number }) {
                             <PackagePlus className="h-5 w-5 text-[#68b9dc]" /> Zamów produkt
                         </h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <input required placeholder="Nazwa produktu *" className={INPUT} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                            <div>
+                                <label className="text-xs text-stone-500 mb-1 block">Produkt *</label>
+                                <select
+                                    required
+                                    className={INPUT}
+                                    value={form.name}
+                                    onChange={handleProductSelect}
+                                >
+                                    <option value="">Wybierz produkt…</option>
+                                    {stockItems.map((item) => (
+                                        <option key={item.id} value={item.name}>{item.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <input required type="number" min="1" placeholder="Ilość *" className={INPUT} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
                                 <input placeholder="Jednostka (szt, op…)" className={INPUT} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} />

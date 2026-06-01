@@ -13,7 +13,6 @@ import {
     Microscope,
     Package,
     ShieldCheck,
-    Building2
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -32,9 +31,6 @@ export default function Sidebar() {
         { name: t.sidebar.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
         { name: t.sidebar.labOrders, href: '/staff/labOrders', icon: Microscope },
         { name: t.sidebar.supplies, href: '/staff/supplies', icon: Package },
-        ...(user.apiRole !== 'VET'
-            ? [{ name: t.sidebar.management, href: '/staff/management', icon: Building2 }]
-            : []),
     ];
 
     if (user.role === 'Admin' || user.role === 'SuperAdmin') {

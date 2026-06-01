@@ -56,6 +56,8 @@ export const userAdminSchema = z.object({
     role: z.string(),
     clinicId: z.number().nullable().optional(),
     clinicName: z.string().nullable().optional(),
+    warehouseId: z.number().nullable().optional(),
+    warehouseName: z.string().nullable().optional(),
     active: z.boolean().nullable().optional(),
     emailVerified: z.boolean().nullable().optional(),
     npwz: z.string().nullable().optional(),
@@ -175,6 +177,7 @@ export type UserAdminRequest = {
     password?: string;
     role: string;
     clinicId?: number;
+    warehouseId?: number;
     active?: boolean;
     npwz?: string;
     phone?: string;

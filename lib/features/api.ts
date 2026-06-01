@@ -9,6 +9,8 @@ import {
     availableSlotsSchema,
     clinicOrderSchema,
     clinicOrdersSchema,
+    labOrderSchema,
+    labOrdersSchema,
     ownerProfileSchema,
     prescriptionSchema,
     productsSchema,
@@ -207,27 +209,31 @@ export const productsApi = {
     },
 };
 
-/** Lab orders endpoints are NOT available in the current API. This stub preserves type safety. */
 export const labOrdersApi = {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getByClinic(_clinicId: number): Promise<LabOrder[]> {
-        return Promise.reject(new Error('Lab orders API not available'));
+    getByClinic(clinicId: number): Promise<LabOrder[]> {
+        return httpClient
+            .get<LabOrder[]>(`/api/clinics/${clinicId}/lab-orders`)
+            .then((data) => labOrdersSchema.parse(data));
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getByAnimal(_animalId: number): Promise<LabOrder[]> {
-        return Promise.reject(new Error('Lab orders API not available'));
+    getByAnimal(animalId: number): Promise<LabOrder[]> {
+        return httpClient
+            .get<LabOrder[]>(`/api/animals/${animalId}/lab-orders`)
+            .then((data) => labOrdersSchema.parse(data));
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getById(_id: number): Promise<LabOrder> {
-        return Promise.reject(new Error('Lab orders API not available'));
+    getById(id: number): Promise<LabOrder> {
+        return httpClient
+            .get<LabOrder>(`/api/lab-orders/${id}`)
+            .then((data) => labOrderSchema.parse(data));
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    create(_animalId: number, _payload: Omit<CreateLabOrderRequest, 'animalId'>): Promise<LabOrder> {
-        return Promise.reject(new Error('Lab orders API not available'));
+    create(animalId: number, payload: Omit<CreateLabOrderRequest, 'animalId'>): Promise<LabOrder> {
+        return httpClient
+            .post<LabOrder>(`/api/animals/${animalId}/lab-orders`, payload)
+            .then((data) => labOrderSchema.parse(data));
     },
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    updateStatus(_id: number, _status: string): Promise<LabOrder> {
-        return Promise.reject(new Error('Lab orders API not available'));
+    updateStatus(id: number, status: string): Promise<LabOrder> {
+        return httpClient
+            .patch<LabOrder>(`/api/lab-orders/${id}/status`, { status })
+            .then((data) => labOrderSchema.parse(data));
     },
 };
 

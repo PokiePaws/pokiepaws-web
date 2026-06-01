@@ -33,7 +33,6 @@ export default function Navbar() {
         { name: t.staffNav.prescriptions, href: '/staff/prescriptions', icon: ClipboardList },
         { name: t.staffNav.labOrders, href: '/staff/labOrders', icon: Microscope },
         { name: t.staffNav.supplies, href: '/staff/supplies', icon: Package },
-        { name: t.staffNav.management, href: '/staff/management', icon: User },
     ];
 
     return (

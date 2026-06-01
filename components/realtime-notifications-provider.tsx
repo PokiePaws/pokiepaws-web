@@ -24,7 +24,7 @@ export default function RealtimeNotificationsProvider() {
 
             const [token, subscriptions] = await Promise.all([
                 notificationsApi.getRealtimeToken(),
-                notificationsApi.getSubscriptions(user.role),
+                notificationsApi.getSubscriptions(user.role, user.apiRole),
             ]);
 
             if (!active || !token) return;

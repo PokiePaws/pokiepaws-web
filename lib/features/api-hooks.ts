@@ -344,6 +344,13 @@ export function useWarehouseStock(warehouseId?: number) {
     });
 }
 
+export function useWarehouseStockAll() {
+    return useQuery({
+        queryKey: apiQueryKeys.warehouseStock(undefined),
+        queryFn: () => warehouseApi.getStock(undefined),
+    });
+}
+
 export function useCreateStockItem() {
     const qc = useQueryClient();
     return useMutation({
