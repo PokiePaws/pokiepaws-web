@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers';
+import { cookies } from "next/headers";
 import { NextResponse } from 'next/server';
 import { getServerApiBaseUrl } from '../../../../lib/config/env';
 import { AUTH_ACCESS_TOKEN_COOKIE } from '../../../../lib/features/auth/auth-cookies';
@@ -55,13 +55,9 @@ async function proxy(request: Request, context: RouteContext) {
     console.log(`[proxy] ${request.method} ${targetUrl} → ${backendResponse.status}`);
 
     if (!backendResponse.ok) {
-        let body: unknown;
-        try {
-            body = await backendResponse.json();
-        } catch {
-            body = { message: `Backend returned ${backendResponse.status}` };
-        }
-        console.error(`[proxy] Backend error ${backendResponse.status} @ ${targetUrl}:`, body);
+        console.error(
+            `[proxy] Backend error ${backendResponse.status} @ ${targetUrl}`
+        );
     }
 
     const responseHeaders = new Headers();
